@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017", "RFC-0018", "RFC-0019", "RFC-0020", "RFC-0021"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017", "RFC-0018", "RFC-0019", "RFC-0020", "RFC-0021", "RFC-0022"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -61,6 +61,7 @@ def architecture_manifest() -> dict[str, Any]:
         "aspp_manifest": "/api/platform/v2/aspp/manifest",
         "esa_manifest": "/api/platform/v2/esa/manifest",
         "idoo_manifest": "/api/platform/v2/idoo/manifest",
+        "egpr_manifest": "/api/platform/v2/egpr/manifest",
     }
 
 
@@ -970,6 +971,54 @@ def get_idoo_backup() -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
 
     return get_idoo_service().backup()
+
+
+def get_egpr_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().manifest()
+
+
+def get_egpr_roadmap() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().roadmap()
+
+
+def get_egpr_rfc_catalog() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().rfc_catalog()
+
+
+def get_egpr_adr_list() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().adr_list()
+
+
+def get_egpr_maturity() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().maturity()
+
+
+def get_egpr_tech_debt() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().tech_debt()
+
+
+def get_egpr_kpi() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().kpi()
+
+
+def post_egpr_rfc_transition(rfc_id: str, target_stage: str, reviewer: str = "architecture_board") -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.egpr import get_egpr_service
+
+    return get_egpr_service().transition_rfc(rfc_id, target_stage, reviewer=reviewer)
 
 
 def emit_scalpel_collect_event(

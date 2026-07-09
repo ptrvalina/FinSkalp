@@ -103,6 +103,14 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     get_idoo_runbooks,
     get_idoo_queues,
     get_idoo_backup,
+    get_egpr_manifest,
+    get_egpr_roadmap,
+    get_egpr_rfc_catalog,
+    get_egpr_adr_list,
+    get_egpr_maturity,
+    get_egpr_tech_debt,
+    get_egpr_kpi,
+    post_egpr_rfc_transition,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -903,6 +911,42 @@ def create_platform_v2_router(
     @router.get("/idoo/backup")
     async def idoo_backup(_user=dep_user):
         return get_idoo_backup()
+
+    @router.get("/egpr/manifest")
+    async def egpr_manifest_route(_user=dep_user):
+        return get_egpr_manifest()
+
+    @router.get("/egpr/roadmap")
+    async def egpr_roadmap(_user=dep_user):
+        return get_egpr_roadmap()
+
+    @router.get("/egpr/rfc-catalog")
+    async def egpr_rfc_catalog(_user=dep_user):
+        return get_egpr_rfc_catalog()
+
+    @router.get("/egpr/adr")
+    async def egpr_adr(_user=dep_user):
+        return get_egpr_adr_list()
+
+    @router.get("/egpr/maturity")
+    async def egpr_maturity(_user=dep_user):
+        return get_egpr_maturity()
+
+    @router.get("/egpr/tech-debt")
+    async def egpr_tech_debt(_user=dep_user):
+        return get_egpr_tech_debt()
+
+    @router.get("/egpr/kpi")
+    async def egpr_kpi(_user=dep_user):
+        return get_egpr_kpi()
+
+    class PlatformV2EgprRfcTransitionRequest(BaseModel):
+        target_stage: str = Field(..., min_length=1, max_length=32)
+        reviewer: str = Field("architecture_board", max_length=64)
+
+    @router.post("/egpr/rfc/{rfc_id}/transition")
+    async def egpr_rfc_transition(rfc_id: str, body: PlatformV2EgprRfcTransitionRequest, _user=dep_user):
+        return post_egpr_rfc_transition(rfc_id, body.target_stage, body.reviewer)
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

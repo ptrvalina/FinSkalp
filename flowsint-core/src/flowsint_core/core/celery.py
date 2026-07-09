@@ -22,6 +22,7 @@ celery = Celery(
         "flowsint_core.tasks.aspp",
         "flowsint_core.tasks.esa",
         "flowsint_core.tasks.idoo",
+        "flowsint_core.tasks.egpr",
     ],
 )
 
@@ -101,6 +102,10 @@ celery.conf.update(
         "idoo-health-probe": {
             "task": "idoo_health_probe_batch",
             "schedule": 120.0,
+        },
+        "egpr-maturity-snapshot": {
+            "task": "egpr_maturity_snapshot",
+            "schedule": 86_400.0,
         },
     },
 )

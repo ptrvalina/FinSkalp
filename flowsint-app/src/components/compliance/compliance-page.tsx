@@ -194,6 +194,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getIdooManifest()
   })
 
+  const egprManifestQuery = useQuery({
+    queryKey: ['compliance', 'egpr-manifest'],
+    queryFn: () => complianceService.getEgprManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -789,6 +794,23 @@ function CompliancePageInner() {
                 {idooManifestQuery.data.observability_signals.length} столпа наблюдаемости
               </div>
               <p className="text-xs text-muted-foreground">{idooManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {egprManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <span>
+                  RFC-0022 · {egprManifestQuery.data.strategic_principles.length} стратегических принципов ·{' '}
+                  {egprManifestQuery.data.roadmap.phase_count} фазы дорожной карты ·{' '}
+                  {egprManifestQuery.data.team_domains.length} команд
+                </span>
+                <Badge variant="default">{egprManifestQuery.data.volume_i_badge_ru}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">{egprManifestQuery.data.principle_ru}</p>
+              <p className="text-xs text-muted-foreground">
+                Зрелость Volume I: {egprManifestQuery.data.maturity.maturity_score_percent}% ·{' '}
+                {egprManifestQuery.data.roadmap.phases_complete}/{egprManifestQuery.data.roadmap.phase_count} фаз завершено
+              </p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

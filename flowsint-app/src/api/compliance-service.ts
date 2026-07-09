@@ -853,6 +853,31 @@ export const complianceService = {
     }>
   },
 
+  getEgprManifest() {
+    return complianceFetch('/api/platform/v2/egpr/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      volume_i_status: string
+      volume_i_badge_ru: string
+      strategic_principles: string[]
+      roadmap_phases: string[]
+      team_domains: string[]
+      mission: { mission_ru: string }
+      roadmap: { phase_count: number; phases_complete: number }
+      maturity: { maturity_score_percent: number; volume_i_ready: boolean }
+    }>
+  },
+
+  getEgprMaturity() {
+    return complianceFetch('/api/platform/v2/egpr/maturity') as Promise<{
+      ok: boolean
+      volume_i_status: string
+      maturity: { maturity_score_percent: number }
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',
