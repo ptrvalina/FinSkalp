@@ -87,8 +87,31 @@
 11. **RFC-0011** — Workflow & User Interaction Logic ✅ [`rfc0011-completion.md`](../architecture/v2/rfc0011-completion.md)
 12. **RFC-0012** — Blockchain Intelligence Framework ✅ [`rfc0012-completion.md`](../architecture/v2/rfc0012-completion.md)
 13. **RFC-0013** — Incremental Block Sync ✅ [`rfc0013-completion.md`](../architecture/v2/rfc0013-completion.md)
+14. **RFC-0014** — Intelligence Collection Framework ✅ [`rfc0014-completion.md`](../architecture/v2/rfc0014-completion.md)
+15. **RFC-0015** — Compliance & Registry Intelligence ✅ [`rfc0015-completion.md`](../architecture/v2/rfc0015-completion.md)
+16. **RFC-0016** — Risk & Decision Engine ✅ [`rfc0016-completion.md`](../architecture/v2/rfc0016-completion.md)
 
 ---
+
+## RFC-0014 / 0015 / 0016 — Production hardening backlog
+
+Закрыто в коде (2026-07-09): `rde/signal_bridge.py` — автосбор сигналов blockchain+CRIF+KG+evidence для RDE.
+
+| ID | Проблема | Статус | Блокер |
+|----|----------|--------|--------|
+| TD-RDE-1 | RDE temporal store in-memory | **Open** | Postgres schema + migration |
+| TD-RDE-2 | Rules engine rollback — stub | **Open** | Persistent rule store |
+| TD-RDE-3 | Live blockchain analyze → RDE без index | **Open** | API keys TronGrid/Etherscan |
+| TD-RDE-4 | ML risk models | **Open** | Нет обученных моделей / ONNX |
+| TD-ICF-1 | Live collectors не вызывают ICF orchestrator | **Open** | Celery refactor |
+| TD-ICF-2 | OCR documents/images — stub | **Open** | Tesseract/cloud OCR |
+| TD-CRIF-1 | Реальные госреестры РФ (ЕГРЮЛ, ЦБ) | **Open** | API-доступ регулятора |
+| TD-CRIF-2 | Sanctions list — demo OFAC subset | **Open** | Лицензия OpenSanctions / FIU feed |
+| TD-CRIF-3 | Registry cache/monitor in-memory | **Open** | Postgres + Redis |
+| TD-CRIF-4 | Change monitoring webhook → analyst | **Open** | Notification channel (email/Slack) |
+| TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
+| TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
+
 
 ## Архитектурные риски (реестр)
 

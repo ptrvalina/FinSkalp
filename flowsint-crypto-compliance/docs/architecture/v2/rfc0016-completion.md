@@ -80,4 +80,10 @@
 
 ## Тесты
 
-- ✅ `tests/test_rfc0016_rde.py` — 8+ tests
+- ✅ `tests/test_rfc0016_rde.py` — 9 tests (incl. auto signal bridge)
+
+## Hardening (2026-07-09)
+
+- ✅ `signal_bridge.py` — auto-acquire blockchain/CRIF/KG/evidence signals
+- ✅ `blockchain_intelligence.service.get_profile_signals()` for RDE
+- ⚠️ Production gaps → `docs/audit/technical-debt.md` TD-RDE-* / TD-ICF-* / TD-CRIF-*

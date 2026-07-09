@@ -228,3 +228,41 @@ def test_rde_api_assess_endpoint(v2_client, sample_signals):
     assert "stages" in data
     assert data["auto_decision"] is False
     assert "risk_level" in data
+
+
+def test_rde_auto_acquires_subsystem_signals():
+    """Integration — RDE pulls blockchain index + CRIF sanctions without manual signals."""
+    import asyncio
+    import uuid
+
+    from flowsint_crypto_compliance.platform.v2.blockchain_intelligence.sync_store import (
+        get_block_sync_store,
+    )
+
+    addr = "T9yD14Nj9j7xRZ4nFf8vieT9j7xRZ4nFf8v"
+    get_block_sync_store().index_transfer(
+        "tron",
+        {
+            "tx_hash": "autosig1",
+            "source": "TSender",
+            "target": addr,
+            "asset": "TRX",
+            "amount": 150_000.0,
+        },
+    )
+
+    async def _run():
+        return await run_rde_assessment(
+            entity_key=addr,
+            tenant_id=uuid.UUID("00000000-0000-0000-0000-000000000099"),
+            case_ref=None,
+            signals=None,
+        )
+
+    result = asyncio.run(_run())
+    assert result.ok
+    acquired = result.explain.get("acquired_groups") or []
+    assert "blockchain_signals" in acquired or "registry_signals" in acquired
+    assert result.factor_scores.get("blockchain", 0) >= 0
+    assert result.explain.get("why") or result.explain.get("facts")
+

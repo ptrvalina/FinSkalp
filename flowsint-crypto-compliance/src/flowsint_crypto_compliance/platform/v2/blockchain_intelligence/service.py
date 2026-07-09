@@ -170,6 +170,32 @@ class BlockchainIntelligenceService:
             "latency_ms": latency_ms,
         }
 
+    def get_profile_signals(self, address: str, *, chain: str = "tron") -> dict[str, Any]:
+        """RFC-0016 bridge — lightweight blockchain signals for RDE (read-only, no network)."""
+        from flowsint_crypto_compliance.platform.v2.blockchain_intelligence.sync_store import (
+            get_block_sync_store,
+        )
+
+        chain_key = normalize_chain_key(chain)
+        transfers = get_block_sync_store().get_transfers_for_address(chain_key, address)
+        tx_count = len(transfers)
+        volume = sum(float(t.get("amount") or 0) for t in transfers)
+        risk_flags: list[str] = []
+        if tx_count > 20:
+            risk_flags.append("high_activity")
+        if volume > 100_000:
+            risk_flags.append("high_volume")
+
+        return {
+            "address": address,
+            "chain": chain_key,
+            "transaction_count": tx_count,
+            "volume_usd": volume,
+            "mixer_exposure": any("mixer" in str(t.get("target", "")).lower() for t in transfers),
+            "risk_flags": risk_flags,
+            "indexed_only": True,
+        }
+
 
 def get_blockchain_intelligence_service() -> BlockchainIntelligenceService:
     global _service

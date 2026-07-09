@@ -21,65 +21,7 @@ from flowsint_crypto_compliance.platform.v2.rde.temporal import AssessmentSnapsh
 from flowsint_crypto_compliance.platform.v2.rde.types import RDEAssessmentResult, RDEStage, RiskLevel
 
 
-async def _acquire_signals(
-    *,
-    tenant_id: uuid.UUID,
-    entity_key: str,
-    case_ref: str | None,
-    input_signals: dict[str, Any] | None,
-) -> dict[str, Any]:
-    """
-    Acquire signals from subsystems via input context dict.
-    Read-only — does NOT mutate source data, KG, or evidence.
-    """
-    signals: dict[str, Any] = dict(input_signals or {})
-
-    if not signals.get("blockchain_signals"):
-        try:
-            from flowsint_crypto_compliance.platform.v2.blockchain_intelligence.service import (
-                get_blockchain_intelligence_service,
-            )
-
-            svc = get_blockchain_intelligence_service()
-            if hasattr(svc, "get_profile_signals"):
-                signals["blockchain_signals"] = svc.get_profile_signals(entity_key)
-        except Exception:
-            pass
-
-    if not signals.get("registry_signals"):
-        signals.setdefault("registry_signals", {})
-
-    if not signals.get("osint_signals"):
-        signals.setdefault("osint_signals", {"mentions": []})
-
-    if not signals.get("graph_signals"):
-        try:
-            from flowsint_crypto_compliance.platform.v2.knowledge_store import get_knowledge_graph_store
-
-            store = get_knowledge_graph_store()
-            entities = store.search_entities_by_value(tenant_id, entity_key)
-            neighbors: list[dict[str, Any]] = []
-            for ent in entities[:3]:
-                neighbors.extend(store.get_neighbors(ent.id))
-            signals["graph_signals"] = {"neighbors": neighbors, "depth": 1}
-        except Exception:
-            signals.setdefault("graph_signals", {"neighbors": []})
-
-    if not signals.get("evidence_signals"):
-        try:
-            from flowsint_crypto_compliance.platform.v2.evidence_center import list_case_evidence_items
-
-            if case_ref:
-                items = list_case_evidence_items(case_ref)
-                signals["evidence_signals"] = {"items": items}
-            else:
-                signals.setdefault("evidence_signals", {"items": []})
-        except Exception:
-            signals.setdefault("evidence_signals", {"items": []})
-
-    return signals
-
-
+from flowsint_crypto_compliance.platform.v2.rde.signal_bridge import acquire_platform_signals
 def _build_rule_context(
     signals: dict[str, dict[str, Any]],
     aggregated: dict[str, Any],
@@ -122,14 +64,15 @@ async def run_rde_assessment(
     with LatencyTimer() as timer:
         try:
             # Stage 1: Fact acquisition (read-only)
-            raw_signals = await _acquire_signals(
+            raw_signals = await acquire_platform_signals(
                 tenant_id=tenant_id,
                 entity_key=entity_key,
                 case_ref=case_ref,
                 input_signals=signals,
             )
             stages.append(RDEStage.FACT_ACQUISITION.value)
-            result.explain["acquired_groups"] = list(raw_signals.keys())
+            acquired_groups = list(raw_signals.keys())
+            result.explain["acquired_groups"] = acquired_groups
 
             # Stage 2: Normalize
             normalized = normalize_signals(raw_signals)
@@ -191,6 +134,8 @@ async def run_rde_assessment(
                 correlations=correlations,
                 rule_events=result.rule_events,
             )
+            result.explain["acquired_groups"] = acquired_groups
+            result.explain["signal_bridge"] = raw_signals.get("_signal_bridge")
             result.explain["risk_mapping"] = risk_mapping
             result.explain["constraints"] = constraints
             stages.append(RDEStage.EXPLAIN.value)
