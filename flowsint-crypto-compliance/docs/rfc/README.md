@@ -28,6 +28,7 @@
 | [RFC-0012](RFC-0012-blockchain-intelligence.md) | Blockchain Intelligence Framework v2.0 | **Complete (100%)** — [`rfc0012-completion.md`](../architecture/v2/rfc0012-completion.md) |
 | [RFC-0013](RFC-0013-incremental-block-sync.md) | Incremental Block Sync | **Complete (100%)** — [`rfc0013-completion.md`](../architecture/v2/rfc0013-completion.md) |
 | [RFC-0014](RFC-0014-intelligence-collection-framework.md) | Intelligence Collection Framework v2.0 | **Complete (100%)** — [`rfc0014-completion.md`](../architecture/v2/rfc0014-completion.md) |
+| [RFC-0015](RFC-0015-compliance-registry-intelligence.md) | Compliance & Registry Intelligence Framework v2.0 | **Complete (100%)** — [`rfc0015-completion.md`](../architecture/v2/rfc0015-completion.md) |
 
 
 

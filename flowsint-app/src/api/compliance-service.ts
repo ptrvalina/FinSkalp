@@ -395,6 +395,91 @@ export const complianceService = {
     }>
   },
 
+  getCrifManifest() {
+    return complianceFetch('/api/platform/v2/crif/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      pipeline: string[]
+      connector_count: number
+      principle_ru: string
+      canonical_entity_types: string[]
+    }>
+  },
+
+  runCrifCheck(payload: {
+    connectorId: string
+    query?: Record<string, unknown>
+    caseRef?: string
+    organizationKey?: string
+    publish?: boolean
+  }) {
+    return complianceFetch('/api/platform/v2/crif/check', {
+      method: 'POST',
+      body: JSON.stringify({
+        connector_id: payload.connectorId,
+        query: payload.query,
+        case_ref: payload.caseRef,
+        organization_key: payload.organizationKey,
+        publish: payload.publish ?? true
+      })
+    }) as Promise<{
+      ok: boolean
+      connector_id: string
+      stages: string[]
+      compliance_check_count: number
+      evidence_count: number
+    }>
+  },
+
+  screenCrifSanctions(name: string) {
+    return complianceFetch('/api/platform/v2/crif/sanctions/screen', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    }) as Promise<{
+      ok: boolean
+      query: string
+      match_count: number
+      requires_analyst: boolean
+      matches: Array<{ match_type: string; confidence: number; requires_analyst_confirmation: boolean }>
+    }>
+  },
+
+  getCrifRules() {
+    return complianceFetch('/api/platform/v2/crif/rules') as Promise<{
+      ok: boolean
+      rules: Array<{ rule_id: string; version: string; description_ru: string }>
+    }>
+  },
+
+  evaluateCrifRules(context: Record<string, unknown>) {
+    return complianceFetch('/api/platform/v2/crif/rules/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ context })
+    }) as Promise<{
+      ok: boolean
+      event_count: number
+      events: Array<{ rule_id: string; event_type: string; severity: string; message_ru: string }>
+    }>
+  },
+
+  getCrifMetrics() {
+    return complianceFetch('/api/platform/v2/crif/metrics') as Promise<{
+      ok: boolean
+      total_connectors: number
+      connectors: Array<{ connector_id: string; request_count: number; checks_run: number }>
+    }>
+  },
+
+  getCrifHistory(entityKey: string) {
+    return complianceFetch(`/api/platform/v2/crif/history/${encodeURIComponent(entityKey)}`) as Promise<{
+      ok: boolean
+      entity_key: string
+      count: number
+      timeline: Array<{ event_type: string; field: string; new_value: unknown; source: string }>
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

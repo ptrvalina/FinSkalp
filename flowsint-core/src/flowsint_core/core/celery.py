@@ -15,6 +15,7 @@ celery = Celery(
         "flowsint_core.tasks.compliance_ops",
         "flowsint_core.tasks.blockchain_sync",
         "flowsint_core.tasks.icf",
+        "flowsint_core.tasks.crif",
     ],
 )
 
@@ -66,6 +67,10 @@ celery.conf.update(
         "icf-scheduled-collections": {
             "task": "icf_run_scheduled_collections",
             "schedule": 300.0,
+        },
+        "crif-registry-sync": {
+            "task": "crif_sync_registries",
+            "schedule": 600.0,
         },
     },
 )

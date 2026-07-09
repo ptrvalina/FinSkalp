@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -54,6 +54,7 @@ def architecture_manifest() -> dict[str, Any]:
         "blockchain_intelligence_manifest": "/api/platform/v2/blockchain-intelligence/manifest",
         "blockchain_sync_status": "/api/platform/v2/blockchain-intelligence/sync/status",
         "icf_manifest": "/api/platform/v2/icf/manifest",
+        "crif_manifest": "/api/platform/v2/crif/manifest",
     }
 
 
@@ -545,6 +546,63 @@ def get_icf_monitoring(connector_id: str | None = None) -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
 
     return get_icf_service().monitoring(connector_id)
+
+
+def get_crif_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().manifest()
+
+
+async def run_crif_check(
+    *,
+    connector_id: str,
+    tenant_id: uuid.UUID,
+    query: dict[str, Any] | None = None,
+    case_ref: str | None = None,
+    organization_key: str | None = None,
+    publish: bool = True,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return await get_crif_service().check(
+        connector_id=connector_id,
+        tenant_id=tenant_id,
+        query=query,
+        case_ref=case_ref,
+        organization_key=organization_key,
+        publish=publish,
+    )
+
+
+def run_crif_sanctions_screen(name: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().screen_sanctions(name)
+
+
+def get_crif_rules() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().get_rules()
+
+
+def evaluate_crif_rules(context: dict[str, Any]) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().evaluate_rules(context)
+
+
+def get_crif_metrics(connector_id: str | None = None) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().metrics(connector_id)
+
+
+def get_crif_change_history(entity_key: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
+
+    return get_crif_service().change_history(entity_key)
 
 
 def emit_scalpel_collect_event(

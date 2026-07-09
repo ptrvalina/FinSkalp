@@ -159,6 +159,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getIcfManifest()
   })
 
+  const crifManifestQuery = useQuery({
+    queryKey: ['compliance', 'crif-manifest'],
+    queryFn: () => complianceService.getCrifManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -683,6 +688,16 @@ function CompliancePageInner() {
                 {icfManifestQuery.data.collector_count} коллекторов
               </div>
               <p className="text-xs text-muted-foreground">{icfManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {crifManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0015 · {crifManifestQuery.data.pipeline.length} стадий ·{' '}
+                {crifManifestQuery.data.connector_count} реестровых коннекторов ·{' '}
+                {crifManifestQuery.data.canonical_entity_types.length} типов сущностей
+              </div>
+              <p className="text-xs text-muted-foreground">{crifManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

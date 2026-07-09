@@ -53,6 +53,13 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     get_icf_scheduler_status,
     schedule_icf_job,
     get_icf_monitoring,
+    get_crif_manifest,
+    run_crif_check,
+    run_crif_sanctions_screen,
+    get_crif_rules,
+    evaluate_crif_rules,
+    get_crif_metrics,
+    get_crif_change_history,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -140,6 +147,22 @@ class PlatformV2ICFScheduleRequest(BaseModel):
     query: dict[str, Any] | None = None
     case_ref: str | None = None
     interval_seconds: int = Field(300, ge=60, le=86_400)
+
+
+class PlatformV2CRIFCheckRequest(BaseModel):
+    connector_id: str = Field(..., min_length=1, max_length=128)
+    query: dict[str, Any] | None = None
+    case_ref: str | None = None
+    organization_key: str | None = None
+    publish: bool = True
+
+
+class PlatformV2CRIFSanctionsRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=512)
+
+
+class PlatformV2CRIFRulesEvaluateRequest(BaseModel):
+    context: dict[str, Any] = Field(default_factory=dict)
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -501,6 +524,42 @@ def create_platform_v2_router(
     @router.get("/icf/monitoring")
     async def icf_monitoring(connector_id: str | None = None, _user=dep_user):
         return get_icf_monitoring(connector_id)
+
+    @router.get("/crif/manifest")
+    async def crif_manifest_route(_user=dep_user):
+        return get_crif_manifest()
+
+    @router.post("/crif/check")
+    async def crif_check(body: PlatformV2CRIFCheckRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        return await run_crif_check(
+            connector_id=body.connector_id,
+            tenant_id=uuid.UUID(tenant_raw),
+            query=body.query,
+            case_ref=body.case_ref,
+            organization_key=body.organization_key,
+            publish=body.publish,
+        )
+
+    @router.post("/crif/sanctions/screen")
+    async def crif_sanctions_screen(body: PlatformV2CRIFSanctionsRequest, _user=dep_batch):
+        return run_crif_sanctions_screen(body.name)
+
+    @router.get("/crif/rules")
+    async def crif_rules(_user=dep_user):
+        return get_crif_rules()
+
+    @router.post("/crif/rules/evaluate")
+    async def crif_rules_evaluate(body: PlatformV2CRIFRulesEvaluateRequest, _user=dep_batch):
+        return evaluate_crif_rules(body.context)
+
+    @router.get("/crif/metrics")
+    async def crif_metrics(connector_id: str | None = None, _user=dep_user):
+        return get_crif_metrics(connector_id)
+
+    @router.get("/crif/history/{entity_key}")
+    async def crif_history(entity_key: str, _user=dep_case_read):
+        return get_crif_change_history(entity_key)
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):
