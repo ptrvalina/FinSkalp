@@ -384,6 +384,17 @@ export const complianceService = {
     }>
   },
 
+  getIcfManifest() {
+    return complianceFetch('/api/platform/v2/icf/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      pipeline: string[]
+      collector_count: number
+      principle_ru: string
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

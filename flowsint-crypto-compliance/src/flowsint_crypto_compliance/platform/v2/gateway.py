@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -53,6 +53,7 @@ def architecture_manifest() -> dict[str, Any]:
         "workflow_manifest": "/api/platform/v2/workflow/manifest",
         "blockchain_intelligence_manifest": "/api/platform/v2/blockchain-intelligence/manifest",
         "blockchain_sync_status": "/api/platform/v2/blockchain-intelligence/sync/status",
+        "icf_manifest": "/api/platform/v2/icf/manifest",
     }
 
 
@@ -488,6 +489,62 @@ async def connector_health(connector_id: str) -> dict[str, Any]:
     health = await connector.health()
     await connector.shutdown()
     return {"connector_id": connector_id, **health}
+
+
+def get_icf_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
+
+    return get_icf_service().manifest()
+
+
+async def run_icf_collect(
+    *,
+    connector_id: str,
+    tenant_id: uuid.UUID,
+    query: dict[str, Any] | None = None,
+    case_ref: str | None = None,
+    publish: bool = True,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
+
+    return await get_icf_service().collect(
+        connector_id=connector_id,
+        tenant_id=tenant_id,
+        query=query,
+        case_ref=case_ref,
+        publish=publish,
+    )
+
+
+def get_icf_scheduler_status() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
+
+    return get_icf_service().scheduler_status()
+
+
+def schedule_icf_job(
+    *,
+    connector_id: str,
+    query: dict[str, Any] | None = None,
+    case_ref: str | None = None,
+    tenant_id: str | None = None,
+    interval_seconds: int = 300,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
+
+    return get_icf_service().schedule_job(
+        connector_id=connector_id,
+        query=query,
+        case_ref=case_ref,
+        tenant_id=tenant_id,
+        interval_seconds=interval_seconds,
+    )
+
+
+def get_icf_monitoring(connector_id: str | None = None) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.icf import get_icf_service
+
+    return get_icf_service().monitoring(connector_id)
 
 
 def emit_scalpel_collect_event(

@@ -48,6 +48,11 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     analyst_workspace_save_personalization,
     connector_health,
     run_connector_collect,
+    get_icf_manifest,
+    run_icf_collect,
+    get_icf_scheduler_status,
+    schedule_icf_job,
+    get_icf_monitoring,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -121,6 +126,20 @@ class PlatformV2ConnectorCollectRequest(BaseModel):
     query: dict[str, Any] | None = None
     case_ref: str | None = None
     publish: bool = True
+
+
+class PlatformV2ICFCollectRequest(BaseModel):
+    connector_id: str = Field(..., min_length=1, max_length=128)
+    query: dict[str, Any] | None = None
+    case_ref: str | None = None
+    publish: bool = True
+
+
+class PlatformV2ICFScheduleRequest(BaseModel):
+    connector_id: str = Field(..., min_length=1, max_length=128)
+    query: dict[str, Any] | None = None
+    case_ref: str | None = None
+    interval_seconds: int = Field(300, ge=60, le=86_400)
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -448,6 +467,40 @@ def create_platform_v2_router(
             case_ref=body.case_ref,
             publish=body.publish,
         )
+
+    @router.get("/icf/manifest")
+    async def icf_manifest_route(_user=dep_user):
+        return get_icf_manifest()
+
+    @router.post("/icf/collect")
+    async def icf_collect(body: PlatformV2ICFCollectRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        return await run_icf_collect(
+            connector_id=body.connector_id,
+            tenant_id=uuid.UUID(tenant_raw),
+            query=body.query,
+            case_ref=body.case_ref,
+            publish=body.publish,
+        )
+
+    @router.get("/icf/scheduler/status")
+    async def icf_scheduler_status(_user=dep_user):
+        return get_icf_scheduler_status()
+
+    @router.post("/icf/scheduler/schedule")
+    async def icf_scheduler_schedule(body: PlatformV2ICFScheduleRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        return schedule_icf_job(
+            connector_id=body.connector_id,
+            query=body.query,
+            case_ref=body.case_ref,
+            tenant_id=tenant_raw,
+            interval_seconds=body.interval_seconds,
+        )
+
+    @router.get("/icf/monitoring")
+    async def icf_monitoring(connector_id: str | None = None, _user=dep_user):
+        return get_icf_monitoring(connector_id)
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

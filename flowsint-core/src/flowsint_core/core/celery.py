@@ -14,6 +14,7 @@ celery = Celery(
         "flowsint_core.tasks.live_collectors",
         "flowsint_core.tasks.compliance_ops",
         "flowsint_core.tasks.blockchain_sync",
+        "flowsint_core.tasks.icf",
     ],
 )
 
@@ -61,6 +62,10 @@ celery.conf.update(
         "blockchain-incremental-sync": {
             "task": "sync_blockchain_chains_incremental",
             "schedule": 120.0,
+        },
+        "icf-scheduled-collections": {
+            "task": "icf_run_scheduled_collections",
+            "schedule": 300.0,
         },
     },
 )

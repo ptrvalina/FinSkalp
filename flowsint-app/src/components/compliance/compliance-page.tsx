@@ -154,6 +154,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getBlockchainIntelligenceManifest()
   })
 
+  const icfManifestQuery = useQuery({
+    queryKey: ['compliance', 'icf-manifest'],
+    queryFn: () => complianceService.getIcfManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -669,6 +674,15 @@ function CompliancePageInner() {
                 {blockchainManifestQuery.data.canonical_entities.length} сущностей модели
               </div>
               <p className="text-xs text-muted-foreground">{blockchainManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {icfManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0014 · {icfManifestQuery.data.pipeline.length} стадий ·{' '}
+                {icfManifestQuery.data.collector_count} коллекторов
+              </div>
+              <p className="text-xs text-muted-foreground">{icfManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (
