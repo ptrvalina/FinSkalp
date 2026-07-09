@@ -169,6 +169,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getRdeManifest()
   })
 
+  const eccfManifestQuery = useQuery({
+    queryKey: ['compliance', 'eccf-manifest'],
+    queryFn: () => complianceService.getEccfManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -713,6 +718,16 @@ function CompliancePageInner() {
                 {rdeManifestQuery.data.risk_levels.length} уровней риска
               </div>
               <p className="text-xs text-muted-foreground">{rdeManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {eccfManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0017 · {eccfManifestQuery.data.pipeline.length} стадий ·{' '}
+                {eccfManifestQuery.data.evidence_categories.length} категорий доказательств ·{' '}
+                {eccfManifestQuery.data.audit_actions.length} типов аудита
+              </div>
+              <p className="text-xs text-muted-foreground">{eccfManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

@@ -17,6 +17,7 @@ celery = Celery(
         "flowsint_core.tasks.icf",
         "flowsint_core.tasks.crif",
         "flowsint_core.tasks.rde",
+        "flowsint_core.tasks.eccf",
     ],
 )
 
@@ -76,6 +77,10 @@ celery.conf.update(
         "rde-batch-reassess": {
             "task": "rde_batch_reassess",
             "schedule": 900.0,
+        },
+        "eccf-integrity-batch": {
+            "task": "eccf_verify_integrity_batch",
+            "schedule": 1800.0,
         },
     },
 )

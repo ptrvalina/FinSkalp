@@ -66,6 +66,15 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     evaluate_rde_rules,
     get_rde_monitoring,
     get_rde_priorities,
+    get_eccf_manifest,
+    register_eccf_evidence,
+    get_eccf_evidence,
+    verify_eccf_integrity,
+    get_eccf_audit_trail,
+    get_eccf_timeline,
+    archive_eccf_evidence,
+    record_eccf_report_usage,
+    get_eccf_monitoring,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -179,6 +188,28 @@ class PlatformV2RDEAssessRequest(BaseModel):
 
 class PlatformV2RDERulesEvaluateRequest(BaseModel):
     context: dict[str, Any] = Field(default_factory=dict)
+
+
+class PlatformV2ECCFRegisterRequest(BaseModel):
+    entity_type: str = Field(..., min_length=1, max_length=64)
+    entity_value: str = Field(..., min_length=1, max_length=512)
+    source_type: str = Field("osint", min_length=1, max_length=64)
+    case_ref: str | None = None
+    collector_id: str | None = None
+    source_uri: str | None = None
+    payload: dict[str, Any] | None = None
+    bridge_kg: bool = True
+
+
+class PlatformV2ECCFReportUsageRequest(BaseModel):
+    evidence_id: str = Field(..., min_length=1, max_length=64)
+    report_id: str = Field(..., min_length=1, max_length=128)
+    analyst: str = Field(..., min_length=1, max_length=128)
+
+
+class PlatformV2ECCFArchiveRequest(BaseModel):
+    reason: str | None = None
+    actor: str = "eccf.api"
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -606,6 +637,56 @@ def create_platform_v2_router(
     @router.get("/rde/priorities")
     async def rde_priorities(case_ref: str | None = None, _user=dep_user):
         return get_rde_priorities(case_ref)
+
+    @router.get("/eccf/manifest")
+    async def eccf_manifest_route(_user=dep_user):
+        return get_eccf_manifest()
+
+    @router.post("/eccf/register")
+    async def eccf_register(body: PlatformV2ECCFRegisterRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        collector_payload = {
+            "entity_type": body.entity_type,
+            "entity_value": body.entity_value,
+            "source_type": body.source_type,
+            "payload": body.payload or {},
+        }
+        return await register_eccf_evidence(
+            tenant_id=uuid.UUID(tenant_raw),
+            collector_payload=collector_payload,
+            case_ref=body.case_ref,
+            collector_id=body.collector_id,
+            source_uri=body.source_uri,
+            bridge_kg=body.bridge_kg,
+        )
+
+    @router.get("/eccf/monitoring")
+    async def eccf_monitoring(_user=dep_user):
+        return get_eccf_monitoring()
+
+    @router.post("/eccf/report-usage")
+    async def eccf_report_usage(body: PlatformV2ECCFReportUsageRequest, _user=dep_batch):
+        return record_eccf_report_usage(body.evidence_id, body.report_id, body.analyst)
+
+    @router.get("/eccf/{evidence_id}")
+    async def eccf_get_evidence(evidence_id: str, _user=dep_user):
+        return get_eccf_evidence(evidence_id)
+
+    @router.post("/eccf/{evidence_id}/verify")
+    async def eccf_verify(evidence_id: str, _user=dep_batch):
+        return verify_eccf_integrity(evidence_id)
+
+    @router.get("/eccf/{evidence_id}/audit")
+    async def eccf_audit(evidence_id: str, _user=dep_user):
+        return get_eccf_audit_trail(evidence_id)
+
+    @router.get("/eccf/{evidence_id}/timeline")
+    async def eccf_timeline(evidence_id: str, _user=dep_user):
+        return get_eccf_timeline(evidence_id)
+
+    @router.post("/eccf/{evidence_id}/archive")
+    async def eccf_archive(evidence_id: str, body: PlatformV2ECCFArchiveRequest, _user=dep_batch):
+        return archive_eccf_evidence(evidence_id, actor=body.actor, reason=body.reason)
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

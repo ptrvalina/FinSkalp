@@ -109,6 +109,11 @@
 | TD-CRIF-2 | Sanctions list — demo OFAC subset | **Open** | Лицензия OpenSanctions / FIU feed |
 | TD-CRIF-3 | Registry cache/monitor in-memory | **Open** | Postgres + Redis |
 | TD-CRIF-4 | Change monitoring webhook → analyst | **Open** | Notification channel (email/Slack) |
+| TD-ECCF-1 | ECCF repository in-memory only | **Open** | Postgres WORM storage + migration |
+| TD-ECCF-2 | Legal archive — no cold storage | **Open** | S3 Glacier / tape archive integration |
+| TD-ECCF-3 | Audit trail not replicated | **Open** | Append-only log shipping (WORM bucket) |
+| TD-ECCF-4 | Digital signatures on evidence packages | **Open** | GOST/RFC3161 timestamping service |
+| TD-ECCF-5 | Cross-tenant evidence isolation audit | **Open** | Row-level security + penetration test |
 | TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
 | TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
 

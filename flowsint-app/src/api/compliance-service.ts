@@ -551,6 +551,108 @@ export const complianceService = {
     }>
   },
 
+  getEccfManifest() {
+    return complianceFetch('/api/platform/v2/eccf/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      pipeline: string[]
+      evidence_categories: string[]
+      lifecycle_states: string[]
+      audit_actions: string[]
+      evidence_id_format: string
+    }>
+  },
+
+  registerEccfEvidence(payload: {
+    entityType: string
+    entityValue: string
+    sourceType?: string
+    caseRef?: string
+    collectorId?: string
+    sourceUri?: string
+    payload?: Record<string, unknown>
+    bridgeKg?: boolean
+  }) {
+    return complianceFetch('/api/platform/v2/eccf/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        entity_type: payload.entityType,
+        entity_value: payload.entityValue,
+        source_type: payload.sourceType ?? 'osint',
+        case_ref: payload.caseRef,
+        collector_id: payload.collectorId,
+        source_uri: payload.sourceUri,
+        payload: payload.payload,
+        bridge_kg: payload.bridgeKg ?? true
+      })
+    }) as Promise<{
+      ok: boolean
+      evidence_id: string
+      stages: string[]
+      integrity_ok: boolean
+      deduplicated: boolean
+    }>
+  },
+
+  getEccfEvidence(evidenceId: string) {
+    return complianceFetch(`/api/platform/v2/eccf/${encodeURIComponent(evidenceId)}`) as Promise<{
+      ok: boolean
+      record: Record<string, unknown>
+    }>
+  },
+
+  verifyEccfIntegrity(evidenceId: string) {
+    return complianceFetch(`/api/platform/v2/eccf/${encodeURIComponent(evidenceId)}/verify`, {
+      method: 'POST'
+    }) as Promise<{ ok: boolean; evidence_id: string; errors: string[] }>
+  },
+
+  getEccfAuditTrail(evidenceId: string) {
+    return complianceFetch(`/api/platform/v2/eccf/${encodeURIComponent(evidenceId)}/audit`) as Promise<{
+      ok: boolean
+      count: number
+      entries: Array<{ action: string; actor: string; timestamp: string }>
+    }>
+  },
+
+  getEccfTimeline(evidenceId: string) {
+    return complianceFetch(`/api/platform/v2/eccf/${encodeURIComponent(evidenceId)}/timeline`) as Promise<{
+      ok: boolean
+      count: number
+      events: Array<{ event_type: string; label: string; timestamp: string }>
+    }>
+  },
+
+  archiveEccfEvidence(evidenceId: string, reason?: string) {
+    return complianceFetch(`/api/platform/v2/eccf/${encodeURIComponent(evidenceId)}/archive`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    }) as Promise<{ ok: boolean; archived_at: string }>
+  },
+
+  recordEccfReportUsage(payload: { evidenceId: string; reportId: string; analyst: string }) {
+    return complianceFetch('/api/platform/v2/eccf/report-usage', {
+      method: 'POST',
+      body: JSON.stringify({
+        evidence_id: payload.evidenceId,
+        report_id: payload.reportId,
+        analyst: payload.analyst
+      })
+    }) as Promise<{ ok: boolean; report_id: string }>
+  },
+
+  getEccfMonitoring() {
+    return complianceFetch('/api/platform/v2/eccf/monitoring') as Promise<{
+      ok: boolean
+      registered_count: number
+      integrity_failures: number
+      archived_count: number
+      success_rate: number
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

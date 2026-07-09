@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -56,6 +56,7 @@ def architecture_manifest() -> dict[str, Any]:
         "icf_manifest": "/api/platform/v2/icf/manifest",
         "crif_manifest": "/api/platform/v2/crif/manifest",
         "rde_manifest": "/api/platform/v2/rde/manifest",
+        "eccf_manifest": "/api/platform/v2/eccf/manifest",
     }
 
 
@@ -651,6 +652,82 @@ def get_rde_priorities(case_ref: str | None = None) -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
 
     return get_rde_service().priorities(case_ref)
+
+
+def get_eccf_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().manifest()
+
+
+async def register_eccf_evidence(
+    *,
+    tenant_id: uuid.UUID,
+    collector_payload: dict[str, Any],
+    case_ref: str | None = None,
+    actor: str = "eccf.gateway",
+    source_uri: str | None = None,
+    collector_id: str | None = None,
+    bridge_kg: bool = True,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return await get_eccf_service().register(
+        tenant_id=tenant_id,
+        collector_payload=collector_payload,
+        case_ref=case_ref,
+        actor=actor,
+        source_uri=source_uri,
+        collector_id=collector_id,
+        bridge_kg=bridge_kg,
+    )
+
+
+def get_eccf_evidence(evidence_id: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().get_evidence(evidence_id)
+
+
+def verify_eccf_integrity(evidence_id: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().verify_integrity(evidence_id)
+
+
+def get_eccf_audit_trail(evidence_id: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().get_audit_trail(evidence_id)
+
+
+def get_eccf_timeline(evidence_id: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().get_timeline(evidence_id)
+
+
+def archive_eccf_evidence(
+    evidence_id: str,
+    *,
+    actor: str = "eccf.gateway",
+    reason: str | None = None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().archive(evidence_id, actor=actor, reason=reason)
+
+
+def record_eccf_report_usage(evidence_id: str, report_id: str, analyst: str) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().record_report_usage(evidence_id, report_id, analyst)
+
+
+def get_eccf_monitoring() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
+
+    return get_eccf_service().monitoring()
 
 
 def emit_scalpel_collect_event(
