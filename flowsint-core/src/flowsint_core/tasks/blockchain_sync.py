@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from celery import states
@@ -22,10 +23,12 @@ def sync_blockchain_chains_incremental(self, chains: list[str] | None = None) ->
         sync_chain_incremental,
     )
 
+    combat_mode = os.getenv("COMPLIANCE_COMBAT_MODE", "1").strip().lower() in ("1", "true", "yes")
+    simulate = not combat_mode
     self.update_state(state=states.STARTED, meta={"task": "block_sync"})
     if chains:
         results = []
         for ch in chains:
-            results.append(_run(sync_chain_incremental(ch)))
+            results.append(_run(sync_chain_incremental(ch, simulate=simulate)))
         return {"ok": True, "results": results}
-    return _run(sync_all_chains())
+    return _run(sync_all_chains(simulate=simulate))

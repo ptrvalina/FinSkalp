@@ -74,6 +74,15 @@ app.include_router(compliance.router, prefix="/api/compliance", tags=["complianc
 app.include_router(compliance_ops.router, prefix="/api/compliance", tags=["compliance-ops"])
 app.include_router(platform_v2.router, prefix="/api/platform/v2", tags=["platform-v2"])
 
+
+@app.on_event("startup")
+async def bootstrap_platform_v2_startup() -> None:
+    if not any(getattr(route, "path", "").startswith("/api/platform/v2") for route in app.routes):
+        return
+    from flowsint_crypto_compliance.platform.v2.integration import bootstrap_platform_v2
+
+    await bootstrap_platform_v2()
+
 from flowsint_crypto_compliance.observability.middleware import CorrelationIdMiddleware
 from flowsint_crypto_compliance.observability.tracing import instrument_fastapi
 

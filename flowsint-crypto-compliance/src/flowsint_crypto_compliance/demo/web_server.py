@@ -334,8 +334,10 @@ async def lifespan(app: FastAPI):
         stop_collector_health_daemon,
     )
     from flowsint_crypto_compliance.platform.v2.entity_store_mode import warn_if_memory_store_in_production
+    from flowsint_crypto_compliance.platform.v2.integration import bootstrap_platform_v2
 
     apply_combat_env_defaults()
+    await bootstrap_platform_v2()
     warn_if_memory_store_in_production()
 
     seed_demo_registry()

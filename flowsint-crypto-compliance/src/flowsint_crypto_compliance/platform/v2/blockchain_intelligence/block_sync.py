@@ -195,10 +195,12 @@ async def _sync_chain_incremental_unlocked(
 
 
 async def sync_all_chains(*, simulate: bool | None = None) -> dict[str, Any]:
-    sim = simulate if simulate is not None else os.getenv("FINSKALP_ENTITY_STORE", "").lower() in (
-        "memory",
-        "in_memory",
-    )
+    if simulate is None:
+        from flowsint_crypto_compliance.demo.combat_mode import is_combat_mode
+
+        sim = not is_combat_mode()
+    else:
+        sim = simulate
     chains = ["btc", "eth", "tron", "bsc", "polygon", "ltc", "sol"]
     results = []
     for ch in chains:

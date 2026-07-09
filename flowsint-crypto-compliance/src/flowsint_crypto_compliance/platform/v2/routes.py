@@ -127,6 +127,11 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     run_intelligence,
     run_intelligence_engine,
 )
+from flowsint_crypto_compliance.platform.v2.integration import (
+    bootstrap_platform_v2,
+    get_integration_status,
+    run_live_smoke,
+)
 
 
 class PlatformV2InvestigateRequest(BaseModel):
@@ -326,6 +331,12 @@ class PlatformV2BlockchainAnalyzeRequest(BaseModel):
 class PlatformV2BlockchainSyncRequest(BaseModel):
     chains: list[str] | None = None
     simulate: bool | None = None
+
+
+class PlatformV2IntegrationSmokeRequest(BaseModel):
+    case_ref: str = Field(..., min_length=1, max_length=128)
+    address: str = Field(..., min_length=4, max_length=128)
+    chain: str = Field(..., min_length=2, max_length=32)
 
 
 class PlatformV2AttributionBody(BaseModel):
@@ -1231,5 +1242,21 @@ def create_platform_v2_router(
             analyst_id=body.analyst_id,
         )
         return {"status": "rejected", "label": el.label, "chain": el.chain, "address": el.address}
+
+    @router.get("/integration/status")
+    async def integration_status(_user=dep_user):
+        return get_integration_status()
+
+    @router.post("/integration/bootstrap")
+    async def integration_bootstrap(_user=dep_batch):
+        return await bootstrap_platform_v2()
+
+    @router.post("/integration/smoke")
+    async def integration_smoke(body: PlatformV2IntegrationSmokeRequest, _user=dep_batch):
+        return await run_live_smoke(
+            case_ref=body.case_ref,
+            address=body.address,
+            chain=body.chain,
+        )
 
     return router
