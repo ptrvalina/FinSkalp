@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -55,6 +55,7 @@ def architecture_manifest() -> dict[str, Any]:
         "blockchain_sync_status": "/api/platform/v2/blockchain-intelligence/sync/status",
         "icf_manifest": "/api/platform/v2/icf/manifest",
         "crif_manifest": "/api/platform/v2/crif/manifest",
+        "rde_manifest": "/api/platform/v2/rde/manifest",
     }
 
 
@@ -603,6 +604,53 @@ def get_crif_change_history(entity_key: str) -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.crif import get_crif_service
 
     return get_crif_service().change_history(entity_key)
+
+
+def get_rde_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return get_rde_service().manifest()
+
+
+async def run_rde_assess(
+    *,
+    entity_key: str,
+    tenant_id: uuid.UUID,
+    case_ref: str | None = None,
+    signals: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return await get_rde_service().assess(
+        entity_key=entity_key,
+        tenant_id=tenant_id,
+        case_ref=case_ref,
+        signals=signals,
+    )
+
+
+def get_rde_rules() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return get_rde_service().get_rules()
+
+
+def evaluate_rde_rules(context: dict[str, Any]) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return get_rde_service().evaluate_rules(context)
+
+
+def get_rde_monitoring() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return get_rde_service().monitoring()
+
+
+def get_rde_priorities(case_ref: str | None = None) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.rde import get_rde_service
+
+    return get_rde_service().priorities(case_ref)
 
 
 def emit_scalpel_collect_event(

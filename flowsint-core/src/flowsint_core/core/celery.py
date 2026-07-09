@@ -16,6 +16,7 @@ celery = Celery(
         "flowsint_core.tasks.blockchain_sync",
         "flowsint_core.tasks.icf",
         "flowsint_core.tasks.crif",
+        "flowsint_core.tasks.rde",
     ],
 )
 
@@ -71,6 +72,10 @@ celery.conf.update(
         "crif-registry-sync": {
             "task": "crif_sync_registries",
             "schedule": 600.0,
+        },
+        "rde-batch-reassess": {
+            "task": "rde_batch_reassess",
+            "schedule": 900.0,
         },
     },
 )

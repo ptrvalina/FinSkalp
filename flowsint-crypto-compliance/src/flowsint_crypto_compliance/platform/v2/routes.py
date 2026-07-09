@@ -60,6 +60,12 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     evaluate_crif_rules,
     get_crif_metrics,
     get_crif_change_history,
+    get_rde_manifest,
+    run_rde_assess,
+    get_rde_rules,
+    evaluate_rde_rules,
+    get_rde_monitoring,
+    get_rde_priorities,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -162,6 +168,16 @@ class PlatformV2CRIFSanctionsRequest(BaseModel):
 
 
 class PlatformV2CRIFRulesEvaluateRequest(BaseModel):
+    context: dict[str, Any] = Field(default_factory=dict)
+
+
+class PlatformV2RDEAssessRequest(BaseModel):
+    entity_key: str = Field(..., min_length=1, max_length=512)
+    case_ref: str | None = None
+    signals: dict[str, Any] | None = None
+
+
+class PlatformV2RDERulesEvaluateRequest(BaseModel):
     context: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -560,6 +576,36 @@ def create_platform_v2_router(
     @router.get("/crif/history/{entity_key}")
     async def crif_history(entity_key: str, _user=dep_case_read):
         return get_crif_change_history(entity_key)
+
+    @router.get("/rde/manifest")
+    async def rde_manifest_route(_user=dep_user):
+        return get_rde_manifest()
+
+    @router.post("/rde/assess")
+    async def rde_assess(body: PlatformV2RDEAssessRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        return await run_rde_assess(
+            entity_key=body.entity_key,
+            tenant_id=uuid.UUID(tenant_raw),
+            case_ref=body.case_ref,
+            signals=body.signals,
+        )
+
+    @router.get("/rde/rules")
+    async def rde_rules(_user=dep_user):
+        return get_rde_rules()
+
+    @router.post("/rde/rules/evaluate")
+    async def rde_rules_evaluate(body: PlatformV2RDERulesEvaluateRequest, _user=dep_batch):
+        return evaluate_rde_rules(body.context)
+
+    @router.get("/rde/monitoring")
+    async def rde_monitoring(_user=dep_user):
+        return get_rde_monitoring()
+
+    @router.get("/rde/priorities")
+    async def rde_priorities(case_ref: str | None = None, _user=dep_user):
+        return get_rde_priorities(case_ref)
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

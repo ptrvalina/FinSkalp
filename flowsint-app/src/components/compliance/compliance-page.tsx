@@ -164,6 +164,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getCrifManifest()
   })
 
+  const rdeManifestQuery = useQuery({
+    queryKey: ['compliance', 'rde-manifest'],
+    queryFn: () => complianceService.getRdeManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -698,6 +703,16 @@ function CompliancePageInner() {
                 {crifManifestQuery.data.canonical_entity_types.length} типов сущностей
               </div>
               <p className="text-xs text-muted-foreground">{crifManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {rdeManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0016 · {rdeManifestQuery.data.pipeline.length} стадий ·{' '}
+                {rdeManifestQuery.data.factor_groups.length} факторных групп ·{' '}
+                {rdeManifestQuery.data.risk_levels.length} уровней риска
+              </div>
+              <p className="text-xs text-muted-foreground">{rdeManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

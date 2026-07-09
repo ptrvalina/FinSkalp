@@ -480,6 +480,77 @@ export const complianceService = {
     }>
   },
 
+  getRdeManifest() {
+    return complianceFetch('/api/platform/v2/rde/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      pipeline: string[]
+      factor_groups: string[]
+      risk_levels: string[]
+      principle_ru: string
+    }>
+  },
+
+  assessRde(payload: {
+    entityKey: string
+    caseRef?: string
+    signals?: Record<string, unknown>
+  }) {
+    return complianceFetch('/api/platform/v2/rde/assess', {
+      method: 'POST',
+      body: JSON.stringify({
+        entity_key: payload.entityKey,
+        case_ref: payload.caseRef,
+        signals: payload.signals
+      })
+    }) as Promise<{
+      ok: boolean
+      entity_key: string
+      risk_level: string
+      composite_score: number
+      stages: string[]
+      auto_decision: boolean
+      recommendation_count: number
+    }>
+  },
+
+  getRdeRules() {
+    return complianceFetch('/api/platform/v2/rde/rules') as Promise<{
+      ok: boolean
+      rules: Array<{ rule_id: string; version: string; description_ru: string }>
+    }>
+  },
+
+  evaluateRdeRules(context: Record<string, unknown>) {
+    return complianceFetch('/api/platform/v2/rde/rules/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ context })
+    }) as Promise<{
+      ok: boolean
+      event_count: number
+      events: Array<{ rule_id: string; event_type: string; severity: string; message_ru: string }>
+    }>
+  },
+
+  getRdeMonitoring() {
+    return complianceFetch('/api/platform/v2/rde/monitoring') as Promise<{
+      ok: boolean
+      assessment_count: number
+      avg_latency_ms: number
+      success_rate: number
+    }>
+  },
+
+  getRdePriorities(caseRef?: string) {
+    const qs = caseRef ? `?case_ref=${encodeURIComponent(caseRef)}` : ''
+    return complianceFetch(`/api/platform/v2/rde/priorities${qs}`) as Promise<{
+      ok: boolean
+      count: number
+      priorities: Array<{ object_type: string; object_key: string; priority_score: number; urgency: string }>
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',
