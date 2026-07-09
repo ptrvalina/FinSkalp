@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017", "RFC-0018", "RFC-0019"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -58,6 +58,7 @@ def architecture_manifest() -> dict[str, Any]:
         "rde_manifest": "/api/platform/v2/rde/manifest",
         "eccf_manifest": "/api/platform/v2/eccf/manifest",
         "eia_manifest": "/api/platform/v2/eia/manifest",
+        "aspp_manifest": "/api/platform/v2/aspp/manifest",
     }
 
 
@@ -783,6 +784,65 @@ def get_eia_monitoring() -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
 
     return get_eia_service().monitoring()
+
+
+def get_aspp_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().manifest()
+
+
+def get_aspp_rest_catalog() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().rest_catalog()
+
+
+def get_aspp_event_catalog() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().event_catalog()
+
+
+def get_aspp_marketplace() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().marketplace()
+
+
+def get_aspp_developer_portal() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().developer_portal()
+
+
+def register_aspp_webhook(
+    *,
+    url: str,
+    event_types: list[str],
+    secret: str | None = None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().subscribe_webhook(url=url, event_types=event_types, secret=secret)
+
+
+def list_aspp_webhooks() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().list_webhooks()
+
+
+def register_aspp_plugin(payload: dict[str, Any]) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().register_plugin(payload)
+
+
+def get_aspp_monitoring() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.aspp import get_aspp_service
+
+    return get_aspp_service().monitoring()
 
 
 def emit_scalpel_collect_event(

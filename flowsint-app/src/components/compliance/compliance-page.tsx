@@ -179,6 +179,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getEiaManifest()
   })
 
+  const asppManifestQuery = useQuery({
+    queryKey: ['compliance', 'aspp-manifest'],
+    queryFn: () => complianceService.getAsppManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -743,6 +748,16 @@ function CompliancePageInner() {
                 {eiaManifestQuery.data.engines.length} движков
               </div>
               <p className="text-xs text-muted-foreground">{eiaManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {asppManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0019 · {asppManifestQuery.data.plugin_categories.length} категорий плагинов ·{' '}
+                {asppManifestQuery.data.plugin_count} плагинов ·{' '}
+                {Object.keys(asppManifestQuery.data.sdks).length} SDK
+              </div>
+              <p className="text-xs text-muted-foreground">{asppManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

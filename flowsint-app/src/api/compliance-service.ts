@@ -720,6 +720,61 @@ export const complianceService = {
     }>
   },
 
+  getAsppManifest() {
+    return complianceFetch('/api/platform/v2/aspp/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      plugin_categories: string[]
+      plugin_count: number
+      gateway: { capabilities: Record<string, unknown> }
+      sdks: Record<string, { language: string; version: string }>
+    }>
+  },
+
+  getAsppRestCatalog() {
+    return complianceFetch('/api/platform/v2/aspp/rest-catalog') as Promise<{
+      total_routes: number
+      routes: Array<{ method: string; path: string; summary_ru: string }>
+    }>
+  },
+
+  getAsppMarketplace() {
+    return complianceFetch('/api/platform/v2/aspp/marketplace') as Promise<{
+      categories: string[]
+      total_items: number
+      items_by_category: Record<string, unknown[]>
+    }>
+  },
+
+  getAsppDeveloperPortal() {
+    return complianceFetch('/api/platform/v2/aspp/developer-portal') as Promise<{
+      title_ru: string
+      sandbox: { enabled: boolean; base_url: string }
+      sdks: string[]
+    }>
+  },
+
+  subscribeAsppWebhook(payload: { url: string; eventTypes: string[] }) {
+    return complianceFetch('/api/platform/v2/aspp/webhooks/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({
+        url: payload.url,
+        event_types: payload.eventTypes
+      })
+    }) as Promise<{ ok: boolean; subscription: { subscription_id: string } }>
+  },
+
+  getAsppMonitoring() {
+    return complianceFetch('/api/platform/v2/aspp/monitoring') as Promise<{
+      ok: boolean
+      plugin_count: number
+      api_request_count: number
+      success_rate: number
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

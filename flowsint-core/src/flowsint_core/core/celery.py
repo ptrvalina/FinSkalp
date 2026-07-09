@@ -19,6 +19,7 @@ celery = Celery(
         "flowsint_core.tasks.rde",
         "flowsint_core.tasks.eccf",
         "flowsint_core.tasks.eia",
+        "flowsint_core.tasks.aspp",
     ],
 )
 
@@ -86,6 +87,10 @@ celery.conf.update(
         "eia-warm-context-cache": {
             "task": "eia_warm_context_cache",
             "schedule": 1200.0,
+        },
+        "aspp-deliver-webhooks": {
+            "task": "aspp_deliver_webhooks",
+            "schedule": 300.0,
         },
     },
 )

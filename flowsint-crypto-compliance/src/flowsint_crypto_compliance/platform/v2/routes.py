@@ -80,6 +80,15 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     get_eia_context,
     get_eia_prompts,
     get_eia_monitoring,
+    get_aspp_manifest,
+    get_aspp_rest_catalog,
+    get_aspp_event_catalog,
+    get_aspp_marketplace,
+    get_aspp_developer_portal,
+    register_aspp_webhook,
+    list_aspp_webhooks,
+    register_aspp_plugin,
+    get_aspp_monitoring,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -223,6 +232,28 @@ class PlatformV2EIAAssistRequest(BaseModel):
     entity_keys: list[str] | None = None
     prompt_version: str | None = None
     actor: str = "eia.api"
+
+
+class PlatformV2ASPPWebhookSubscribeRequest(BaseModel):
+    url: str = Field(..., min_length=8, max_length=512)
+    event_types: list[str] = Field(..., min_length=1)
+    secret: str | None = None
+
+
+class PlatformV2ASPPPluginRegisterRequest(BaseModel):
+    plugin_id: str = Field(..., min_length=1, max_length=128)
+    category: str = Field(..., min_length=1, max_length=64)
+    version: str = Field("1.0.0", min_length=1, max_length=32)
+    name_ru: str = ""
+    description_ru: str = ""
+    permissions: list[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    events_published: list[str] = Field(default_factory=list)
+    events_subscribed: list[str] = Field(default_factory=list)
+    config_schema: dict[str, Any] = Field(default_factory=dict)
+    health_status: str = "healthy"
+    source: str = "api"
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -738,6 +769,42 @@ def create_platform_v2_router(
     @router.get("/eia/monitoring")
     async def eia_monitoring(_user=dep_user):
         return get_eia_monitoring()
+
+    @router.get("/aspp/manifest")
+    async def aspp_manifest_route(_user=dep_user):
+        return get_aspp_manifest()
+
+    @router.get("/aspp/rest-catalog")
+    async def aspp_rest_catalog(_user=dep_user):
+        return get_aspp_rest_catalog()
+
+    @router.get("/aspp/events")
+    async def aspp_events(_user=dep_user):
+        return get_aspp_event_catalog()
+
+    @router.get("/aspp/marketplace")
+    async def aspp_marketplace(_user=dep_user):
+        return get_aspp_marketplace()
+
+    @router.get("/aspp/developer-portal")
+    async def aspp_developer_portal(_user=dep_user):
+        return get_aspp_developer_portal()
+
+    @router.post("/aspp/webhooks/subscribe")
+    async def aspp_webhook_subscribe(body: PlatformV2ASPPWebhookSubscribeRequest, _user=dep_batch):
+        return register_aspp_webhook(url=body.url, event_types=body.event_types, secret=body.secret)
+
+    @router.get("/aspp/webhooks")
+    async def aspp_webhooks_list(_user=dep_user):
+        return list_aspp_webhooks()
+
+    @router.get("/aspp/monitoring")
+    async def aspp_monitoring(_user=dep_user):
+        return get_aspp_monitoring()
+
+    @router.post("/aspp/plugins/register")
+    async def aspp_plugin_register(body: PlatformV2ASPPPluginRegisterRequest, _user=dep_batch):
+        return register_aspp_plugin(body.model_dump())
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

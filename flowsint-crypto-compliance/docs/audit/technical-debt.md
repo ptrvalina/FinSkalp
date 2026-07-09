@@ -119,6 +119,10 @@
 | TD-EIA-3 | Fine-tuned domain models | **Open** | Training data + ONNX/GGUF deployment |
 | TD-EIA-4 | Context cache — in-memory only | **Open** | Redis cache + TTL policy |
 | TD-EIA-5 | Analyst history — stub | **Open** | analyst_workspace integration |
+| TD-ASPP-1 | Real GraphQL server | **Open** | Strawberry/Ariadne + federation |
+| TD-ASPP-2 | gRPC protos + codegen | **Open** | protobuf + grpcio services |
+| TD-ASPP-3 | OAuth2 provider integration | **Open** | Keycloak/Auth0 OIDC |
+| TD-ASPP-4 | Marketplace install flow | **Open** | Plugin sandbox + signing |
 | TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
 | TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
 
