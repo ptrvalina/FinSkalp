@@ -174,6 +174,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getEccfManifest()
   })
 
+  const eiaManifestQuery = useQuery({
+    queryKey: ['compliance', 'eia-manifest'],
+    queryFn: () => complianceService.getEiaManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -728,6 +733,16 @@ function CompliancePageInner() {
                 {eccfManifestQuery.data.audit_actions.length} типов аудита
               </div>
               <p className="text-xs text-muted-foreground">{eccfManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {eiaManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0018 · {eiaManifestQuery.data.task_types.length} типов задач ·{' '}
+                {eiaManifestQuery.data.pipeline.length} стадий ·{' '}
+                {eiaManifestQuery.data.engines.length} движков
+              </div>
+              <p className="text-xs text-muted-foreground">{eiaManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

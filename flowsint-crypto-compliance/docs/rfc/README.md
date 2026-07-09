@@ -31,6 +31,7 @@
 | [RFC-0015](RFC-0015-compliance-registry-intelligence.md) | Compliance & Registry Intelligence Framework v2.0 | **Complete (100%)** — [`rfc0015-completion.md`](../architecture/v2/rfc0015-completion.md) |
 | [RFC-0016](RFC-0016-risk-decision-engine.md) | Risk & Decision Engine v2.0 | **Complete (100%)** — [`rfc0016-completion.md`](../architecture/v2/rfc0016-completion.md) |
 | [RFC-0017](RFC-0017-evidence-chain-of-custody.md) | Evidence & Chain of Custody Framework v2.0 | **Complete (100%)** — [`rfc0017-completion.md`](../architecture/v2/rfc0017-completion.md) |
+| [RFC-0018](RFC-0018-explainable-ai-investigation-assistant.md) | Explainable AI & Investigation Assistant v2.0 | **Complete (100%)** — [`rfc0018-completion.md`](../architecture/v2/rfc0018-completion.md) |
 
 
 

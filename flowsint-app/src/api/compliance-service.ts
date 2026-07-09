@@ -653,6 +653,73 @@ export const complianceService = {
     }>
   },
 
+  getEiaManifest() {
+    return complianceFetch('/api/platform/v2/eia/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      task_types: string[]
+      pipeline: string[]
+      engines: string[]
+    }>
+  },
+
+  runEiaAssist(payload: {
+    taskType: string
+    caseRef: string
+    entityKeys?: string[]
+    promptVersion?: string
+  }) {
+    return complianceFetch('/api/platform/v2/eia/assist', {
+      method: 'POST',
+      body: JSON.stringify({
+        task_type: payload.taskType,
+        case_ref: payload.caseRef,
+        entity_keys: payload.entityKeys,
+        prompt_version: payload.promptVersion
+      })
+    }) as Promise<{
+      ok: boolean
+      task_type: string
+      narrative_ru: string
+      citations: Array<{ evidence_id: string | null; label_ru: string; confidence: number }>
+      recommendations: Array<{ action_ru: string; requires_analyst_confirmation: boolean }>
+      requires_analyst_confirmation: boolean
+      confidence: number
+    }>
+  },
+
+  getEiaContext(caseRef: string, entityKeys?: string[]) {
+    const params = new URLSearchParams({ case_ref: caseRef })
+    if (entityKeys?.length) params.set('entity_keys', entityKeys.join(','))
+    return complianceFetch(`/api/platform/v2/eia/context?${params}`) as Promise<{
+      ok: boolean
+      case_ref: string
+      evidence_count: number
+      sources: string[]
+    }>
+  },
+
+  getEiaPrompts(taskType?: string) {
+    const qs = taskType ? `?task_type=${encodeURIComponent(taskType)}` : ''
+    return complianceFetch(`/api/platform/v2/eia/prompts${qs}`) as Promise<{
+      ok: boolean
+      prompts?: Record<string, unknown[]>
+      versions?: Array<{ version: string; task_type: string }>
+    }>
+  },
+
+  getEiaMonitoring() {
+    return complianceFetch('/api/platform/v2/eia/monitoring') as Promise<{
+      ok: boolean
+      task_count: number
+      success_rate: number
+      cache_hits: number
+      cache_misses: number
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

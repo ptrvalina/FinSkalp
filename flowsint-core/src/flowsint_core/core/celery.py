@@ -18,6 +18,7 @@ celery = Celery(
         "flowsint_core.tasks.crif",
         "flowsint_core.tasks.rde",
         "flowsint_core.tasks.eccf",
+        "flowsint_core.tasks.eia",
     ],
 )
 
@@ -81,6 +82,10 @@ celery.conf.update(
         "eccf-integrity-batch": {
             "task": "eccf_verify_integrity_batch",
             "schedule": 1800.0,
+        },
+        "eia-warm-context-cache": {
+            "task": "eia_warm_context_cache",
+            "schedule": 1200.0,
         },
     },
 )

@@ -114,6 +114,11 @@
 | TD-ECCF-3 | Audit trail not replicated | **Open** | Append-only log shipping (WORM bucket) |
 | TD-ECCF-4 | Digital signatures on evidence packages | **Open** | GOST/RFC3161 timestamping service |
 | TD-ECCF-5 | Cross-tenant evidence isolation audit | **Open** | Row-level security + penetration test |
+| TD-EIA-1 | Real LLM API keys (OpenAI/Anthropic) | **Open** | API keys + HTTP client integration |
+| TD-EIA-2 | Streaming SSE responses | **Open** | FastAPI SSE endpoint + frontend consumer |
+| TD-EIA-3 | Fine-tuned domain models | **Open** | Training data + ONNX/GGUF deployment |
+| TD-EIA-4 | Context cache — in-memory only | **Open** | Redis cache + TTL policy |
+| TD-EIA-5 | Analyst history — stub | **Open** | analyst_workspace integration |
 | TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
 | TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
 

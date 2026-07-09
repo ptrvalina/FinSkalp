@@ -75,6 +75,11 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     archive_eccf_evidence,
     record_eccf_report_usage,
     get_eccf_monitoring,
+    get_eia_manifest,
+    run_eia_assistant,
+    get_eia_context,
+    get_eia_prompts,
+    get_eia_monitoring,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -210,6 +215,14 @@ class PlatformV2ECCFReportUsageRequest(BaseModel):
 class PlatformV2ECCFArchiveRequest(BaseModel):
     reason: str | None = None
     actor: str = "eccf.api"
+
+
+class PlatformV2EIAAssistRequest(BaseModel):
+    task_type: str = Field(..., min_length=1, max_length=64)
+    case_ref: str = Field(..., min_length=1, max_length=128)
+    entity_keys: list[str] | None = None
+    prompt_version: str | None = None
+    actor: str = "eia.api"
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -687,6 +700,44 @@ def create_platform_v2_router(
     @router.post("/eccf/{evidence_id}/archive")
     async def eccf_archive(evidence_id: str, body: PlatformV2ECCFArchiveRequest, _user=dep_batch):
         return archive_eccf_evidence(evidence_id, actor=body.actor, reason=body.reason)
+
+    @router.get("/eia/manifest")
+    async def eia_manifest_route(_user=dep_user):
+        return get_eia_manifest()
+
+    @router.post("/eia/assist")
+    async def eia_assist(body: PlatformV2EIAAssistRequest, _user=dep_batch):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        return await run_eia_assistant(
+            task_type=body.task_type,
+            case_ref=body.case_ref,
+            entity_keys=body.entity_keys,
+            tenant_id=uuid.UUID(tenant_raw),
+            actor=body.actor,
+            prompt_version=body.prompt_version,
+        )
+
+    @router.get("/eia/context")
+    async def eia_context(
+        case_ref: str = Query(..., min_length=1),
+        entity_keys: str | None = None,
+        _user=dep_user,
+    ):
+        tenant_raw = os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001")
+        keys = [k.strip() for k in entity_keys.split(",") if k.strip()] if entity_keys else []
+        return await get_eia_context(
+            case_ref=case_ref,
+            entity_keys=keys or None,
+            tenant_id=uuid.UUID(tenant_raw),
+        )
+
+    @router.get("/eia/prompts")
+    async def eia_prompts(task_type: str | None = None, _user=dep_user):
+        return get_eia_prompts(task_type)
+
+    @router.get("/eia/monitoring")
+    async def eia_monitoring(_user=dep_user):
+        return get_eia_monitoring()
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

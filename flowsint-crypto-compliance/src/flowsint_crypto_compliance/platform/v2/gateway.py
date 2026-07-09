@@ -57,6 +57,7 @@ def architecture_manifest() -> dict[str, Any]:
         "crif_manifest": "/api/platform/v2/crif/manifest",
         "rde_manifest": "/api/platform/v2/rde/manifest",
         "eccf_manifest": "/api/platform/v2/eccf/manifest",
+        "eia_manifest": "/api/platform/v2/eia/manifest",
     }
 
 
@@ -728,6 +729,60 @@ def get_eccf_monitoring() -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.eccf import get_eccf_service
 
     return get_eccf_service().monitoring()
+
+
+def get_eia_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
+
+    return get_eia_service().manifest()
+
+
+async def run_eia_assistant(
+    *,
+    task_type: str,
+    case_ref: str,
+    entity_keys: list[str] | None = None,
+    tenant_id: uuid.UUID | None = None,
+    actor: str = "eia.gateway",
+    prompt_version: str | None = None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
+
+    return await get_eia_service().assist(
+        task_type=task_type,
+        case_ref=case_ref,
+        entity_keys=entity_keys,
+        tenant_id=tenant_id,
+        actor=actor,
+        prompt_version=prompt_version,
+    )
+
+
+async def get_eia_context(
+    *,
+    case_ref: str,
+    entity_keys: list[str] | None = None,
+    tenant_id: uuid.UUID | None = None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
+
+    return await get_eia_service().get_context(
+        case_ref=case_ref,
+        entity_keys=entity_keys,
+        tenant_id=tenant_id,
+    )
+
+
+def get_eia_prompts(task_type: str | None = None) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
+
+    return get_eia_service().get_prompts(task_type)
+
+
+def get_eia_monitoring() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.eia import get_eia_service
+
+    return get_eia_service().monitoring()
 
 
 def emit_scalpel_collect_event(
