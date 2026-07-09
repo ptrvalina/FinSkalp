@@ -96,6 +96,13 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     get_esa_monitoring,
     get_esa_siem_config,
     get_esa_data_classification,
+    get_idoo_manifest,
+    get_idoo_health,
+    get_idoo_observability,
+    get_idoo_cicd,
+    get_idoo_runbooks,
+    get_idoo_queues,
+    get_idoo_backup,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -868,6 +875,34 @@ def create_platform_v2_router(
     @router.get("/esa/data-classification")
     async def esa_data_classification(_user=dep_user):
         return get_esa_data_classification()
+
+    @router.get("/idoo/manifest")
+    async def idoo_manifest_route(_user=dep_user):
+        return get_idoo_manifest()
+
+    @router.get("/idoo/health")
+    async def idoo_health(_user=dep_user):
+        return get_idoo_health()
+
+    @router.get("/idoo/observability")
+    async def idoo_observability(_user=dep_user):
+        return get_idoo_observability()
+
+    @router.get("/idoo/cicd")
+    async def idoo_cicd(_user=dep_user):
+        return get_idoo_cicd()
+
+    @router.get("/idoo/runbooks")
+    async def idoo_runbooks(_user=dep_user):
+        return get_idoo_runbooks()
+
+    @router.get("/idoo/queues")
+    async def idoo_queues(_user=dep_user):
+        return get_idoo_queues()
+
+    @router.get("/idoo/backup")
+    async def idoo_backup(_user=dep_user):
+        return get_idoo_backup()
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

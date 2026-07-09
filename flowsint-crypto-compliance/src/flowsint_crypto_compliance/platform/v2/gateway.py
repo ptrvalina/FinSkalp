@@ -13,7 +13,7 @@ from flowsint_crypto_compliance.platform.v2.plugin_registry import get_plugin_re
 def architecture_manifest() -> dict[str, Any]:
     return {
         "rfc": "RFC-0002",
-        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017", "RFC-0018", "RFC-0019", "RFC-0020"],
+        "rfc_extensions": ["RFC-0003", "RFC-0004", "RFC-0005", "RFC-0006", "RFC-0007", "RFC-0008", "RFC-0009", "RFC-0010", "RFC-0011", "RFC-0012", "RFC-0013", "RFC-0014", "RFC-0015", "RFC-0016", "RFC-0017", "RFC-0018", "RFC-0019", "RFC-0020", "RFC-0021"],
         "schema_version": SCHEMA_VERSION,
         "knowledge_model": "RFC-0003",
         "layers": [
@@ -60,6 +60,7 @@ def architecture_manifest() -> dict[str, Any]:
         "eia_manifest": "/api/platform/v2/eia/manifest",
         "aspp_manifest": "/api/platform/v2/aspp/manifest",
         "esa_manifest": "/api/platform/v2/esa/manifest",
+        "idoo_manifest": "/api/platform/v2/idoo/manifest",
     }
 
 
@@ -927,6 +928,48 @@ def get_esa_data_classification() -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.esa import get_esa_service
 
     return get_esa_service().data_classification()
+
+
+def get_idoo_manifest() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().manifest()
+
+
+def get_idoo_health() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().health()
+
+
+def get_idoo_observability() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().observability()
+
+
+def get_idoo_cicd() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().cicd()
+
+
+def get_idoo_runbooks() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().runbooks()
+
+
+def get_idoo_queues() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().queues()
+
+
+def get_idoo_backup() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.idoo import get_idoo_service
+
+    return get_idoo_service().backup()
 
 
 def emit_scalpel_collect_event(

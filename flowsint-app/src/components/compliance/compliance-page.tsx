@@ -189,6 +189,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getEsaManifest()
   })
 
+  const idooManifestQuery = useQuery({
+    queryKey: ['compliance', 'idoo-manifest'],
+    queryFn: () => complianceService.getIdooManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -773,6 +778,17 @@ function CompliancePageInner() {
                 {esaManifestQuery.data.data_classifications.length} уровней классификации
               </div>
               <p className="text-xs text-muted-foreground">{esaManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {idooManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0021 · {idooManifestQuery.data.infra_principles.length} принципов инфраструктуры ·{' '}
+                {idooManifestQuery.data.topology.stage_count} стадий pipeline ·{' '}
+                {idooManifestQuery.data.queues.platform_task_count} beat-задач ·{' '}
+                {idooManifestQuery.data.observability_signals.length} столпа наблюдаемости
+              </div>
+              <p className="text-xs text-muted-foreground">{idooManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

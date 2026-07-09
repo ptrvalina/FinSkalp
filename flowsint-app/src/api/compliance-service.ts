@@ -823,6 +823,36 @@ export const complianceService = {
     }>
   },
 
+  getIdooManifest() {
+    return complianceFetch('/api/platform/v2/idoo/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      infra_principles: string[]
+      environments: string[]
+      observability_signals: string[]
+      topology: { stage_count: number }
+      queues: { platform_task_count: number }
+    }>
+  },
+
+  getIdooHealth() {
+    return complianceFetch('/api/platform/v2/idoo/health') as Promise<{
+      ok: boolean
+      overall_status: string
+      service_count: number
+      healthy_count: number
+    }>
+  },
+
+  getIdooObservability() {
+    return complianceFetch('/api/platform/v2/idoo/observability') as Promise<{
+      ok: boolean
+      pillars: string[]
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

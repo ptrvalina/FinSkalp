@@ -128,6 +128,11 @@
 | TD-ESA-3 | Service mesh Istio mTLS STRICT | **Open** | Istio control plane + cert-manager |
 | TD-ESA-4 | SIEM connector (syslog/webhook) | **Open** | Splunk/ELK integration |
 | TD-ESA-5 | FIDO2/WebAuthn hardware keys | **Open** | WebAuthn server + security keys |
+| TD-IDOO-1 | Real K8s manifests (Deployment, HPA, NetworkPolicy) | **Open** | Helm charts + cert-manager |
+| TD-IDOO-2 | ArgoCD GitOps deployment | **Open** | ArgoCD control plane + repo structure |
+| TD-IDOO-3 | Prometheus/Grafana production stack | **Open** | Prometheus operator + Grafana dashboards |
+| TD-IDOO-4 | Loki log aggregation | **Open** | Loki + Promtail sidecar deployment |
+| TD-IDOO-5 | Automated DR failover | **Open** | Cross-region replication + runbook automation |
 | TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
 | TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
 

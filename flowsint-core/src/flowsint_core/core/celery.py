@@ -21,6 +21,7 @@ celery = Celery(
         "flowsint_core.tasks.eia",
         "flowsint_core.tasks.aspp",
         "flowsint_core.tasks.esa",
+        "flowsint_core.tasks.idoo",
     ],
 )
 
@@ -96,6 +97,10 @@ celery.conf.update(
         "esa-security-scan": {
             "task": "esa_security_scan_batch",
             "schedule": 3600.0,
+        },
+        "idoo-health-probe": {
+            "task": "idoo_health_probe_batch",
+            "schedule": 120.0,
         },
     },
 )

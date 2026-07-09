@@ -34,6 +34,7 @@
 | [RFC-0018](RFC-0018-explainable-ai-investigation-assistant.md) | Explainable AI & Investigation Assistant v2.0 | **Complete (100%)** — [`rfc0018-completion.md`](../architecture/v2/rfc0018-completion.md) |
 | [RFC-0019](RFC-0019-api-sdk-plugin-platform.md) | API, SDK & Plugin Platform v2.0 | **Complete (100%)** — [`rfc0019-completion.md`](../architecture/v2/rfc0019-completion.md) |
 | [RFC-0020](RFC-0020-enterprise-security-architecture.md) | Enterprise Security Architecture v2.0 | **Complete (100%)** — [`rfc0020-completion.md`](../architecture/v2/rfc0020-completion.md) |
+| [RFC-0021](RFC-0021-infrastructure-devops-observability.md) | Infrastructure, DevOps & Observability v2.0 | **Complete (100%)** — [`rfc0021-completion.md`](../architecture/v2/rfc0021-completion.md) |
 
 
 
