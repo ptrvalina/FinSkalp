@@ -775,6 +775,54 @@ export const complianceService = {
     }>
   },
 
+  getEsaManifest() {
+    return complianceFetch('/api/platform/v2/esa/manifest') as Promise<{
+      rfc: string
+      schema_version: string
+      title_ru: string
+      principle_ru: string
+      security_principles: string[]
+      enterprise_roles: string[]
+      data_classifications: string[]
+      authentication: { require_mfa_for_admin: boolean }
+      authorization: { model: string }
+    }>
+  },
+
+  evaluateEsaAccess(payload: {
+    user: Record<string, unknown>
+    resource: Record<string, unknown>
+    action: string
+    attributes?: Record<string, unknown>
+  }) {
+    return complianceFetch('/api/platform/v2/esa/access/evaluate', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }) as Promise<{
+      ok: boolean
+      allowed: boolean
+      pipeline_stages: number
+      decision: Record<string, unknown>
+    }>
+  },
+
+  getEsaThreatModel() {
+    return complianceFetch('/api/platform/v2/esa/threat-model') as Promise<{
+      rfc: string
+      threat_count: number
+      threats: Array<Record<string, unknown>>
+    }>
+  },
+
+  getEsaMonitoring() {
+    return complianceFetch('/api/platform/v2/esa/monitoring') as Promise<{
+      ok: boolean
+      failed_auth_count: number
+      role_change_count: number
+      evidence_integrity_violations: number
+    }>
+  },
+
   analyzeBlockchainAddress(payload: { address: string; chain: string; caseRef?: string }) {
     return complianceFetch('/api/platform/v2/blockchain-intelligence/analyze', {
       method: 'POST',

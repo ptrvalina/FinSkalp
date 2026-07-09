@@ -89,6 +89,13 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     list_aspp_webhooks,
     register_aspp_plugin,
     get_aspp_monitoring,
+    get_esa_manifest,
+    evaluate_esa_access,
+    record_esa_audit,
+    get_esa_threat_model,
+    get_esa_monitoring,
+    get_esa_siem_config,
+    get_esa_data_classification,
     get_investigation_manifest,
     get_investigation_workspace,
     get_operations_manifest,
@@ -254,6 +261,22 @@ class PlatformV2ASPPPluginRegisterRequest(BaseModel):
     health_status: str = "healthy"
     source: str = "api"
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class PlatformV2ESAAccessEvaluateRequest(BaseModel):
+    user: dict[str, Any]
+    resource: dict[str, Any]
+    action: str = Field(..., min_length=1, max_length=64)
+    attributes: dict[str, Any] | None = None
+
+
+class PlatformV2ESAAuditRequest(BaseModel):
+    event_type: str = Field(..., min_length=1, max_length=64)
+    actor: str = Field(..., min_length=1, max_length=256)
+    action: str = Field(..., min_length=1, max_length=256)
+    resource: str = ""
+    outcome: str = "success"
+    details: dict[str, Any] | None = None
 
 
 class PlatformV2CollaborationCommentRequest(BaseModel):
@@ -805,6 +828,46 @@ def create_platform_v2_router(
     @router.post("/aspp/plugins/register")
     async def aspp_plugin_register(body: PlatformV2ASPPPluginRegisterRequest, _user=dep_batch):
         return register_aspp_plugin(body.model_dump())
+
+    @router.get("/esa/manifest")
+    async def esa_manifest_route(_user=dep_user):
+        return get_esa_manifest()
+
+    @router.post("/esa/access/evaluate")
+    async def esa_access_evaluate(body: PlatformV2ESAAccessEvaluateRequest, _user=dep_user):
+        return evaluate_esa_access(
+            user=body.user,
+            resource=body.resource,
+            action=body.action,
+            attributes=body.attributes,
+        )
+
+    @router.post("/esa/audit")
+    async def esa_audit(body: PlatformV2ESAAuditRequest, _user=dep_batch):
+        return record_esa_audit(
+            event_type=body.event_type,
+            actor=body.actor,
+            action=body.action,
+            resource=body.resource,
+            outcome=body.outcome,
+            details=body.details,
+        )
+
+    @router.get("/esa/threat-model")
+    async def esa_threat_model(_user=dep_user):
+        return get_esa_threat_model()
+
+    @router.get("/esa/monitoring")
+    async def esa_monitoring(_user=dep_user):
+        return get_esa_monitoring()
+
+    @router.get("/esa/siem")
+    async def esa_siem(_user=dep_user):
+        return get_esa_siem_config()
+
+    @router.get("/esa/data-classification")
+    async def esa_data_classification(_user=dep_user):
+        return get_esa_data_classification()
 
     @router.get("/intelligence-engine/manifest")
     async def intelligence_engine_manifest(_user=dep_user):

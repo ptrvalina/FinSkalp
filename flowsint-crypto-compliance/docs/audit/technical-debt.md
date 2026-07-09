@@ -123,6 +123,11 @@
 | TD-ASPP-2 | gRPC protos + codegen | **Open** | protobuf + grpcio services |
 | TD-ASPP-3 | OAuth2 provider integration | **Open** | Keycloak/Auth0 OIDC |
 | TD-ASPP-4 | Marketplace install flow | **Open** | Plugin sandbox + signing |
+| TD-ESA-1 | Real IdP integration (LDAP/OIDC/SAML) | **Open** | Keycloak/AD FS deployment |
+| TD-ESA-2 | HSM for restricted data keys | **Open** | CloudHSM / Luna HSM |
+| TD-ESA-3 | Service mesh Istio mTLS STRICT | **Open** | Istio control plane + cert-manager |
+| TD-ESA-4 | SIEM connector (syslog/webhook) | **Open** | Splunk/ELK integration |
+| TD-ESA-5 | FIDO2/WebAuthn hardware keys | **Open** | WebAuthn server + security keys |
 | TD-INT-1 | E2E: ICF→CRIF→RDE→Workspace в одном кейсе | **Partial** | `test_rde_auto_acquires_subsystem_signals` |
 | TD-INT-2 | Package cycle core ↔ crypto-compliance | **Open** | RFC-0004 plugin extraction |
 

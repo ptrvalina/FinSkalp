@@ -184,6 +184,11 @@ function CompliancePageInner() {
     queryFn: () => complianceService.getAsppManifest()
   })
 
+  const esaManifestQuery = useQuery({
+    queryKey: ['compliance', 'esa-manifest'],
+    queryFn: () => complianceService.getEsaManifest()
+  })
+
   const analystWorkspaceManifestQuery = useQuery({
     queryKey: ['compliance', 'analyst-workspace-manifest'],
     queryFn: () => complianceService.getAnalystWorkspaceManifest()
@@ -758,6 +763,16 @@ function CompliancePageInner() {
                 {Object.keys(asppManifestQuery.data.sdks).length} SDK
               </div>
               <p className="text-xs text-muted-foreground">{asppManifestQuery.data.principle_ru}</p>
+            </div>
+          ) : null}
+          {esaManifestQuery.data ? (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                RFC-0020 · {esaManifestQuery.data.security_principles.length} принципов Zero Trust ·{' '}
+                {esaManifestQuery.data.enterprise_roles.length} ролей ·{' '}
+                {esaManifestQuery.data.data_classifications.length} уровней классификации
+              </div>
+              <p className="text-xs text-muted-foreground">{esaManifestQuery.data.principle_ru}</p>
             </div>
           ) : null}
           {analystWorkspaceManifestQuery.data ? (

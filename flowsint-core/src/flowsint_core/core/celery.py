@@ -20,6 +20,7 @@ celery = Celery(
         "flowsint_core.tasks.eccf",
         "flowsint_core.tasks.eia",
         "flowsint_core.tasks.aspp",
+        "flowsint_core.tasks.esa",
     ],
 )
 
@@ -91,6 +92,10 @@ celery.conf.update(
         "aspp-deliver-webhooks": {
             "task": "aspp_deliver_webhooks",
             "schedule": 300.0,
+        },
+        "esa-security-scan": {
+            "task": "esa_security_scan_batch",
+            "schedule": 3600.0,
         },
     },
 )
