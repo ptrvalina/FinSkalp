@@ -1,0 +1,110 @@
+[project]
+name = "flowsint-crypto-compliance"
+version = "0.1.0"
+description = "Fiat-crypto bridge OSINT engine for regulatory investigations"
+license = "Apache-2.0"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "flowsint-types",
+    "flowsint-core",
+    "pydantic>=2.11.7,<3.0.0",
+    "httpx>=0.28.0,<0.29.0",
+    "sqlalchemy>=2.0,<3.0",
+    "jsonschema>=4.25.1,<5.0.0",
+    "fastapi>=0.115.0,<1.0.0",
+    "uvicorn>=0.32.0,<0.33.0",
+    "duckdb>=1.1.0,<2.0.0",
+    "numpy>=1.26,<3.0",
+    "xgboost>=2.1.0,<3.0.0",
+    "scikit-learn>=1.5,<2.0",
+    "jinja2>=3.1,<4.0",
+    "weasyprint>=69.0,<70.0",
+    "openpyxl>=3.1,<4.0",
+    "prometheus-client>=0.21,<1.0",
+    "redis>=5.0,<6.0",
+    "rapidfuzz>=3.9,<4.0",
+    "pytest-asyncio>=0.21,<2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3,<10.0.0",
+    "pytest-asyncio>=0.21,<2.0",
+]
+
+[project.optional-dependencies]
+ocr = [
+    "pymupdf>=1.24,<2.0",
+    "pillow>=10.0,<12.0",
+    "pytesseract>=0.3.10,<0.4",
+]
+tor = [
+    "stem>=1.8,<2.0",
+]
+scalpel-full = [
+    "pymupdf>=1.24,<2.0",
+    "pillow>=10.0,<12.0",
+    "pytesseract>=0.3.10,<0.4",
+    "stem>=1.8,<2.0",
+]
+maigret = [
+    "maigret",
+]
+paddleocr = [
+    "paddleocr>=2.9,<4.0",
+    "paddlepaddle>=2.6,<4.0",
+    "pymupdf>=1.24,<2.0",
+    "pillow>=10.0,<12.0",
+    "numpy>=1.26,<3.0",
+]
+hardening = [
+    "evidently>=0.4.0,<1.0",
+    "meilisearch>=0.31,<1.0",
+    "UnleashClient>=5.12,<7.0",
+    "opentelemetry-api>=1.28,<2.0",
+    "opentelemetry-sdk>=1.28,<2.0",
+    "opentelemetry-instrumentation-fastapi>=0.49b0,<1.0",
+    "opentelemetry-instrumentation-httpx>=0.49b0,<1.0",
+    "opentelemetry-exporter-otlp>=1.28,<2.0",
+]
+osint-quality = [
+    "playwright>=1.49,<2.0",
+    "argostranslate>=1.9,<3.0",
+]
+embeddings = [
+    "sentence-transformers>=3.0,<4.0",
+]
+ml = [
+    "onnxruntime>=1.19,<2.0",
+    "onnxmltools>=1.12,<2.0",
+    "skl2onnx>=1.17,<2.0",
+    "pandas>=2.2,<3.0",
+    "networkx>=2.6.3,<4.0",
+    "matplotlib>=3.8,<4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flowsint_crypto_compliance"]
+
+[project.scripts]
+flowsint-regulator-demo = "flowsint_crypto_compliance.demo.cli:main"
+flowsint-regulator-stand = "flowsint_crypto_compliance.demo.web_server:main"
+flowsint-ml-serve = "flowsint_crypto_compliance.services.ml_server:main"
+flowsint-ml-train = "flowsint_crypto_compliance.ml.train_baseline:main"
+
+# Only include paths outside the package tree; data/static/templates live under
+# src/flowsint_crypto_compliance/ and are picked up by `packages` above.
+[tool.hatch.build.targets.wheel.force-include]
+"schemas" = "flowsint_crypto_compliance/json_schemas"
+
+[tool.uv.sources]
+flowsint-types = { workspace = true }
+flowsint-core = { workspace = true }
+maigret = { git = "https://github.com/soxoj/maigret" }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

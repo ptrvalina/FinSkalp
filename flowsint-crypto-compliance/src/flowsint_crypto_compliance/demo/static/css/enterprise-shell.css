@@ -1,0 +1,141 @@
+/* FinSkalp enterprise shell + live workspace views */
+body.fs-enterprise {
+  height: 100vh;
+  overflow: hidden;
+  display: block;
+  background: #031427;
+  color: #d3e4fe;
+}
+
+body.fs-enterprise::before {
+  display: none;
+}
+
+.fs-app-main {
+  position: relative;
+  z-index: 1;
+  background: #031427;
+  display: flex;
+  flex-direction: column;
+}
+
+.fs-app-main > .workspace-full,
+.fs-app-main > .workspace {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.fs-app-main > .hidden {
+  display: none !important;
+}
+
+.fs-app-main .dash-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  height: 100%;
+  min-height: 0;
+}
+
+.fs-app-main .dash-main,
+.fs-app-main .osint-layout,
+.fs-app-main .wallet-screen-layout,
+.fs-app-main .ms-layout,
+.fs-app-main .ic-layout,
+.fs-app-main .ops-workspace {
+  height: 100%;
+  min-height: 0;
+}
+
+.fs-app-main .dash-main,
+.fs-app-main .osint-main,
+.fs-app-main .live-feed-panel,
+.fs-app-main .osint-output-panel,
+.fs-app-main .wallet-result-panel,
+.fs-app-main .wallet-screen-main {
+  overflow-y: auto;
+}
+
+.fs-app-main .osint-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 42%);
+  min-height: 0;
+}
+
+.fs-app-main .wallet-screen-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 380px);
+}
+
+.fs-app-main .ops-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) 1fr;
+}
+
+.fs-app-main .ops-content-split {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 40%);
+  min-height: 0;
+  flex: 1;
+}
+
+.fs-app-main .graph-workspace:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 320px;
+}
+
+.fs-app-main .graph-body {
+  flex: 1;
+  min-height: 240px;
+  position: relative;
+}
+
+.fs-app-main .force-graph-mount,
+.fs-app-main .ops-graph-mount {
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+}
+
+.fs-topbar .fs-kpi .kpi-pulse {
+  animation: fs-kpi-pulse 0.6s ease;
+}
+
+@keyframes fs-kpi-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; color: #38bdf8; }
+}
+
+.fs-app-main .nav-badge {
+  font-size: 0.65rem;
+  background: #38bdf8;
+  color: #001e2c;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+#toastContainer .toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+}
+
+@media (max-width: 1024px) {
+  .fs-app-main .dash-grid,
+  .fs-app-main .osint-layout,
+  .fs-app-main .wallet-screen-layout,
+  .fs-app-main .ops-workspace {
+    grid-template-columns: 1fr;
+  }
+  .fs-app-main .live-feed-panel,
+  .fs-app-main .osint-output-panel,
+  .fs-app-main .wallet-result-panel {
+    max-height: 40vh;
+  }
+}

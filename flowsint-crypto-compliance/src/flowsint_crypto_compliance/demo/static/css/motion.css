@@ -1,0 +1,246 @@
+/**
+ * FinSkalp Motion System — ambient, glass, stagger, live indicators
+ */
+
+/* ── Ambient mesh background ── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 20%, var(--fs-mesh-accent) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 75%, var(--fs-mesh-violet) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 45% at 50% 100%, var(--fs-mesh-teal) 0%, transparent 45%),
+    linear-gradient(165deg, var(--fs-mesh-1) 0%, var(--fs-mesh-3) 45%, var(--fs-mesh-2) 100%);
+}
+
+.ambient-bg::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(circle at 30% 40%, var(--fs-mesh-accent) 0%, transparent 35%),
+    radial-gradient(circle at 70% 60%, var(--fs-mesh-violet) 0%, transparent 30%);
+  animation: mesh-drift 28s ease-in-out infinite alternate;
+  opacity: 0.7;
+}
+
+.ambient-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 20%, transparent 75%);
+}
+
+@keyframes mesh-drift {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  100% { transform: translate(3%, -2%) rotate(2deg) scale(1.04); }
+}
+
+/* ── Glass panels ── */
+.glass-panel {
+  background: var(--fs-glass-bg);
+  backdrop-filter: blur(var(--fs-glass-blur));
+  -webkit-backdrop-filter: blur(var(--fs-glass-blur));
+  border: 1px solid var(--fs-glass-border);
+  box-shadow: var(--fs-shadow-premium);
+}
+
+.glass-card {
+  background: var(--fs-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--fs-glass-border);
+  border-radius: var(--fs-radius-xl, 12px);
+  box-shadow: var(--fs-shadow-sm);
+  transition:
+    transform var(--fs-duration-normal) var(--fs-ease-out-expo),
+    box-shadow var(--fs-duration-normal) var(--fs-ease),
+    border-color var(--fs-duration-normal) var(--fs-ease);
+}
+
+.glass-card:hover {
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: var(--fs-shadow-md);
+}
+
+/* ── Stagger fade-in utilities ── */
+.motion-stagger-1,
+.motion-stagger-2,
+.motion-stagger-3,
+.motion-stagger-4,
+.motion-stagger-5 {
+  opacity: 0;
+  animation: motion-fade-up var(--fs-duration-reveal, 520ms) var(--fs-ease-out-expo) forwards;
+}
+
+.motion-stagger-1 { animation-delay: 40ms; }
+.motion-stagger-2 { animation-delay: 90ms; }
+.motion-stagger-3 { animation-delay: 140ms; }
+.motion-stagger-4 { animation-delay: 190ms; }
+.motion-stagger-5 { animation-delay: 240ms; }
+
+@keyframes motion-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Workspace crossfade ── */
+.workspace-enter {
+  animation: workspace-enter var(--fs-duration-slow, 320ms) var(--fs-ease-out-expo) forwards;
+}
+
+.workspace-exit {
+  animation: workspace-exit var(--fs-duration-fast, 120ms) var(--fs-ease) forwards;
+  pointer-events: none;
+}
+
+@keyframes workspace-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes workspace-exit {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+/* ── Graph workspace reveal ── */
+.motion-reveal {
+  animation: graph-reveal var(--fs-duration-hero, 680ms) var(--fs-ease-out-expo) forwards;
+}
+
+@keyframes graph-reveal {
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(4px); }
+  60% { filter: blur(0); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+/* ── Investigation result entrance ── */
+.osint-result,
+.finskalp-result {
+  animation: result-rise var(--fs-duration-reveal, 520ms) var(--fs-ease-out-expo) forwards;
+}
+
+@keyframes result-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Shimmer skeleton ── */
+.shimmer-skeleton,
+.motion-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--panel2) 0%,
+    var(--panel3) 40%,
+    rgba(148, 163, 184, 0.12) 50%,
+    var(--panel3) 60%,
+    var(--panel2) 100%
+  );
+  background-size: 200% 100%;
+  animation: motion-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--fs-radius-md, 6px);
+}
+
+@keyframes motion-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Live flow pulse ── */
+.flow-pulse,
+.live-dot {
+  animation: flow-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes flow-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  50% { opacity: 0.75; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
+/* ── Risk score number glow ── */
+.risk-glow-num,
+.entity-risk-num,
+.score .num {
+  transition: text-shadow var(--fs-duration-normal) var(--fs-ease);
+}
+
+.risk-critical .entity-risk-num,
+.risk-critical .num,
+.entity-risk-badge.risk-critical .entity-risk-num {
+  text-shadow: var(--fs-glow-risk-critical);
+}
+
+.risk-high .entity-risk-num,
+.risk-high .num,
+.entity-risk-badge.risk-high .entity-risk-num {
+  text-shadow: var(--fs-glow-risk-high);
+}
+
+.risk-medium .entity-risk-num,
+.risk-medium .num,
+.entity-risk-badge.risk-medium .entity-risk-num {
+  text-shadow: var(--fs-glow-risk-medium);
+}
+
+.risk-low .entity-risk-num,
+.risk-low .num,
+.entity-risk-badge.risk-low .entity-risk-num {
+  text-shadow: var(--fs-glow-risk-clear);
+}
+
+/* ── KPI count-up flash ── */
+.kpi-counting .v {
+  color: #93c5fd;
+  text-shadow: var(--fs-glow-accent);
+}
+
+.kpi-updated {
+  animation: kpi-glow-flash 600ms var(--fs-ease-out-expo);
+}
+
+@keyframes kpi-glow-flash {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: var(--fs-glow-accent); }
+  100% { box-shadow: none; }
+}
+
+/* ── Reduced motion overrides ── */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-bg::before,
+  .ambient-bg::after,
+  .motion-stagger-1,
+  .motion-stagger-2,
+  .motion-stagger-3,
+  .motion-stagger-4,
+  .motion-stagger-5,
+  .workspace-enter,
+  .workspace-exit,
+  .motion-reveal,
+  .osint-result,
+  .finskalp-result,
+  .shimmer-skeleton,
+  .motion-shimmer,
+  .flow-pulse,
+  .live-dot,
+  .kpi-updated {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .risk-glow-num,
+  .entity-risk-num,
+  .score .num {
+    text-shadow: none !important;
+  }
+}

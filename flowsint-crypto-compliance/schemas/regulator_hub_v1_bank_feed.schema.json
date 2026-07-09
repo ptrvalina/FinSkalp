@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowsint.io/schemas/regulator-hub/v1/bank-feed.json",
+  "title": "BankRegulatorFeed",
+  "description": "Нормализованный сигнал банка через хаб госрегулятора (115-ФЗ). Банки передают в хаб регулятора; OSINT забирает уже обезличенный feed.",
+  "type": "object",
+  "required": ["feed_id", "region", "reported_at"],
+  "additionalProperties": false,
+  "properties": {
+    "feed_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Уникальный ID записи в хабе регулятора"
+    },
+    "case_id": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "ID расследования регулятора (опционально при ingest в кейс)"
+    },
+    "bank_bic": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{8}([A-Z0-9]{3})?$",
+      "description": "BIC/SWIFT банка-отправителя"
+    },
+    "bank_name": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "STR",
+        "CTR",
+        "crypto_suspicion",
+        "p2p_suspicion",
+        "cross_border",
+        "other"
+      ]
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 (RU, KZ, BY, ...)"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "payment_reference": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Хэш или маскированное назначение платежа"
+    },
+    "counterparty_hint": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "Маскированный контрагент / merchant / platform hint"
+    },
+    "linked_crypto_address": {
+      "type": "string",
+      "minLength": 26,
+      "maxLength": 128,
+      "description": "On-chain адрес, если банк указал в сообщении"
+    },
+    "linked_chain": {
+      "type": "string",
+      "enum": ["btc", "eth", "tron"]
+    },
+    "subject_id": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "Псевдонимизированный субъект (не ФИО)"
+    },
+    "reported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Время события по данным банка (ISO 8601)"
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Время приёма хабом регулятора"
+    }
+  }
+}

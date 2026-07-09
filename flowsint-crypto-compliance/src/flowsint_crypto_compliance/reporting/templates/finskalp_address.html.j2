@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — скрининг адреса</title>
+  <style>
+    @page { margin: 1.5cm; }
+    body { font-family: "Segoe UI", Arial, sans-serif; font-size: 11pt; color: #1a1a2e; margin: 0; padding: 1.5rem; }
+    .banner { background: linear-gradient(135deg, #0d2137 0%, #1a4a6e 100%); color: #fff; padding: 1.2rem 1.5rem; margin: -1.5rem -1.5rem 1.5rem; }
+    .banner h1 { margin: 0; font-size: 1.4rem; letter-spacing: 0.02em; }
+    .banner .tag { opacity: 0.85; font-size: 0.85rem; margin-top: 0.25rem; }
+    .conf { text-align: center; font-size: 0.7rem; letter-spacing: 0.15em; color: #c0392b; margin: 0.5rem 0 1rem; }
+    .score-box { border: 2px solid #e74c3c; border-radius: 8px; padding: 1rem; text-align: center; max-width: 220px; margin: 1rem 0; }
+    .score-box .num { font-size: 2rem; font-weight: bold; color: #c0392b; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 2rem; margin: 1rem 0; font-size: 0.9rem; }
+    .meta dt { font-weight: 600; color: #555; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+    th, td { border: 1px solid #ccc; padding: 0.35rem 0.5rem; text-align: left; }
+    th { background: #f0f4f8; }
+    .tags span { display: inline-block; background: #eee; padding: 0.15rem 0.5rem; margin: 0.15rem; border-radius: 4px; font-size: 0.8rem; }
+    h2 { font-size: 1.05rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 1.5rem; }
+    .footer { margin-top: 2rem; font-size: 0.75rem; color: #888; border-top: 1px solid #eee; padding-top: 0.5rem; }
+    .tier-severe { color: #c0392b; font-weight: bold; }
+    .tier-high { color: #e67e22; font-weight: bold; }
+    .tier-low { color: #27ae60; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <h1>{{ report.product_ru }} <span style="font-weight:300">| FinSkalp</span></h1>
+    <div class="tag">{{ report.title_en }} · {{ report.version }}</div>
+  </div>
+  <div class="conf">{{ report.classification }}</div>
+
+  <p><strong>Отчёт сформирован:</strong> {{ report.generated_at }}</p>
+  <p><strong>Анализируемый адрес:</strong> <code>{{ report.address }}</code></p>
+  <p><strong>Сеть:</strong> Tron (TRX) / {{ report.chain }}</p>
+  <p><strong>ID отчёта:</strong> {{ report.report_id }}</p>
+  <p><strong>Дело:</strong> {{ report.case_ref }}</p>
+
+  {% if report.balance_usd %}
+  <p><strong>Текущий баланс:</strong> ${{ "%.2f"|format(report.balance_usd) }}
+    {% if report.balance_trx %} · {{ "%.4f"|format(report.balance_trx) }} TRX{% endif %}
+    · {{ report.token_count or 0 }} tokens</p>
+  {% endif %}
+
+  <div class="score-box">
+    <div class="num">{{ "%.2f"|format(report.risk_score or 0) }}%</div>
+    <div>Risk Score · {{ report.risk_level }}</div>
+  </div>
+  <p><strong>Результат аудита:</strong> {{ report.audit_result_ru }}</p>
+
+  <h2>Risk Tags</h2>
+  <div class="tags">{% for t in report.risk_tags %}<span>{{ t }}</span>{% endfor %}</div>
+
+  <h2>Address transactions info</h2>
+  <dl class="meta">
+    <dt>Total incoming</dt><dd>{{ report.onchain.inbound_count or 0 }}</dd>
+    <dt>Total outgoing</dt><dd>{{ report.onchain.outbound_count or 0 }}</dd>
+    <dt>Connections</dt><dd>{{ report.connections_count or 0 }}</dd>
+    <dt>First activity</dt><dd>{{ report.first_activity or "—" }}</dd>
+    <dt>Last activity</dt><dd>{{ report.last_activity or "—" }}</dd>
+  </dl>
+
+  <h2>Source of Funds · Money origin</h2>
+  <table>
+    <tr><th>Категория риска</th><th>%</th></tr>
+    <tr><td class="tier-severe">Severe</td><td>{{ report.risk_buckets.severe or 0 }}%</td></tr>
+    <tr><td class="tier-high">High</td><td>{{ report.risk_buckets.high or 0 }}%</td></tr>
+    <tr><td>Moderate</td><td>{{ report.risk_buckets.moderate or 0 }}%</td></tr>
+    <tr><td class="tier-low">Low</td><td>{{ report.risk_buckets.low or 0 }}%</td></tr>
+    <tr><td>Unknown</td><td>{{ report.risk_buckets.unknown or 0 }}%</td></tr>
+  </table>
+
+  {% if report.tag_breakdown %}
+  <h2>Type tags breakdown</h2>
+  <table>
+    <tr><th>Tag</th><th>%</th></tr>
+    {% for tag, pct in report.tag_breakdown.items() %}
+    <tr><td>{{ tag }}</td><td>{{ pct }}%</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if report.indirect_exposure %}
+  <h2>Indirect exposure · Entity connections</h2>
+  <table>
+    <tr><th>Entity</th><th>Category</th><th>Behavior</th><th>Hops</th><th>Received</th><th>Risk</th></tr>
+    {% for c in report.indirect_exposure %}
+    <tr>
+      <td>{{ c.entity_name }}</td>
+      <td>{{ c.category }}</td>
+      <td>{{ c.behavior or "indirect" }}</td>
+      <td>{{ c.hops or "—" }}</td>
+      <td>{{ c.total_received or "—" }}</td>
+      <td>{{ c.risk_pct or 0 }}% {{ c.risk_tier|upper if c.risk_tier else "" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if report.tokens %}
+  <h2>Portfolio Tokens</h2>
+  <table>
+    <tr><th>Token</th><th>Contract</th><th>Balance</th><th>USD</th></tr>
+    {% for t in report.tokens %}
+    <tr>
+      <td>{{ t.symbol }}</td>
+      <td><code>{{ t.contract[:12] }}…</code></td>
+      <td>{{ t.balance }}</td>
+      <td>${{ t.balance_usd }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <h2>On-chain сводка</h2>
+  <dl class="meta">
+    <dt>Входящая сумма</dt><dd>{{ report.onchain.inbound_amount or 0 }}</dd>
+    <dt>Исходящая сумма</dt><dd>{{ report.onchain.outbound_amount or 0 }}</dd>
+    <dt>Контрагентов</dt><dd>{{ report.onchain.counterparties or 0 }}</dd>
+    <dt>Fusion индекс</dt><dd>{{ report.fusion_score }}/100 ({{ report.fusion_risk }})</dd>
+  </dl>
+
+  <h2>KYC / CFT (115-ФЗ)</h2>
+  <p>{{ report.kyc_block_ru }}</p>
+  <p>{{ report.cft_block_ru }}</p>
+
+  <h2>Рекомендации</h2>
+  <ul>{% for r in report.recommendations_ru %}<li>{{ r }}</li>{% endfor %}</ul>
+
+  <h2>Mentions on the Internet · Открытый OSINT</h2>
+  <p>{{ report.mentions_internet.summary_ru }}</p>
+  {% if report.mentions_internet.found %}
+  <table>
+    <tr><th>Источник</th><th>Тип</th><th>Заголовок</th><th>Риск</th></tr>
+    {% for m in report.mentions_internet.mentions[:10] %}
+    <tr>
+      <td>{{ m.source_name }}</td>
+      <td>{{ m.source_type }}</td>
+      <td>{{ m.title_ru }}</td>
+      <td>{{ m.risk_tag }} ({{ (m.confidence * 100)|int }}%)</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <h2>Evidence chain</h2>
+  <ul>{% for e in report.evidence_chain[:20] %}<li><code>{{ e }}</code></li>{% endfor %}</ul>
+
+  {% if report.notes %}<h2>Примечания аналитика</h2><p>{{ report.notes }}</p>{% endif %}
+
+  <div class="footer">{{ report.product_ru }} · {{ report.classification }} · {{ report.case_ref }}</div>
+</body>
+</html>

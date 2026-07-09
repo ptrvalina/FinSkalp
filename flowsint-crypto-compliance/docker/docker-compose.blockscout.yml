@@ -1,0 +1,64 @@
+# Blockscout self-hosted — optional sovereign EVM indexer
+# Usage: docker compose -f docker/docker-compose.blockscout.yml --profile blockscout up -d
+# Docs: docker/blockscout/README.md
+
+services:
+  blockscout-db:
+    image: postgres:15-alpine
+    profiles: ["blockscout"]
+    environment:
+      POSTGRES_USER: blockscout
+      POSTGRES_PASSWORD: blockscout
+      POSTGRES_DB: blockscout
+    volumes:
+      - blockscout-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blockscout"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  blockscout-redis:
+    image: redis:7-alpine
+    profiles: ["blockscout"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  blockscout:
+    image: blockscout/blockscout:6.9.2
+    profiles: ["blockscout"]
+    depends_on:
+      blockscout-db:
+        condition: service_healthy
+      blockscout-redis:
+        condition: service_healthy
+    ports:
+      - "${BLOCKSCOUT_HOST_PORT:-4000}:4000"
+    environment:
+      DATABASE_URL: postgresql://blockscout:blockscout@blockscout-db:5432/blockscout?ssl=false
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: ${BLOCKSCOUT_ETHEREUM_RPC_URL:-http://host.docker.internal:8545}
+      ETHEREUM_JSONRPC_TRACE_URL: ${BLOCKSCOUT_ETHEREUM_RPC_URL:-http://host.docker.internal:8545}
+      ETHEREUM_JSONRPC_WS_URL: ${BLOCKSCOUT_ETHEREUM_WS_URL:-ws://host.docker.internal:8546}
+      CHAIN_ID: ${BLOCKSCOUT_CHAIN_ID:-1}
+      COIN: ETH
+      COIN_NAME: Ether
+      INDEXER_DISABLE_INTERNAL_TRANSACTIONS_FETCHER: "false"
+      INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "false"
+      INDEXER_DISABLE_BLOCK_REWARD_FETCHER: "true"
+      BLOCKSCOUT_HOST: ${BLOCKSCOUT_PUBLIC_HOST:-localhost}
+      BLOCKSCOUT_PROTOCOL: http
+      SECRET_KEY_BASE: ${BLOCKSCOUT_SECRET_KEY_BASE:-changeme-run-openssl-rand-hex-64-for-production}
+      REDIS_URL: redis://blockscout-redis:6379
+      API_V2_ENABLED: "true"
+      DISABLE_WEBAPP: "false"
+      MIX_ENV: prod
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  blockscout-db:

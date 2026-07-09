@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — изъятие активов {{ report.case_ref }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.45; }
+    h1 { color: #8b0000; }
+    h2 { color: #333; border-bottom: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #bbb; padding: 0.35rem; }
+    th { background: #fee; }
+  </style>
+</head>
+<body>
+  <h1>{{ report.title_ru }}</h1>
+  <p><b>{{ report.classification }}</b> · {{ report.case_ref }}</p>
+  <p>{{ report.subtitle_ru }}</p>
+
+  <h2>Правовые основания</h2>
+  <ul>{% for l in report.legal_basis_ru %}<li>{{ l }}</li>{% endfor %}</ul>
+
+  <h2>Активы для изъятия / блокировки</h2>
+  <table>
+    <thead><tr><th>Адрес</th><th>Сеть</th><th>Роль</th></tr></thead>
+    <tbody>
+    {% for w in report.assets_for_seizure.wallets %}
+      <tr><td>{{ w.address }}</td><td>{{ w.chain }}</td><td>{{ w.role }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>OCR-доказательства</h2>
+  <p>Документов: {{ report.ocr_evidence.documents_count }}</p>
+  {% for doc in report.ocr_evidence.documents %}
+  <h3>{{ doc.filename }} ({{ doc.backend }}, conf {{ doc.confidence }})</h3>
+  <pre>{{ doc.preview }}</pre>
+  {% endfor %}
+
+  <h2>OSINT Scalpel</h2>
+  <p>Упоминаний: {{ report.osint_evidence.mentions_count }}, источников: {{ report.osint_evidence.independent_sources }}</p>
+
+  <h2>Рекомендуемые действия</h2>
+  <ol>{% for a in report.recommended_actions_ru %}<li>{{ a }}</li>{% endfor %}</ol>
+</body>
+</html>

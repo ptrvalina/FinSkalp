@@ -1,0 +1,217 @@
+# FinSkalp observability / search / flags stack (self-hosted, localhost-only)
+
+#
+
+# SECURITY: run STANDALONE — do NOT merge with docker-compose.prod.yml or docker-compose.dev.yml.
+
+# Merging compose files re-declares prod services and can recreate/restart production containers.
+
+#
+
+# Usage:
+
+#   docker compose -f docker-compose.hardening.yml up -d
+
+#
+
+# Requires an existing Postgres container on the Docker network (prod or dev).
+
+# Set FLOWSINT_DOCKER_NETWORK and FLOWSINT_POSTGRES_HOST to match your stack.
+
+name: flowsint-hardening
+
+
+
+services:
+
+  pghero:
+
+    image: ankane/pghero:latest
+
+    container_name: flowsint-pghero
+
+    restart: unless-stopped
+
+    ports:
+
+      - "127.0.0.1:${PGHERO_HOST_PORT:-8088}:8080"
+
+    environment:
+
+      DATABASE_URL: postgresql://flowsint:flowsint@${FLOWSINT_POSTGRES_HOST:-flowsint-postgres-prod}:5432/flowsint
+
+    networks:
+
+      - flowsint_network
+
+
+
+  tempo:
+
+    image: grafana/tempo:2.6.1
+
+    container_name: flowsint-tempo
+
+    command: ["-config.file=/etc/tempo.yaml"]
+
+    volumes:
+
+      - ./flowsint-crypto-compliance/infra/tempo.yaml:/etc/tempo.yaml:ro
+
+      - tempo_data:/var/tempo
+
+    ports:
+
+      - "127.0.0.1:${TEMPO_HTTP_PORT:-3200}:3200"
+
+      - "127.0.0.1:${TEMPO_OTLP_GRPC_PORT:-4317}:4317"
+
+      - "127.0.0.1:${TEMPO_OTLP_HTTP_PORT:-4318}:4318"
+
+    networks:
+
+      - flowsint_network
+
+
+
+  grafana:
+
+    image: grafana/grafana:11.4.0
+
+    container_name: flowsint-grafana
+
+    ports:
+
+      - "127.0.0.1:${GRAFANA_HOST_PORT:-3001}:3000"
+
+    environment:
+
+      GF_SECURITY_ADMIN_USER: admin
+
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-finskalp}
+
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+
+      GF_SERVER_ROOT_URL: http://127.0.0.1:${GRAFANA_HOST_PORT:-3001}
+
+    volumes:
+
+      - grafana_data:/var/lib/grafana
+
+      - ./flowsint-crypto-compliance/infra/grafana/provisioning:/etc/grafana/provisioning:ro
+
+    networks:
+
+      - flowsint_network
+
+    depends_on:
+
+      - tempo
+
+
+
+  meilisearch:
+
+    image: getmeili/meilisearch:v1.12
+
+    container_name: flowsint-meilisearch
+
+    ports:
+
+      - "127.0.0.1:${MEILI_HOST_PORT:-7700}:7700"
+
+    environment:
+
+      MEILI_ENV: development
+
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-finskalp-dev-key}
+
+    volumes:
+
+      - meili_data:/meili_data
+
+    networks:
+
+      - flowsint_network
+
+
+
+  unleash-db-init:
+
+    image: postgres:15
+
+    container_name: flowsint-unleash-db-init
+
+    environment:
+
+      PGPASSWORD: flowsint
+
+    entrypoint:
+
+      - sh
+
+      - -c
+
+      - |
+
+        psql -h ${FLOWSINT_POSTGRES_HOST:-flowsint-postgres-prod} -U flowsint -d flowsint -tc "SELECT 1 FROM pg_database WHERE datname = 'unleash'" | grep -q 1 \
+
+          || psql -h ${FLOWSINT_POSTGRES_HOST:-flowsint-postgres-prod} -U flowsint -d flowsint -c "CREATE DATABASE unleash"
+
+    networks:
+
+      - flowsint_network
+
+    restart: "no"
+
+
+
+  unleash:
+
+    image: unleashorg/unleash-server:6.4
+
+    container_name: flowsint-unleash
+
+    ports:
+
+      - "127.0.0.1:${UNLEASH_HOST_PORT:-4242}:4242"
+
+    environment:
+
+      DATABASE_URL: postgresql://flowsint:flowsint@${FLOWSINT_POSTGRES_HOST:-flowsint-postgres-prod}:5432/unleash
+
+      DATABASE_SSL: "false"
+
+      INIT_CLIENT_API_TOKENS: ${UNLEASH_CLIENT_TOKEN:-default:development.unleash-insecure-api-token}
+
+    networks:
+
+      - flowsint_network
+
+    depends_on:
+
+      unleash-db-init:
+
+        condition: service_completed_successfully
+
+
+
+volumes:
+
+  tempo_data:
+
+  grafana_data:
+
+  meili_data:
+
+
+
+networks:
+
+  flowsint_network:
+
+    external: true
+
+    name: ${FLOWSINT_DOCKER_NETWORK:-flowsint_network_prod}
+
+

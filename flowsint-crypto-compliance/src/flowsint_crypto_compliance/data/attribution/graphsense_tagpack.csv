@@ -1,0 +1,4 @@
+address,currency,label,category,confidence,risk_score
+TKzxdv2T6kk7k1a48KQvzk1sRvde9BE9Fe,trx,SunSwap V2 Router,dex,0.8,15
+TQn9Yz2r8p7bLSEz7K8vJ3mN4pQ2wR5tYX,trx,JustSwap Router,dex,0.75,18
+TLa2f6VPqDgRE67v1736s7bJ8Ray5w6jZ7,trx,Poloniex,exchange,0.85,12

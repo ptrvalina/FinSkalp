@@ -1,0 +1,97 @@
+/**
+ * RFC-0008 Enterprise Design System — design tokens (Ch.3, 4, 5, 12)
+ * Components MUST use these tokens, not hardcoded values.
+ */
+
+:root {
+  /* Surfaces — Ch.3 */
+  --fs-bg-primary: var(--background);
+  --fs-bg-secondary: var(--muted);
+  --fs-surface: var(--card);
+  --fs-border: var(--border);
+  --fs-text-primary: var(--foreground);
+  --fs-text-secondary: var(--muted-foreground);
+
+  /* Semantic — Ch.3 */
+  --fs-success: var(--success, oklch(0.6 0.12 145));
+  --fs-warning: var(--warning, oklch(0.7 0.12 80));
+  --fs-error: var(--destructive);
+  --fs-info: var(--info, oklch(0.6 0.1 240));
+
+  /* Risk analytics — Ch.3 (aliases; base values in styles.css :root) */
+  --fs-risk-low-token: var(--fs-risk-low);
+  --fs-risk-medium-token: var(--fs-risk-medium);
+  --fs-risk-high-token: var(--fs-risk-high);
+  --fs-risk-critical-token: var(--fs-risk-critical);
+
+  /* Graph entity colors — Ch.3 */
+  --fs-graph-wallet: oklch(0.72 0.14 70);
+  --fs-graph-person: oklch(0.65 0.12 250);
+  --fs-graph-company: oklch(0.62 0.1 300);
+  --fs-graph-exchange: oklch(0.68 0.15 40);
+  --fs-graph-contract: oklch(0.58 0.08 200);
+  --fs-graph-document: oklch(0.55 0.06 180);
+  --fs-graph-evidence: oklch(0.7 0.12 145);
+  --fs-graph-investigation: oklch(0.64 0.17 36);
+
+  /* Typography scale — Ch.4 */
+  --fs-text-h1: 1.875rem;
+  --fs-text-h2: 1.5rem;
+  --fs-text-h3: 1.25rem;
+  --fs-text-h4: 1.125rem;
+  --fs-text-body-lg: 1rem;
+  --fs-text-body: 0.875rem;
+  --fs-text-caption: 0.75rem;
+  --fs-text-label: 0.6875rem;
+  --fs-font-sans: var(--font-sans, Inter, system-ui, sans-serif);
+  --fs-font-mono: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+
+  /* 8px grid — Ch.5 */
+  --fs-space-1: 4px;
+  --fs-space-2: 8px;
+  --fs-space-3: 16px;
+  --fs-space-4: 24px;
+  --fs-space-5: 32px;
+  --fs-space-6: 48px;
+
+  /* Motion — Ch.8 */
+  --fs-duration-fast: 120ms;
+  --fs-duration-normal: 200ms;
+  --fs-duration-slow: 320ms;
+  --fs-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Breakpoints reference — Ch.11 */
+  --fs-bp-laptop: 1280px;
+  --fs-bp-desktop: 1920px;
+  --fs-bp-wide: 2560px;
+}
+
+.high-contrast {
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --border: oklch(0.85 0 0);
+  --muted-foreground: oklch(0.9 0 0);
+  --primary: oklch(0.85 0.2 95);
+  --fs-risk-critical: #ff6b6b;
+  --fs-risk-high: #ffa94d;
+  --fs-risk-medium: #ffe066;
+  --fs-risk-low: #69db7c;
+}
+
+.fs-density-compact {
+  --fs-text-body: 0.8125rem;
+  --fs-space-3: 12px;
+}
+
+.fs-table-mono {
+  font-family: var(--fs-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fs-duration-fast: 0.01ms;
+    --fs-duration-normal: 0.01ms;
+    --fs-duration-slow: 0.01ms;
+  }
+}

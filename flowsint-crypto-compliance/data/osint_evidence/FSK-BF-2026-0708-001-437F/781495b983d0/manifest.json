@@ -1,0 +1,14 @@
+{
+  "url": "https://dns.google/query?name=www.justice.gov&type=A",
+  "discovery_at": "2026-07-08T21:26:32.981846+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": "data\\osint_evidence\\FSK-BF-2026-0708-001-437F\\781495b983d0\\page.html",
+  "html_sha256": "d39a3dd7ac61c8030074e3f42f1d600748d6b7ad226ff578163730e2fa29d6e7",
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0708-001-437F/d39a3dd7ac61c8030074e3f42f1d600748d6b7ad226ff578163730e2fa29d6e7",
+  "report_link_ru": "Обнаружено: 2026-07-08T21:26:32.981846+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0708-001-437F/d39a3dd7ac61c8030074e3f42f1d600748d6b7ad226ff578163730e2fa29d6e7 · SHA-256 HTML: d39a3dd7ac61c803…",
+  "status": "pending",
+  "errors": []
+}

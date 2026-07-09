@@ -1,0 +1,8 @@
+[
+  {"name": "GitHub", "url": "https://github.com/{username}", "exists_marker": "pinned-items", "missing_marker": "Not Found", "confidence": 0.72, "tag": "dev_profile"},
+  {"name": "Reddit", "url": "https://www.reddit.com/user/{username}", "exists_marker": "Reddit -", "missing_marker": "nobody on Reddit goes by that name", "confidence": 0.60, "tag": "forum_profile"},
+  {"name": "Telegram t.me", "url": "https://t.me/{username}", "exists_marker": "tgme_page", "missing_marker": "If you have <strong>Telegram</strong>", "confidence": 0.68, "tag": "telegram"},
+  {"name": "Keybase", "url": "https://keybase.io/{username}", "exists_marker": "keybase-", "missing_marker": "usernotfound", "confidence": 0.65, "tag": "crypto_identity"},
+  {"name": "Medium", "url": "https://medium.com/@{username}", "exists_marker": "medium.com", "missing_marker": "404", "confidence": 0.55, "tag": "blog"},
+  {"name": "Habr", "url": "https://habr.com/ru/users/{username}/", "exists_marker": "habr", "missing_marker": "404", "confidence": 0.62, "tag": "ru_forum"}
+]

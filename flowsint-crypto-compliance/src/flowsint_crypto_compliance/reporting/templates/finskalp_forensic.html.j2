@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — {{ report.case_ref }}</title>
+  <style>
+    @page { margin: 1.2cm; }
+    body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; color: #1a1a2e; line-height: 1.45; }
+    .cover { background: #0d2137; color: #fff; padding: 2rem; page-break-after: always; }
+    h2 { color: #1a4a6e; font-size: 1.1rem; border-bottom: 2px solid #1a4a6e; margin-top: 1.5rem; }
+    h3 { color: #334155; font-size: 0.95rem; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    th, td { border: 1px solid #bbb; padding: 0.35rem 0.5rem; vertical-align: top; }
+    th { background: #e8eef3; }
+    code { font-size: 0.75rem; word-break: break-all; }
+    .footer { font-size: 0.7rem; color: #666; margin-top: 2rem; border-top: 1px solid #ddd; }
+    .timeline-step { border-left: 3px solid #1a4a6e; padding-left: 0.75rem; margin: 0.35rem 0; }
+    .conf-high { color: #059669; font-weight: 600; }
+    .conf-mod { color: #d97706; font-weight: 600; }
+    .warn { background: #fef3c7; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+    .onchain-badge { display: inline-block; background: #0d4f3c; color: #e8fff6; padding: 0.25rem 0.6rem;
+      border-radius: 4px; font-size: 0.8rem; margin: 0.5rem 0; }
+    .onchain-badge.failover { background: #7c3aed; }
+    .svg-wrap { background: #0a0a0f; padding: 0.35rem; margin: 0.5rem 0; width: 100%; box-sizing: border-box; }
+    .svg-wrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div>{{ report.classification }}</div>
+    <h1>FinSkalp · Blockchain Forensic Investigation Report</h1>
+    <table style="margin-top:1.5rem;color:#fff;border-color:#456">
+      <tr><td>Case Reference</td><td>{{ report.case_ref }}</td></tr>
+      <tr><td>Report UUID</td><td>{{ (report.digital_signature or {}).report_uuid or report.report_id }}</td></tr>
+      <tr><td>Network</td><td>{{ report.cover.subject_network if report.cover else report.address_profile.network }}</td></tr>
+      <tr><td>Primary Asset</td><td>{{ report.cover.primary_asset if report.cover else "—" }}</td></tr>
+      <tr><td>Activity Window</td><td>{{ report.cover.activity_window if report.cover else "—" }}</td></tr>
+      <tr><td>Methodology</td><td>{{ report.cover.methodology if report.cover else report.version }}</td></tr>
+      <tr><td>Subject Address</td><td>{{ report.address_profile.address }}</td></tr>
+    </table>
+  </div>
+
+  {% set ocs = report.on_chain_source or {} %}
+  {% if ocs.on_chain_badge_ru %}
+  <p class="onchain-badge{% if ocs.on_chain_failover %} failover{% endif %}">{{ ocs.on_chain_badge_ru }}</p>
+  {% endif %}
+
+  <h2>1. Executive Summary</h2>
+  <p>{{ report.executive_summary.text_ru }}</p>
+  <p><strong>Pattern:</strong> {{ report.executive_summary.pattern_ru }}</p>
+  <ol>{% for f in report.executive_summary.key_findings_ru %}<li>{{ f }}</li>{% endfor %}</ol>
+
+  {% set oac = report.overall_attribution_confidence or {} %}
+  {% if oac.pct %}
+  <p><strong>Overall Attribution Confidence:</strong>
+    <span class="{% if oac.label == 'High' %}conf-high{% else %}conf-mod{% endif %}">
+      {{ oac.label }} ({{ oac.pct }}%)
+    </span>
+  </p>
+  {% endif %}
+
+  <h2>2. Scope, Standards and Methodology</h2>
+  <p>{{ report.methodology.scope_ru }}</p>
+  <ul>{% for t in report.methodology.tiering_ru %}<li>{{ t }}</li>{% endfor %}</ul>
+
+  <h2>3. Sanctions Screening</h2>
+  {% set ss = report.sanctions_screening or {} %}
+  {% set st = report.screening_status or ss.screening_status or {} %}
+  <table>
+    <tr><th>Source</th><th>Status</th></tr>
+    <tr><td>OFAC</td><td>{{ st.OFAC or st.get('OFAC') or '—' }}</td></tr>
+    <tr><td>OpenSanctions</td><td>{{ st.OpenSanctions or st.get('OpenSanctions') or '—' }}</td></tr>
+    <tr><td>Internal Registry</td><td>{{ st.Internal_Registry or st.get('Internal_Registry') or '—' }}</td></tr>
+  </table>
+  <div class="warn">{{ ss.status_ru or ss.status_en or '—' }}</div>
+  {% if ss.hits %}
+  <ul>{% for h in ss.hits %}<li>{{ h.address }} — {{ h.caption or h.label or h.source }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <h2>4. Evidence Inventory</h2>
+  <table>
+    <tr><th>Exhibit</th><th>Source</th><th>SHA-256</th><th>Tier</th></tr>
+    {% for e in report.evidence_inventory %}
+    <tr><td>{{ e.exhibit_id }}</td><td>{{ e.description }}</td><td><code>{{ e.sha256 }}</code></td><td>{{ e.tier }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>5. Subject Wallet Profile</h2>
+  <table>
+    <tr><td>Address</td><td>{{ report.address_profile.address }}</td></tr>
+    <tr><td>Network</td><td>{{ report.address_profile.network }}</td></tr>
+    <tr><td>Account type</td><td>{{ report.address_profile.account_type }}</td></tr>
+    <tr><td>Tx count (in/out)</td><td>{{ report.address_profile.inbound_count }} / {{ report.address_profile.outbound_count }}</td></tr>
+    <tr><td>Counterparties</td><td>{{ report.address_profile.counterparties }}</td></tr>
+    <tr><td>Gross in / out</td><td>{{ report.address_profile.gross_inbound }} / {{ report.address_profile.gross_outbound }}</td></tr>
+    <tr><td>Net retained</td><td>{{ report.address_profile.net_retained }}</td></tr>
+    <tr><td>Balance USD</td><td>{{ report.address_profile.balance_usd or "—" }}</td></tr>
+    <tr><td>Risk rating</td><td>{{ report.address_profile.risk_rating }} ({{ report.address_profile.risk_score }})</td></tr>
+  </table>
+
+  <h2>6. Risk Score Breakdown</h2>
+  {% set rb = report.risk_score_breakdown or {} %}
+  <table>
+    <tr><th>Component</th><th>Points</th><th>%</th><th>Explanation</th></tr>
+    {% for c in rb.components or [] %}
+    <tr>
+      <td>{{ c.component }}</td>
+      <td>{{ c.points }}</td>
+      <td>{{ c.pct }}%</td>
+      <td>{{ c.explanation_ru }}</td>
+    </tr>
+    {% endfor %}
+    <tr><td><strong>Total</strong></td><td colspan="3"><strong>{{ rb.total }}</strong></td></tr>
+  </table>
+  <p><em>{{ rb.methodology_ru or '' }}</em></p>
+
+  <h2>7. Activity Timeline</h2>
+  {% for step in report.activity_timeline or [] %}
+  <div class="timeline-step">
+    <strong>{{ step.ts }}</strong> — {{ step.label_ru }}
+  </div>
+  {% endfor %}
+
+  <h2>8. Fund-Flow Analysis</h2>
+  {% set fund_flow = report.fund_flow or {} %}
+  {% if fund_flow.consolidation_detected %}
+  <p><strong>Consolidation pattern detected</strong> ({{ fund_flow.consolidation_pct }}%) — indicative of funnel behavior (Tier-3 heuristic).</p>
+  {% endif %}
+
+  <h3>Flow graph (counterparty heuristic)</h3>
+  {% set fv = report.flow_visualization or {} %}
+  {% if fv.svg %}
+  <div class="svg-wrap">{{ fv.svg | safe }}</div>
+  {% endif %}
+  {% if fv.fusion_linked %}
+  <p><em>Heuristic flow above; multi-hop fusion graph ({% if fv.fusion_node_count %}{{ fv.fusion_node_count }} nodes, {{ fv.fusion_edge_count }} edges{% else %}see below{% endif %}) matches the interactive investigation graph.</em></p>
+  {% endif %}
+
+  <h3>Multi-hop fusion graph (investigation evidence)</h3>
+  {% set gs = report.graph_section or {} %}
+  {% if gs.has_svg and gs.svg %}
+  <div class="svg-wrap">{{ gs.svg | safe }}</div>
+  {% elif gs.png_data_uri %}
+  <p><img src="{{ gs.png_data_uri }}" style="max-width:100%" alt="fusion graph"/></p>
+  {% else %}
+  <p><em>Fusion graph not available for this investigation (demo address or empty hop expansion).</em></p>
+  {% endif %}
+  {% if gs.node_count %}
+  <p>Nodes: {{ gs.node_count }} · Edges: {{ gs.edge_count or 0 }}{% if gs.corridor_flagged %} · Corridor flagged{% endif %}</p>
+  {% endif %}
+  {% if gs.annotations_ru %}
+  <ul>{% for a in gs.annotations_ru %}<li>{{ a }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <h3>Sankey diagram (volumes)</h3>
+  {% if fv.sankey_svg %}
+  <div class="svg-wrap">{{ fv.sankey_svg | safe }}</div>
+  {% endif %}
+
+  <h2>9. Counterparty Distribution</h2>
+  <table>
+    <tr>
+      <th>Counterparty</th><th>Amount</th><th>Risk</th><th>Tier</th>
+      <th>First Seen</th><th>Last Seen</th><th>Relationship</th><th>Source</th><th>Verification</th>
+    </tr>
+    {% for c in report.counterparty_distribution or report.counterparty_risk or [] %}
+    <tr>
+      <td>{{ c.counterparty or c.entity }}</td>
+      <td>{{ c.amount or '—' }}</td>
+      <td>{{ c.risk or c.severity or '—' }}</td>
+      <td>{{ c.tier or '—' }}</td>
+      <td>{{ c.first_seen or '—' }}</td>
+      <td>{{ c.last_seen or '—' }}</td>
+      <td>{{ c.relationship or '—' }}</td>
+      <td>{{ c.source or c.source_display or '—' }}</td>
+      <td>{{ c.verification_level or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>10. Attribution Records</h2>
+  <table>
+    <tr><th>Entity</th><th>Evidence</th><th>Confidence</th><th>Source</th><th>Verification</th></tr>
+    {% for a in report.attribution_records or [] %}
+    <tr>
+      <td>{{ a.entity_name }}<br/><code>{{ a.address }}</code></td>
+      <td>{{ a.evidence }}</td>
+      <td>{{ a.confidence_pct or (a.confidence * 100)|round(1) if a.confidence else '—' }}%</td>
+      <td>{{ a.source_display or a.source }}</td>
+      <td>{{ a.verification_level }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if report.priority_tracing_lead %}
+  <h2>11. Priority Tracing Lead</h2>
+  <p>{{ report.priority_tracing_lead.lead_address }} · {{ report.priority_tracing_lead.pct_of_outflow }}% outflow · tx {{ report.priority_tracing_lead.tx_hash }}</p>
+  <p>{{ report.priority_tracing_lead.recommendation_ru }}</p>
+  {% endif %}
+
+  <h2>12. Behavioural Pattern Analysis</h2>
+  <table>
+    {% for k, v in report.behavioural_analysis.items() %}
+    <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>13. Risk Assessment</h2>
+  <table>
+    <tr><th>Indicator</th><th>Weight</th><th>Basis</th></tr>
+    {% for r in report.risk_assessment %}
+    <tr><td>{{ r.indicator }}</td><td>{{ r.weight }}</td><td>{{ r.basis }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>14. Database Versions (Reproducibility)</h2>
+  {% set dbv = report.database_versions or {} %}
+  <table>
+    <tr><td>Registry snapshot</td><td>{{ dbv.registry_snapshot }}</td></tr>
+    <tr><td>OSINT snapshot</td><td>{{ dbv.osint_snapshot }}</td></tr>
+    <tr><td>Sanctions snapshot</td><td>{{ dbv.sanctions_snapshot }}</td></tr>
+    <tr><td>Blockchain height</td><td>{{ dbv.blockchain_height }}</td></tr>
+    <tr><td>Generated at</td><td>{{ dbv.generated_at }}</td></tr>
+    <tr><td>Engine</td><td>{{ dbv.engine_version }}</td></tr>
+  </table>
+
+  <h2>15. Limitations</h2>
+  {% set lim = report.limitations_and_confidence or {} %}
+  <ul>{% for l in lim.get('items', []) %}<li>{{ l }}</li>{% endfor %}</ul>
+  <p>{{ lim.get('controller_identification_ru', '') }}</p>
+
+  <h2>16. Conclusions and Next Steps</h2>
+  <ol>{% for s in (report.conclusions or {}).get('next_steps_ru', []) %}<li>{{ s }}</li>{% endfor %}</ol>
+
+  <h2>17. Digital Signature & Integrity</h2>
+  {% set sig = report.digital_signature or {} %}
+  <table>
+    <tr><td>Report UUID</td><td><code>{{ sig.report_uuid }}</code></td></tr>
+    <tr><td>Generation ID</td><td><code>{{ sig.generation_id }}</code></td></tr>
+    <tr><td>Engine version</td><td>{{ sig.engine_version }}</td></tr>
+    <tr><td>Report SHA-256</td><td><code>{{ sig.report_sha256 }}</code></td></tr>
+    <tr><td>Evidence bundle SHA-256</td><td><code>{{ sig.evidence_bundle_sha256 }}</code></td></tr>
+    {% if sig.signature_algorithm %}
+    <tr><td>{{ sig.signature_algorithm }}</td><td><code>{{ sig.signature_value }}</code></td></tr>
+    {% endif %}
+  </table>
+  {% if sig.signature_note %}<p><em>{{ sig.signature_note }}</em></p>{% endif %}
+
+  <h2>Appendix A — Exhibit hashes</h2>
+  <ul>{% for e in report.evidence_inventory %}<li>{{ e.exhibit_id }}: <code>{{ e.sha256 }}</code></li>{% endfor %}</ul>
+
+  <h2>Appendix B — On-chain verification</h2>
+  {% set app_b = report.appendix_b or {} %}
+  <pre>{{ app_b.get('verification_record', {}) }}</pre>
+  <p>Source status: {{ app_b.get('source_status', {}) }}</p>
+  {% if fv.dot_source %}
+  <h3>Appendix C — Graphviz DOT</h3>
+  <pre style="font-size:0.65rem">{{ fv.dot_source }}</pre>
+  {% endif %}
+
+  <div class="footer">FinSkalp · {{ report.case_ref }} · {{ report.version }} · {{ report.generated_at }}</div>
+</body>
+</html>

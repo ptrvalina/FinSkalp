@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — объёмный отчёт {{ report.case_ref }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; }
+    h1 { color: #1a4a6e; }
+    h2 { color: #333; border-bottom: 1px solid #ccc; margin-top: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    th, td { border: 1px solid #bbb; padding: 0.3rem; vertical-align: top; }
+    th { background: #eef; }
+    .stat { display: inline-block; margin: 0.25rem 0.5rem; padding: 0.35rem 0.6rem; background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>{{ report.title_ru }}</h1>
+  <p><b>{{ report.classification }}</b> · {{ report.case_ref }} · {{ report.generated_at }}</p>
+  <p>{{ report.executive_summary_ru }}</p>
+
+  <h2>Статистика объёма</h2>
+  {% for k, v in report.volume_stats.items() %}
+  <span class="stat"><b>{{ k }}</b>: {{ v }}</span>
+  {% endfor %}
+
+  {% for section in report.sections %}
+  <h2>{{ section.title_ru }} ({{ section.count }})</h2>
+  <table>
+    <thead><tr><th>#</th><th>Данные</th></tr></thead>
+    <tbody>
+    {% for item in section['items'] %}
+      <tr><td>{{ loop.index }}</td><td><pre style="white-space:pre-wrap;margin:0">{{ item }}</pre></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+
+  <h2>Методология</h2>
+  <ul>{% for m in report.methodology_ru %}<li>{{ m }}</li>{% endfor %}</ul>
+</body>
+</html>

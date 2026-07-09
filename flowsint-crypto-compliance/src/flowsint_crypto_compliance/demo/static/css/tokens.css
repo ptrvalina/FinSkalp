@@ -1,0 +1,196 @@
+/**
+ * FinSkalp Design Tokens v2 — premium motion tier
+ * Palantir/Linear-grade density · WCAG AA contrast (dark default)
+ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Navy / blue base */
+  --fs-color-bg: #040810;
+  --fs-color-bg-elevated: #0a1019;
+  --fs-color-bg-surface: #0f1724;
+  --fs-color-bg-muted: #152032;
+  --fs-color-border: #1e2d45;
+  --fs-color-border-subtle: #162033;
+
+  --fs-color-text: #eef2f7;
+  --fs-color-text-secondary: #94a3b8;
+  --fs-color-text-muted: #64748b;
+  --fs-color-text-inverse: #0f172a;
+
+  --fs-color-accent: #3b82f6;
+  --fs-color-accent-hover: #60a5fa;
+  --fs-color-accent-muted: #1e3a5f;
+
+  /* Risk semantics */
+  --fs-risk-critical: #ef4444;
+  --fs-risk-critical-bg: rgba(239, 68, 68, 0.12);
+  --fs-risk-high: #f97316;
+  --fs-risk-high-bg: rgba(249, 115, 22, 0.12);
+  --fs-risk-medium: #eab308;
+  --fs-risk-medium-bg: rgba(234, 179, 8, 0.12);
+  --fs-risk-low: #22c55e;
+  --fs-risk-low-bg: rgba(34, 197, 94, 0.12);
+  --fs-risk-clear: #14b8a6;
+  --fs-risk-clear-bg: rgba(20, 184, 166, 0.12);
+
+  /* Premium glow tokens */
+  --fs-glow-accent: 0 0 24px rgba(59, 130, 246, 0.35), 0 0 48px rgba(59, 130, 246, 0.12);
+  --fs-glow-risk-critical: 0 0 20px rgba(239, 68, 68, 0.45), 0 0 40px rgba(239, 68, 68, 0.15);
+  --fs-glow-risk-high: 0 0 18px rgba(249, 115, 22, 0.4), 0 0 36px rgba(249, 115, 22, 0.12);
+  --fs-glow-risk-medium: 0 0 16px rgba(234, 179, 8, 0.35), 0 0 32px rgba(234, 179, 8, 0.1);
+  --fs-glow-risk-low: 0 0 14px rgba(34, 197, 94, 0.3), 0 0 28px rgba(34, 197, 94, 0.1);
+  --fs-glow-risk-clear: 0 0 14px rgba(20, 184, 166, 0.35), 0 0 28px rgba(20, 184, 166, 0.1);
+
+  /* Ambient mesh gradient stops */
+  --fs-mesh-1: #0a1628;
+  --fs-mesh-2: #0c1a32;
+  --fs-mesh-3: #081420;
+  --fs-mesh-accent: rgba(37, 99, 235, 0.18);
+  --fs-mesh-teal: rgba(20, 184, 166, 0.08);
+  --fs-mesh-violet: rgba(99, 102, 241, 0.1);
+
+  /* Typography */
+  --fs-font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --fs-font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --fs-text-xs: 0.6875rem;
+  --fs-text-sm: 0.8125rem;
+  --fs-text-base: 0.875rem;
+  --fs-text-lg: 1rem;
+  --fs-text-xl: 1.125rem;
+  --fs-leading-tight: 1.25;
+  --fs-leading-normal: 1.45;
+
+  /* Spacing (4px grid) */
+  --fs-space-1: 0.25rem;
+  --fs-space-2: 0.5rem;
+  --fs-space-3: 0.75rem;
+  --fs-space-4: 1rem;
+  --fs-space-5: 1.25rem;
+  --fs-space-6: 1.5rem;
+  --fs-space-8: 2rem;
+
+  /* Radius */
+  --fs-radius-sm: 4px;
+  --fs-radius-md: 6px;
+  --fs-radius-lg: 8px;
+  --fs-radius-xl: 12px;
+
+  /* Motion — standard */
+  --fs-duration-fast: 120ms;
+  --fs-duration-normal: 200ms;
+  --fs-duration-slow: 320ms;
+  --fs-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Motion — premium / hero */
+  --fs-duration-hero: 680ms;
+  --fs-duration-reveal: 520ms;
+  --fs-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fs-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Glass */
+  --fs-glass-bg: rgba(10, 16, 25, 0.72);
+  --fs-glass-border: rgba(148, 163, 184, 0.12);
+  --fs-glass-blur: 16px;
+
+  /* Shadows */
+  --fs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --fs-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --fs-shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* Legacy aliases (app.css compat) */
+  --bg: var(--fs-color-bg);
+  --panel: var(--fs-color-bg-elevated);
+  --panel2: var(--fs-color-bg-surface);
+  --panel3: var(--fs-color-bg-muted);
+  --border: var(--fs-color-border);
+  --text: var(--fs-color-text);
+  --muted: var(--fs-color-text-secondary);
+  --accent: var(--fs-color-accent);
+  --accent2: #0ea5e9;
+  --critical: var(--fs-risk-critical);
+  --high: var(--fs-risk-high);
+  --medium: var(--fs-risk-medium);
+  --low: var(--fs-risk-low);
+  --font: var(--fs-font-sans);
+  --mono: var(--fs-font-mono);
+
+  --fs-focus-ring: 0 0 0 2px var(--fs-color-bg), 0 0 0 4px var(--fs-color-accent);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --fs-color-bg: #f1f5f9;
+  --fs-color-bg-elevated: #ffffff;
+  --fs-color-bg-surface: #f8fafc;
+  --fs-color-bg-muted: #e2e8f0;
+  --fs-color-border: #cbd5e1;
+  --fs-color-border-subtle: #e2e8f0;
+
+  --fs-color-text: #0f172a;
+  --fs-color-text-secondary: #475569;
+  --fs-color-text-muted: #64748b;
+  --fs-color-text-inverse: #f8fafc;
+
+  --fs-color-accent: #2563eb;
+  --fs-color-accent-hover: #1d4ed8;
+  --fs-color-accent-muted: #dbeafe;
+
+  --fs-risk-critical: #dc2626;
+  --fs-risk-critical-bg: rgba(220, 38, 38, 0.1);
+  --fs-risk-high: #ea580c;
+  --fs-risk-high-bg: rgba(234, 88, 12, 0.1);
+  --fs-risk-medium: #ca8a04;
+  --fs-risk-medium-bg: rgba(202, 138, 4, 0.1);
+  --fs-risk-low: #16a34a;
+  --fs-risk-low-bg: rgba(22, 163, 74, 0.1);
+  --fs-risk-clear: #0d9488;
+  --fs-risk-clear-bg: rgba(13, 148, 136, 0.1);
+
+  --fs-glow-accent: 0 0 20px rgba(37, 99, 235, 0.2), 0 0 40px rgba(37, 99, 235, 0.08);
+  --fs-glow-risk-critical: 0 0 16px rgba(220, 38, 38, 0.3);
+  --fs-glow-risk-high: 0 0 14px rgba(234, 88, 12, 0.28);
+  --fs-glow-risk-medium: 0 0 12px rgba(202, 138, 4, 0.25);
+  --fs-glow-risk-low: 0 0 12px rgba(22, 163, 74, 0.22);
+  --fs-glow-risk-clear: 0 0 12px rgba(13, 148, 136, 0.22);
+
+  --fs-mesh-1: #e8eef5;
+  --fs-mesh-2: #f1f5f9;
+  --fs-mesh-3: #e2e8f0;
+  --fs-mesh-accent: rgba(37, 99, 235, 0.08);
+  --fs-mesh-teal: rgba(13, 148, 136, 0.06);
+  --fs-mesh-violet: rgba(99, 102, 241, 0.06);
+
+  --fs-glass-bg: rgba(255, 255, 255, 0.78);
+  --fs-glass-border: rgba(15, 23, 42, 0.08);
+  --fs-shadow-premium: 0 8px 32px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  --bg: var(--fs-color-bg);
+  --panel: var(--fs-color-bg-elevated);
+  --panel2: var(--fs-color-bg-surface);
+  --panel3: var(--fs-color-bg-muted);
+  --border: var(--fs-color-border);
+  --text: var(--fs-color-text);
+  --muted: var(--fs-color-text-secondary);
+  --accent: var(--fs-color-accent);
+  --accent2: #0284c7;
+  --critical: var(--fs-risk-critical);
+  --high: var(--fs-risk-high);
+  --medium: var(--fs-risk-medium);
+  --low: var(--fs-risk-low);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --fs-duration-fast: 0.01ms;
+    --fs-duration-normal: 0.01ms;
+    --fs-duration-slow: 0.01ms;
+    --fs-duration-hero: 0.01ms;
+    --fs-duration-reveal: 0.01ms;
+  }
+}

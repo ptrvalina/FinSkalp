@@ -1,0 +1,19 @@
+services:
+  tron-fullnode:
+    container_name: finskalp-tron-fullnode
+    image: tronprotocol/java-tron:latest
+    restart: unless-stopped
+    mem_limit: 16g
+    ports:
+      - "8090:8090"   # HTTP API (TronGrid-compatible /v1 + /wallet)
+      - "8091:8091"   # Solidity HTTP API
+      - "18888:18888" # P2P TCP
+      - "18888:18888/udp"
+      - "50051:50051" # gRPC
+    volumes:
+      - tron-output:/java-tron/output-directory
+    # Default image config syncs from genesis; mount a snapshot — see docker/tron-fullnode/README.md
+
+volumes:
+  tron-output:
+    driver: local

@@ -1,0 +1,6 @@
+address,chain,label,category,confidence,risk_score
+bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh,btc,Huobi,exchange,0.85,15
+0x3f5ce5fbfe3e9ee397108865aa489f795bb6ff99,eth,Binance,exchange,0.9,12
+0xd551234ae421e3bcba99a0a6da7362bacd46c195,eth,Binance,exchange,0.9,12
+0x564286362092d8e7936f57565092948ef02d3a8,eth,Kraken,exchange,0.85,12
+0x503828976d8fdaf8643b21a36f3f57ed2d12041,eth,Bitfinex,exchange,0.8,18

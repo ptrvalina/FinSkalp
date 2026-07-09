@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "source": "reference_wallet_screening",
+    "address": "TZASfRXk51No5XHPDE2eCcXpS8F8t1jgwL",
+    "note": "Entity exposure derived from MetaSleuth-style screening reference (combat KYT sample)"
+  },
+  "focus_address": "TZASfRXk51No5XHPDE2eCcXpS8F8t1jgwL",
+  "chain": "tron",
+  "exposure_rows": [
+    {"entity_name": "Stake", "category": "gambling", "risk_pct": 75, "hops": 3, "amount": 620.0, "behavior": "indirect", "risk_tier": "high"},
+    {"entity_name": "BCGAME", "category": "gambling", "risk_pct": 75, "hops": 2, "amount": 5228.0, "behavior": "indirect", "risk_tier": "high"},
+    {"entity_name": "Shuffle", "category": "gambling", "risk_pct": 75, "hops": 3, "amount": 1396.0, "behavior": "indirect", "risk_tier": "high"},
+    {"entity_name": "0xProcessing", "category": "other", "risk_pct": 25, "hops": 6, "amount": 700.0, "behavior": "indirect", "risk_tier": "low"},
+    {"entity_name": "Kraken", "category": "exchange", "risk_pct": 10, "hops": 6, "amount": 1629.0, "behavior": "indirect", "risk_tier": "low"},
+    {"entity_name": "OKX (prev. OKEx)", "category": "exchange", "risk_pct": 10, "hops": 2, "amount": 3508.0, "behavior": "indirect", "risk_tier": "low"},
+    {"entity_name": "Bybit", "category": "exchange", "risk_pct": 10, "hops": 2, "amount": 4074.0, "behavior": "indirect", "risk_tier": "low"},
+    {"entity_name": "Binance", "category": "exchange", "risk_pct": 10, "hops": 2, "amount": 1348.0, "behavior": "indirect", "risk_tier": "low"},
+    {"entity_name": "Unnamed Entities", "category": "unknown", "risk_pct": 0, "hops": null, "amount": 14930.0, "behavior": "indirect", "risk_tier": "unknown"},
+    {"entity_name": "risky_exchange", "category": "risky_exchange", "risk_pct": 75, "hops": 2, "amount": 2830.0, "behavior": "indirect", "risk_tier": "severe"},
+    {"entity_name": "illegal_service", "category": "illegal_service", "risk_pct": 75, "hops": 3, "amount": 283.0, "behavior": "indirect", "risk_tier": "severe"},
+    {"entity_name": "sanctions", "category": "sanctions", "risk_pct": 90, "hops": 4, "amount": 141.0, "behavior": "indirect", "risk_tier": "severe"}
+  ],
+  "labels": []
+}

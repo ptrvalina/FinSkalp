@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowsint.io/schemas/finskalp/v1/fusion-graph-ftm-export.json",
+  "title": "FusionGraphFTMExport",
+  "description": "FinSkalp fusion graph exported as followthemoney entities + statements",
+  "type": "object",
+  "required": ["version", "dataset", "entities", "statements"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "fusion_graph_ftm_export_v1"
+    },
+    "dataset": {
+      "type": "string",
+      "description": "Default: finskalp"
+    },
+    "entity_count": { "type": "integer", "minimum": 0 },
+    "statement_count": { "type": "integer", "minimum": 0 },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "schema", "caption", "datasets", "properties"],
+        "properties": {
+          "id": { "type": "string" },
+          "schema": { "type": "string", "enum": ["CryptoWallet", "LegalEntity"] },
+          "caption": { "type": "string" },
+          "datasets": { "type": "array", "items": { "type": "string" } },
+          "properties": { "type": "object" }
+        }
+      }
+    },
+    "statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "schema", "entity", "target", "datasets"],
+        "properties": {
+          "id": { "type": "string" },
+          "schema": { "type": "string", "enum": ["Payment", "Reference"] },
+          "entity": { "type": "string", "description": "Source FTM entity id" },
+          "target": { "type": "string", "description": "Target FTM entity id" },
+          "datasets": { "type": "array", "items": { "type": "string" } },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "amount": { "type": "array", "items": { "type": "string" } },
+              "date": { "type": "array", "items": { "type": "string" } },
+              "notes": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

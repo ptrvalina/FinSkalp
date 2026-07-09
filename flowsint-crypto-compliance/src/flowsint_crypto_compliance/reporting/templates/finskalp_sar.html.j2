@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — SAR {{ report.case_ref }}</title>
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; line-height: 1.45; color: #111; margin: 1.5rem; }
+    h1 { color: #1a4a6e; font-size: 1.25rem; margin-bottom: 0.25rem; }
+    h2 { color: #333; font-size: 1rem; border-bottom: 1px solid #ccc; margin-top: 1.25rem; padding-bottom: 0.2rem; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; background: #1e3a5f; color: #fff; font-size: 0.75rem; border-radius: 3px; }
+    .meta { color: #555; font-size: 0.85rem; margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 0.5rem; }
+    th, td { border: 1px solid #bbb; padding: 0.35rem 0.5rem; vertical-align: top; }
+    th { background: #eef; text-align: left; width: 32%; }
+    ul { margin: 0.25rem 0 0.5rem 1.1rem; padding: 0; }
+    li { margin-bottom: 0.2rem; }
+    .score { font-size: 1.2rem; font-weight: 700; color: #8b1a1a; }
+    .narrative { background: #f8f9fb; border-left: 3px solid #1a4a6e; padding: 0.6rem 0.8rem; }
+    .section-block { page-break-inside: avoid; }
+  </style>
+</head>
+<body>
+  <h1>{{ report.title_ru }}</h1>
+  <div class="meta">
+    <span class="badge">{{ report.classification }}</span>
+    ID: {{ report.report_id }} · Кейс: {{ report.case_ref }} · {{ report.generated_at }}
+  </div>
+
+  <div class="section-block">
+    <h2>1. Параметры подачи</h2>
+    <table>
+      <tr><th>Тип сообщения</th><td>{{ report.filing.message_type_ru }}</td></tr>
+      <tr><th>Получатель</th><td>{{ report.filing.recipient_ru }}</td></tr>
+      <tr><th>Организация-отправитель</th><td>{{ report.filing.reporting_entity_ru }}</td></tr>
+    </table>
+    <ul>{% for l in report.filing.legal_basis_ru %}<li>{{ l }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="section-block">
+    <h2>2. Субъект и операция</h2>
+    <table>
+      <tr><th>Subject ID</th><td>{{ report.subject.subject_id }}</td></tr>
+      <tr><th>Адрес</th><td>{{ report.subject.address }}</td></tr>
+      <tr><th>Сеть</th><td>{{ report.subject.chain }}</td></tr>
+      <tr><th>Классификация</th><td>{{ report.subject.entity_classification_ru }}</td></tr>
+      <tr><th>Банк</th><td>{{ report.subject.bank_name or "—" }}</td></tr>
+      <tr><th>Референс банка</th><td>{{ report.subject.bank_reference or "—" }}</td></tr>
+      <tr><th>Сумма (фиат)</th><td>{{ report.subject.amount or "—" }}</td></tr>
+      <tr><th>Tx hash</th><td>{{ report.operation.tx_hash or "—" }}</td></tr>
+      <tr><th>Окно активности</th><td>{{ report.operation.activity_window }}</td></tr>
+      <tr><th>Операции в/из</th><td>{{ report.operation.inbound_count }} / {{ report.operation.outbound_count }}</td></tr>
+      <tr><th>Контрагенты</th><td>{{ report.operation.counterparties }}</td></tr>
+    </table>
+  </div>
+
+  <div class="section-block">
+    <h2>3. Профиль риска</h2>
+    <p class="score">Композит: {{ report.risk_profile.composite_score }}/100 · {{ report.risk_profile.composite_label_ru }}</p>
+    <table>
+      <tr><th>Скрининг кошелька</th><td>{{ report.risk_profile.wallet_score }}/100</td></tr>
+      <tr><th>Fusion / AML</th><td>{{ report.risk_profile.fusion_score }}/100</td></tr>
+      <tr><th>Open OSINT</th><td>{{ report.risk_profile.open_risk_score }}/100</td></tr>
+      <tr><th>Граф доказательств</th><td>{{ report.risk_profile.graph_nodes }} узлов · {{ report.risk_profile.graph_edges }} рёбер</td></tr>
+    </table>
+  </div>
+
+  <div class="section-block">
+    <h2>4. Признаки подозрительности · ст. 6 115-ФЗ</h2>
+    <table>
+      <thead><tr><th>Основание</th><th>Индикатор</th><th>Подтв.</th><th>Источник</th></tr></thead>
+      <tbody>
+      {% for i in report.suspicion_indicators %}
+        <tr>
+          <td>{{ i.article_ru }}</td>
+          <td>{{ i.indicator_ru }}</td>
+          <td>{{ i.confirmed }}</td>
+          <td>{{ i.source }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-block">
+    <h2>5. Нарратив подозрительной активности</h2>
+    <div class="narrative">{{ report.narrative_ru }}</div>
+    {% if report.executive_summary_ru %}
+    <p><b>Резюме:</b> {{ report.executive_summary_ru }}</p>
+    {% endif %}
+    {% if report.key_findings_ru %}
+    <ul>{% for k in report.key_findings_ru %}<li>{{ k }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  {% for section in report.evidence_sections %}
+  <div class="section-block">
+    <h2>6.{{ loop.index }} {{ section.title_ru }}</h2>
+    <ul>{% for item in section['items'] %}<li>{{ item }}</li>{% endfor %}</ul>
+  </div>
+  {% endfor %}
+
+  <div class="section-block">
+    <h2>7. Решение и рекомендации</h2>
+    <p><b>{{ report.decision.decision_ru }}</b></p>
+    <p>{{ report.decision.basis_ru }}</p>
+    <p>SAR/СПО рекомендовано: <b>{{ "да" if report.decision.str_recommended else "нет" }}</b></p>
+    <ul>{% for a in report.decision.recommended_actions_ru %}<li>{{ a }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="section-block">
+    <h2>8. Приложения к SAR</h2>
+    <ul>{% for a in report.attachments_index %}<li>{{ a.title_ru }} ({{ a.type }})</li>{% endfor %}</ul>
+    {% if report.analyst_notes %}
+    <p><b>Примечания аналитика:</b> {{ report.analyst_notes }}</p>
+    {% endif %}
+  </div>
+</body>
+</html>

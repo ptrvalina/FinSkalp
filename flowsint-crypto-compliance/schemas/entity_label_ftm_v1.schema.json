@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowsint.io/schemas/finskalp/v1/entity-label-ftm.json",
+  "title": "EntityLabelFTMEntity",
+  "description": "FinSkalp EntityLabel mapped to followthemoney entity (OpenSanctions-compatible)",
+  "type": "object",
+  "required": ["id", "schema", "caption", "datasets", "properties"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable FTM id: ftm-{chain}-{sha256_prefix}"
+    },
+    "schema": {
+      "type": "string",
+      "enum": ["CryptoWallet", "LegalEntity"]
+    },
+    "caption": {
+      "type": "string",
+      "description": "Human label (EntityLabel.label)"
+    },
+    "datasets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Provenance tag: finskalp, opensanctions, graphsense, ofac"
+    },
+    "properties": {
+      "type": "object",
+      "properties": {
+        "cryptoWallet": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "On-chain address (EntityLabel.address)"
+        },
+        "currency": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["trx", "eth", "btc", "bnb", "matic"] },
+          "description": "FTM currency code derived from EntityLabel.chain"
+        },
+        "topics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "EntityLabel.category + sanction topic when applicable"
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "source, confidence, tier, evidence metadata"
+        },
+        "name": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "LegalEntity name when label is not wallet-only"
+        },
+        "sanctions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "_finskalp_mapping": {
+      "type": "object",
+      "description": "Documentary field — not emitted in export",
+      "properties": {
+        "address": { "type": "string" },
+        "chain": { "type": "string" },
+        "source": { "type": "string" },
+        "confidence": { "type": "number" },
+        "tier": { "type": "integer" },
+        "sanctioned": { "type": "boolean" }
+      }
+    }
+  }
+}

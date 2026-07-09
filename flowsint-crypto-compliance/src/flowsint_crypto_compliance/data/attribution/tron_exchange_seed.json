@@ -1,0 +1,9 @@
+[
+  {"address": "TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE", "label": "Binance", "category": "exchange", "confidence": 0.85},
+  {"address": "TLaGjwhvAeiXQ3kf7eBT6ZtqjndSfy9Dir", "label": "Binance Hot Wallet", "category": "exchange", "confidence": 0.85},
+  {"address": "TKHuVq1oK6XTBDXiwro9i6mYs2GCXdEJgZ", "label": "OKX", "category": "exchange", "confidence": 0.82},
+  {"address": "TYASr5UV6HEcXatwdFQfmLVUqQQQMUxHLS", "label": "Bybit", "category": "exchange", "confidence": 0.82},
+  {"address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", "label": "USDT Contract", "category": "payment", "confidence": 0.99},
+  {"address": "TGzz8AQViAVt5PJ7FQviLmZcEk2cGiwKoK", "label": "Huobi", "category": "exchange", "confidence": 0.8},
+  {"address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S", "label": "SunSwap", "category": "exchange", "confidence": 0.7}
+]

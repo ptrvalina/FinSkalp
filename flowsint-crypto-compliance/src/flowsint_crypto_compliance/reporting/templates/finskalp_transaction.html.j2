@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ report.product_ru }} — транзакция</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1.5rem; font-size: 11pt; }
+    .banner { background: #1a4a6e; color: #fff; padding: 1rem; margin: -1.5rem -1.5rem 1rem; }
+    h2 { color: #1a4a6e; }
+    code { word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="banner"><h1>{{ report.product_ru }} — Transaction Report</h1></div>
+  <p><strong>{{ report.classification }}</strong></p>
+  <p><strong>Дело:</strong> {{ report.case_ref }}</p>
+  <p><strong>TX Hash:</strong> <code>{{ report.tx_hash }}</code></p>
+  <p><strong>Контекст адреса:</strong> <code>{{ report.source_address }}</code></p>
+  <p>{{ report.focus_ru }}</p>
+  <h2>Риск</h2>
+  <p>{{ report.risk_assessment.composite_label_ru }} — {{ report.risk_assessment.composite_score }}/100</p>
+  <h2>Ключевые выводы</h2>
+  <ol>{% for f in report.executive_summary.key_findings_ru %}<li>{{ f }}</li>{% endfor %}</ol>
+  <p style="margin-top:2rem;font-size:0.8rem;color:#666">{{ report.product_ru }} · {{ report.generated_at }}</p>
+</body>
+</html>
