@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic | OSINT Fusion Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Mono:wght@400;450;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        /* Custom Scrollbar for Tactical Minimalist Aesthetic */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1F1F1F; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b494b; }
+        
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            overflow: hidden;
+        }
+
+        .module-border {
+            border: 1px solid #1F1F1F;
+        }
+        
+        .active-glow {
+            box-shadow: inset 0 0 10px rgba(0, 219, 233, 0.1);
+        }
+
+        .instrumentation-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            height: calc(100vh - 48px - 24px); /* TopNav - Footer */
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "tertiary-fixed-dim": "#ffba20",
+                "error": "#ffb4ab",
+                "on-primary-fixed-variant": "#004f54",
+                "inverse-primary": "#006970",
+                "surface": "#131313",
+                "tertiary-fixed": "#ffdea8",
+                "secondary-fixed": "#ffdad6",
+                "surface-container-high": "#2a2a2a",
+                "on-error-container": "#ffdad6",
+                "on-secondary-container": "#ffd2cd",
+                "secondary": "#ffb3ac",
+                "surface-tint": "#00dbe9",
+                "surface-variant": "#353534",
+                "surface-bright": "#3a3939",
+                "surface-container-low": "#1c1b1b",
+                "outline-variant": "#3b494b",
+                "secondary-fixed-dim": "#ffb3ac",
+                "on-surface": "#e5e2e1",
+                "on-tertiary": "#412d00",
+                "primary-fixed": "#7df4ff",
+                "on-tertiary-fixed": "#271900",
+                "on-background": "#e5e2e1",
+                "error-container": "#93000a",
+                "primary-container": "#00f0ff",
+                "on-surface-variant": "#b9cacb",
+                "surface-container-highest": "#353534",
+                "on-error": "#690005",
+                "on-primary": "#00363a",
+                "outline": "#849495",
+                "inverse-on-surface": "#313030",
+                "on-primary-fixed": "#002022",
+                "surface-dim": "#131313",
+                "on-secondary-fixed": "#410003",
+                "inverse-surface": "#e5e2e1",
+                "surface-container": "#201f1f",
+                "on-secondary-fixed-variant": "#930010",
+                "on-tertiary-fixed-variant": "#5e4200",
+                "tertiary-container": "#ffd386",
+                "on-primary-container": "#006970",
+                "surface-container-lowest": "#0e0e0e",
+                "primary": "#dbfcff",
+                "background": "#131313",
+                "tertiary": "#fff4e8",
+                "primary-fixed-dim": "#00dbe9",
+                "secondary-container": "#c40019",
+                "on-secondary": "#680008",
+                "on-tertiary-container": "#7d5800"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "tight-inset": "4px",
+                "module-gap": "1px",
+                "standard-inset": "8px",
+                "unit": "4px",
+                "container-padding": "12px"
+              },
+              "fontFamily": {
+                "headline-lg": ["Inter"],
+                "mono-sm": ["IBM Plex Mono"],
+                "mono-data": ["IBM Plex Mono"],
+                "mono-label": ["IBM Plex Mono"],
+                "body-md": ["Inter"],
+                "headline-md": ["Inter"]
+              },
+              "fontSize": {
+                "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="flex">
+<!-- Shared SideNavBar -->
+<nav class="flex flex-col h-screen items-center py-4 bg-surface-dim dark:bg-surface-dim docked h-full w-16 left-0 top-0 border-r border-outline-variant flat no shadows z-50">
+<div class="mb-8 text-on-surface flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div class="flex flex-col gap-2 w-full">
+<!-- Command Center -->
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+<!-- OSINT Hub (Active) -->
+<button class="w-full h-12 flex items-center justify-center text-primary bg-surface-container-high border-l-2 border-primary transition-colors duration-75">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+</button>
+<!-- Others -->
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</button>
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+</button>
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</button>
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest">
+<span class="material-symbols-outlined" data-icon="settings_applications">settings_applications</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-2 w-full border-t border-outline-variant pt-4">
+<button class="w-full h-12 flex items-center justify-center text-outline hover:text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</button>
+</div>
+</nav>
+<div class="flex-1 flex flex-col min-w-0">
+<!-- Shared TopNavBar -->
+<header class="flex justify-between items-center h-12 px-container-padding w-full bg-surface-container-low dark:bg-surface-container-low border-b border-outline-variant flat no shadows z-40">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-on-surface tracking-tighter">FinSkalp Forensic</span>
+<span class="font-mono-label text-mono-label text-outline px-2 border border-outline-variant">PORT_8877/OSINT</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="text-primary font-mono-label border-b border-primary cursor-pointer uppercase">CIS/FIU</span>
+<span class="text-on-surface-variant font-mono-label hover:bg-surface-container-highest transition-all cursor-pointer uppercase">PROD-ACTIVE</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-primary-container text-on-primary-container px-3 h-8 font-mono-label flex items-center gap-2 hover:opacity-80 active:opacity-70 transition-all">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+                        NEW_INVESTIGATION
+                    </button>
+<button class="text-outline hover:text-on-surface-variant"><span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span></button>
+<button class="text-outline hover:text-on-surface-variant relative">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="absolute top-0 right-0 w-1.5 h-1.5 bg-error rounded-full"></span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 overflow-hidden grid grid-cols-[300px_1fr_400px] gap-module-gap bg-[#1F1F1F]">
+<!-- LEFT COLUMN: INPUT & COLLECTION -->
+<section class="flex flex-col gap-module-gap bg-[#050505] overflow-y-auto">
+<!-- Parameters Module -->
+<div class="bg-surface-container-low p-4 module-border">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest">Target_Parameters</h2>
+<span class="text-mono-sm text-primary">v4.0.2</span>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="font-mono-label text-mono-label text-outline uppercase block">Identifier_Address</label>
+<input class="w-full bg-[#050505] border border-outline-variant text-mono-data focus:border-surface-tint focus:ring-0 h-9 px-2" placeholder="0x..." type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="space-y-1">
+<label class="font-mono-label text-mono-label text-outline uppercase block">Network</label>
+<select class="w-full bg-[#050505] border border-outline-variant text-mono-data focus:border-surface-tint focus:ring-0 h-9 px-2 appearance-none">
+<option>ETH_MAIN</option>
+<option>TRON_GRID</option>
+<option>BTC_NODE</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="font-mono-label text-mono-label text-outline uppercase block">Depth</label>
+<input class="w-full bg-[#050505] border border-outline-variant text-mono-data focus:border-surface-tint focus:ring-0 h-9 px-2" type="number" value="3"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-mono-label text-mono-label text-outline uppercase block">STR_Reference</label>
+<input class="w-full bg-[#050505] border border-outline-variant text-mono-data focus:border-surface-tint focus:ring-0 h-9 px-2 uppercase" placeholder="CASE_99128_ALPHA" type="text"/>
+</div>
+</div>
+</div>
+<!-- Scalpel Collection Grid -->
+<div class="bg-surface-container-low p-4 module-border flex-1">
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest mb-4">Scalpel_Collection</h2>
+<div class="grid grid-cols-1 gap-1">
+<!-- Collection Item -->
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">On-chain_Telemetry</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,219,233,0.5)]"></span>
+</div>
+<!-- Repeat for 10 items -->
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Sanctions_OFAC</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,219,233,0.5)]"></span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Darknet_Leak_DB</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,219,233,0.5)]"></span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer opacity-50">
+<div class="flex items-center gap-3">
+<input class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Social_Scraper</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-outline">OFFLINE</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Whois_History</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Exchange_KYC_Sync</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-primary">SCANNING...</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Telegram_Leaks</span>
+</div>
+<span class="w-2 h-2 rounded-full border border-outline-variant"></span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#050505] border border-outline-variant group hover:border-surface-tint transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<input checked="" class="w-3 h-3 bg-black border-outline-variant text-surface-tint focus:ring-0 rounded-none" type="checkbox"/>
+<span class="font-mono-data text-mono-data text-on-surface">Passive_DNS</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+</div>
+</div>
+</div>
+</section>
+<!-- CENTER COLUMN: PIPELINE & OCR -->
+<section class="flex flex-col gap-module-gap bg-[#050505] overflow-y-auto">
+<!-- Fusion Pipeline -->
+<div class="bg-surface-container-low p-6 module-border">
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest mb-8">Fusion_Pipeline_Status</h2>
+<div class="relative">
+<!-- Line -->
+<div class="absolute left-4 top-0 bottom-0 w-[1px] bg-outline-variant"></div>
+<!-- Steps -->
+<div class="space-y-10 relative">
+<div class="flex items-center gap-6 group">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-mono-data z-10">01</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-primary uppercase">Ingestion_Active</span>
+<span class="text-mono-sm text-primary">COMPLETE</span>
+</div>
+<div class="w-full bg-[#0D0D0D] h-1 mt-2">
+<div class="bg-primary-container h-full w-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-primary text-primary flex items-center justify-center font-mono-data z-10 active-glow">02</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface uppercase">Entity_Resolution</span>
+<span class="text-mono-sm text-primary animate-pulse">88% PROCESSED</span>
+</div>
+<div class="w-full bg-[#0D0D0D] h-1 mt-2">
+<div class="bg-primary h-full w-[88%] transition-all duration-1000"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6 opacity-40">
+<div class="w-8 h-8 rounded-full bg-[#0D0D0D] border border-outline-variant text-outline flex items-center justify-center font-mono-data z-10">03</div>
+<div class="flex-1">
+<span class="font-mono-label text-mono-label text-outline uppercase">Risk_Scoring_Engine</span>
+<div class="w-full bg-[#0D0D0D] h-1 mt-2"></div>
+</div>
+</div>
+<div class="flex items-center gap-6 opacity-40">
+<div class="w-8 h-8 rounded-full bg-[#0D0D0D] border border-outline-variant text-outline flex items-center justify-center font-mono-data z-10">04</div>
+<div class="flex-1">
+<span class="font-mono-label text-mono-label text-outline uppercase">Report_Generation</span>
+<div class="w-full bg-[#0D0D0D] h-1 mt-2"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Intelligence Source Cards -->
+<div class="grid grid-cols-3 gap-module-gap border-b border-[#1F1F1F]">
+<div class="bg-surface-container-low p-4 module-border text-center">
+<span class="font-mono-label text-mono-label text-outline block mb-2 uppercase">Maigret</span>
+<div class="text-headline-md font-mono-data text-on-surface">1.2k</div>
+<span class="text-mono-sm text-primary">MATCHES</span>
+</div>
+<div class="bg-surface-container-low p-4 module-border text-center">
+<span class="font-mono-label text-mono-label text-outline block mb-2 uppercase">Sherlock</span>
+<div class="text-headline-md font-mono-data text-on-surface">244</div>
+<span class="text-mono-sm text-primary">ACTIVE</span>
+</div>
+<div class="bg-surface-container-low p-4 module-border text-center">
+<span class="font-mono-label text-mono-label text-outline block mb-2 uppercase">Holehe</span>
+<div class="text-headline-md font-mono-data text-on-surface">89%</div>
+<span class="text-mono-sm text-primary">HEALTH</span>
+</div>
+</div>
+<!-- OCR Drag & Drop Zone -->
+<div class="bg-surface-container-lowest p-8 flex-1 flex flex-col items-center justify-center border-2 border-dashed border-outline-variant m-4 group hover:border-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary mb-4" data-icon="cloud_upload">cloud_upload</span>
+<h3 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest">OCR_SECURE_DROP</h3>
+<p class="font-mono-sm text-mono-sm text-outline mt-2 text-center max-w-[200px]">Drag PDF court orders or identity docs for high-fidelity extraction.</p>
+<div class="mt-4 flex gap-2">
+<span class="text-mono-sm text-primary border border-primary px-2">PDF</span>
+<span class="text-mono-sm text-primary border border-primary px-2">JPG</span>
+<span class="text-mono-sm text-primary border border-primary px-2">DOCX</span>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: PREVIEW & RESULTS -->
+<section class="flex flex-col gap-module-gap bg-[#050505] overflow-y-auto">
+<!-- Risk Intelligence Summary -->
+<div class="bg-surface-container-low p-4 module-border">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest">Risk_Report_Preview</h2>
+<span class="text-mono-sm text-outline">GEN-TIME: 2023-11-20 14:02:11</span>
+</div>
+<div class="bg-secondary-container text-white px-3 py-1 font-mono-label tracking-tighter">CRITICAL</div>
+</div>
+<div class="bg-[#050505] p-3 border border-outline-variant mb-4">
+<div class="flex justify-between text-mono-sm text-outline mb-1">
+<span>SYBIL_SCORE</span>
+<span class="text-secondary">92.4%</span>
+</div>
+<div class="w-full bg-[#1A1A1A] h-2">
+<div class="bg-secondary h-full w-[92%] shadow-[0_0_8px_rgba(255,179,172,0.5)]"></div>
+</div>
+</div>
+<!-- Entity Graph Placeholder (Visual focus point) -->
+<div class="relative w-full h-48 bg-[#0D0D0D] module-border overflow-hidden group">
+
+<div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
+<div class="text-mono-label text-outline uppercase">Loading_Relational_Graph...</div>
+<div class="w-32 bg-outline-variant h-[1px] mt-2 overflow-hidden">
+<div class="w-full h-full bg-primary animate-[slide_2s_infinite]"></div>
+</div>
+</div>
+<style>
+                            @keyframes slide {
+                                0% { transform: translateX(-100%); }
+                                100% { transform: translateX(100%); }
+                            }
+                        </style>
+</div>
+</div>
+<!-- SAR / Entity Data Modules -->
+<div class="bg-surface-container-low p-0 module-border flex-1">
+<div class="flex border-b border-outline-variant">
+<button class="flex-1 py-2 font-mono-label text-mono-label text-primary bg-[#050505] border-r border-outline-variant">SAR_DATA</button>
+<button class="flex-1 py-2 font-mono-label text-mono-label text-outline hover:bg-[#0D0D0D]">GRAPH_LOG</button>
+<button class="flex-1 py-2 font-mono-label text-mono-label text-outline hover:bg-[#0D0D0D]">METADATA</button>
+</div>
+<div class="p-4 space-y-4">
+<div class="font-mono-data text-mono-data text-on-surface-variant leading-relaxed">
+<div class="flex gap-2 mb-2">
+<span class="text-primary">[VERIFIED]</span>
+<span class="text-outline">IP_ORIGIN: 192.168.0.1 (VPN_DETECTED)</span>
+</div>
+<div class="flex gap-2 mb-2">
+<span class="text-primary">[VERIFIED]</span>
+<span class="text-outline">WALLET_AGE: 1,294 DAYS</span>
+</div>
+<div class="flex gap-2 mb-2">
+<span class="text-error">[ALERT]</span>
+<span class="text-on-surface">TORNADO_CASH_MIXER_EXIT: 45.2 ETH</span>
+</div>
+<div class="flex gap-2 mb-2">
+<span class="text-primary">[VERIFIED]</span>
+<span class="text-outline">TELEGRAM_ID: @dark_operator_99</span>
+</div>
+</div>
+<!-- Mini Map/Location Placeholder -->
+<div class="w-full h-32 bg-cover bg-center border border-outline-variant grayscale hover:grayscale-0 transition-all" data-alt="A dark, forensic satellite map view showing complex network nodes over a city at night, illuminated by neon cyan data points and paths representing blockchain transactions and physical locations. High-contrast, tactical aesthetic with technical overlays and grid lines. Minimalist, professional, and authoritative atmosphere." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCOShHYENhyn3r1wrDFRX5Fuk3XAZtrOXklTulHRjnu2xhRuZrzXEnI6-nC7To-9XNlMDelyPGZApfA3vjgbiuaWp4fCzJZ_Q9_2xZdA5VdHLqhAfLCfiAuTW0bTwCoeDd1yYfwmVxRslbk19cgyiQ2Wxo_G3kTaCfS8GlQRNPOnzAVZStJiFjD9KVTS5KY45GjZRHP6rbDe_Ig8_kwQ3o-UlPsZefHg9782LruRdtwR9RK2h-vjSNJ')">
+</div>
+</div>
+</div>
+<!-- CTA Action -->
+<div class="bg-surface-container-highest p-4">
+<button class="w-full bg-primary-container text-on-primary-container h-10 font-mono-label flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                        EXPORT_FULL_SAR_DOSSIER
+                    </button>
+</div>
+</section>
+</main>
+<!-- Shared Footer -->
+<footer class="fixed bottom-0 right-0 w-[calc(100%-4rem)] h-6 flex justify-between items-center px-4 z-40 bg-surface-container-lowest border-t border-outline-variant flat no shadows">
+<div class="font-mono-label text-mono-label uppercase tracking-widest text-on-surface">SOVEREIGN NODE // SYSTEM SIGNATURE</div>
+<div class="flex gap-4">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary cursor-pointer">LATENCY: 12ms</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary cursor-pointer">UPTIME: 99.99%</span>
+</div>
+</footer>
+</div>
+<!-- Micro-Interactions Script -->
+<script>
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                alert('Command Palette Initiated: Search forensic database...');
+            }
+        });
+
+        // Simulating data updates
+        setInterval(() => {
+            const matches = document.querySelector('.text-headline-md');
+            if(matches) {
+                const current = parseInt(matches.innerText.replace('k', '000'));
+                const next = current + Math.floor(Math.random() * 5);
+                matches.innerText = next > 1000 ? (next/1000).toFixed(1) + 'k' : next;
+            }
+        }, 3000);
+    </script>
+</body></html>

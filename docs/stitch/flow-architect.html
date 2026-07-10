@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic Framework | Logic Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#00dbe9",
+                        "background": "#131313",
+                        "surface-tint": "#00dbe9",
+                        "secondary-fixed": "#ffdad6",
+                        "surface": "#131313",
+                        "on-background": "#e5e2e1",
+                        "tertiary-container": "#ffd386",
+                        "on-tertiary-container": "#7d5800",
+                        "on-surface": "#e5e2e1",
+                        "surface-container": "#201f1f",
+                        "secondary": "#ffb3ac",
+                        "outline": "#849495",
+                        "on-secondary-fixed": "#410003",
+                        "error": "#ffb4ab",
+                        "tertiary": "#fff4e8",
+                        "on-primary-fixed-variant": "#004f54",
+                        "inverse-on-surface": "#313030",
+                        "on-secondary-container": "#ffd2cd",
+                        "on-primary-fixed": "#002022",
+                        "primary-fixed": "#7df4ff",
+                        "secondary-container": "#c40019",
+                        "on-tertiary-fixed": "#271900",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "on-secondary": "#680008",
+                        "inverse-primary": "#006970",
+                        "surface-variant": "#353534",
+                        "surface-bright": "#3a3939",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-fixed-dim": "#ffb3ac",
+                        "outline-variant": "#3b494b",
+                        "on-tertiary": "#412d00",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdea8",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-dim": "#131313",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary": "#00363a",
+                        "on-surface-variant": "#b9cacb",
+                        "primary-container": "#00f0ff",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#006970",
+                        "on-error": "#690005",
+                        "surface-container-high": "#2a2a2a",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#930010",
+                        "primary": "#dbfcff",
+                        "on-tertiary-fixed-variant": "#5e4200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "standard-inset": "8px",
+                        "tight-inset": "4px",
+                        "module-gap": "1px",
+                        "container-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "mono-sm": ["IBM Plex Mono"],
+                        "mono-label": ["IBM Plex Mono"],
+                        "mono-data": ["IBM Plex Mono"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connection {
+            stroke-dasharray: 4;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -1000; }
+        }
+        .glow-cyan {
+            filter: drop-shadow(0 0 4px rgba(0, 219, 233, 0.4));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed-dim/30 overflow-hidden">
+<!-- TopNavBar Shell -->
+<header class="fixed left-64 top-0 h-12 flex justify-between items-center px-4 bg-surface-container-lowest border-b border-outline-variant z-50 max-w-[calc(100%-16rem)] w-full">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">FinSkalp Forensic Framework</span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2 px-2 py-1 bg-surface-container-low rounded border border-outline-variant">
+<span class="material-symbols-outlined text-outline text-[14px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-mono-data font-mono-data w-64 p-0 placeholder:text-outline/50" placeholder="Global Protocol Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-3 py-1 text-mono-label font-mono-label border border-primary-fixed-dim text-primary-fixed-dim hover:bg-primary-fixed-dim/10 transition-colors">
+                QUERY
+            </button>
+<button class="flex items-center gap-2 px-3 py-1 bg-primary-fixed-dim text-background font-mono-label font-bold hover:opacity-90 transition-opacity">
+                EXECUTE
+            </button>
+<div class="flex items-center gap-2 ml-2">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">terminal</span>
+</div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-screen w-64 flex flex-col border-r border-outline-variant bg-surface-container-lowest z-50">
+<div class="p-6">
+<h1 class="font-headline-lg text-headline-lg font-semibold text-on-surface">FinSkalp</h1>
+<p class="font-mono-label text-mono-label text-outline mt-1 uppercase tracking-wider">Forensic Ops v4.2</p>
+</div>
+<nav class="flex-1 px-4 py-2 space-y-1">
+<!-- Nav Item: Flows is active -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-body-md text-body-md">Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-primary-fixed-dim font-bold border-l-2 border-primary-fixed-dim bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-body-md text-body-md">Flows</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">lock</span>
+<span class="font-body-md text-body-md">Vault</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">construction</span>
+<span class="font-body-md text-body-md">Tools</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-body-md text-body-md">Profile</span>
+</a>
+</nav>
+<div class="px-4 py-4 space-y-4 border-t border-outline-variant/30">
+<button class="w-full py-2 bg-primary-fixed-dim text-background font-mono-label font-bold flex items-center justify-center gap-2 hover:opacity-90">
+<span class="material-symbols-outlined">add_circle</span>
+                NEW INVESTIGATION
+            </button>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-1 text-on-surface-variant font-mono-label text-mono-label opacity-70 hover:opacity-100 cursor-pointer">
+<span class="material-symbols-outlined text-sm">analytics</span>
+                    System Status
+                </div>
+<div class="flex items-center gap-3 px-3 py-1 text-on-surface-variant font-mono-label text-mono-label opacity-70 hover:opacity-100 cursor-pointer">
+<span class="material-symbols-outlined text-sm">fingerprint</span>
+                    Sovereign Node
+                </div>
+</div>
+</div>
+</aside>
+<!-- Main Logic Canvas Area -->
+<main class="ml-64 pt-12 flex h-screen overflow-hidden">
+<!-- Left: Node Palette -->
+<section class="w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col">
+<div class="p-3 border-b border-outline-variant bg-surface-container-low">
+<span class="font-mono-label text-mono-label uppercase text-outline">NODE LIBRARIES</span>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-4">
+<!-- Group: Data Sources -->
+<div>
+<h3 class="px-2 py-1 font-mono-label text-mono-label text-primary-fixed-dim mb-1">DATA SOURCES</h3>
+<div class="space-y-1">
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab active:cursor-grabbing flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<span class="font-body-md text-body-md">Blockchain Ingress</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab active:cursor-grabbing flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">dns</span>
+<span class="font-body-md text-body-md">Mempool Stream</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab active:cursor-grabbing flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">history</span>
+<span class="font-body-md text-body-md">History Crawler</span>
+</div>
+</div>
+</div>
+<!-- Group: Enrichers -->
+<div>
+<h3 class="px-2 py-1 font-mono-label text-mono-label text-primary-fixed-dim mb-1">ENRICHERS</h3>
+<div class="space-y-1">
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">label</span>
+<span class="font-body-md text-body-md">Entity Labeler</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">psychology</span>
+<span class="font-body-md text-body-md">Heuristic ML</span>
+</div>
+</div>
+</div>
+<!-- Group: Logic -->
+<div>
+<h3 class="px-2 py-1 font-mono-label text-mono-label text-primary-fixed-dim mb-1">LOGIC</h3>
+<div class="space-y-1">
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container">filter_alt</span>
+<span class="font-body-md text-body-md">Condition Gate</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container">analytics</span>
+<span class="font-body-md text-body-md">Risk Scorer</span>
+</div>
+</div>
+</div>
+<!-- Group: Actions -->
+<div>
+<h3 class="px-2 py-1 font-mono-label text-mono-label text-primary-fixed-dim mb-1">ACTIONS</h3>
+<div class="space-y-1">
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-error">webhook</span>
+<span class="font-body-md text-body-md">Webhook POST</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim cursor-grab flex items-center gap-2">
+<span class="material-symbols-outlined text-error">campaign</span>
+<span class="font-body-md text-body-md">Alert Dispatch</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Center: Node Graph Canvas -->
+<section class="flex-1 relative overflow-hidden canvas-grid bg-background">
+<!-- SVG Layer for connections -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<!-- Path 1 -->
+<path class="node-connection glow-cyan" d="M 280 200 C 350 200, 350 300, 420 300" fill="none" stroke="#00dbe9" stroke-width="1.5"></path>
+<!-- Path 2 -->
+<path class="node-connection glow-cyan" d="M 580 300 C 650 300, 650 300, 720 300" fill="none" stroke="#00dbe9" stroke-width="1.5"></path>
+<!-- Path 3 -->
+<path class="node-connection glow-cyan" d="M 880 300 C 950 300, 950 200, 1020 200" fill="none" stroke="#00dbe9" stroke-width="1.5"></path>
+</svg>
+<!-- Nodes UI -->
+<!-- Node 1: Ingress -->
+<div class="absolute left-20 top-40 w-48 bg-surface-container-low border border-outline-variant shadow-xl p-0 flex flex-col group hover:border-primary-fixed-dim transition-colors">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-primary-fixed-dim">INGRESS_01</span>
+<span class="material-symbols-outlined text-[14px]">more_vert</span>
+</div>
+<div class="p-3">
+<h4 class="font-headline-md text-body-md font-bold mb-1">Blockchain Ingress</h4>
+<div class="flex items-center gap-2 text-mono-sm text-mono-sm text-outline">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full animate-pulse"></span>
+                        LIVE STREAMING
+                    </div>
+</div>
+<div class="border-t border-outline-variant p-2 flex justify-end relative">
+<span class="font-mono-sm text-mono-sm text-outline uppercase">Output</span>
+<!-- Port Indicator -->
+<div class="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary-fixed-dim border border-background rounded-full glow-cyan"></div>
+</div>
+</div>
+<!-- Node 2: Risk Scorer -->
+<div class="absolute left-[420px] top-[260px] w-56 bg-surface-container-low border border-primary-fixed-dim shadow-xl p-0 flex flex-col z-10">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-on-tertiary-container">LOGIC_UNIT</span>
+<span class="text-mono-sm text-mono-sm bg-primary-fixed-dim text-background px-1">ACTIVE</span>
+</div>
+<div class="p-3">
+<h4 class="font-headline-md text-body-md font-bold mb-2">Risk Scorer</h4>
+<div class="space-y-1">
+<div class="flex justify-between items-center text-mono-sm text-mono-sm">
+<span class="text-outline">CPU LOAD</span>
+<span class="text-primary-fixed-dim">14.2%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1">
+<div class="bg-primary-fixed-dim h-full w-[14.2%]"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between border-t border-outline-variant px-2 py-1.5 relative">
+<div class="flex items-center gap-1 relative">
+<!-- Input Port -->
+<div class="absolute -left-3.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary-fixed-dim border border-background rounded-full glow-cyan"></div>
+<span class="font-mono-sm text-mono-sm text-outline uppercase">In</span>
+</div>
+<div class="flex items-center gap-1 relative">
+<span class="font-mono-sm text-mono-sm text-outline uppercase">Out</span>
+<!-- Output Port -->
+<div class="absolute -right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary-fixed-dim border border-background rounded-full glow-cyan"></div>
+</div>
+</div>
+</div>
+<!-- Node 3: Webhook -->
+<div class="absolute left-[720px] top-[260px] w-48 bg-surface-container-low border border-outline-variant shadow-xl p-0 flex flex-col">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-error">ACTION_E7</span>
+<span class="material-symbols-outlined text-[14px]">link</span>
+</div>
+<div class="p-3">
+<h4 class="font-headline-md text-body-md font-bold mb-1">Discord Webhook</h4>
+<div class="flex items-center gap-2 text-mono-sm text-mono-sm text-outline">
+<span class="w-1.5 h-1.5 bg-outline rounded-full"></span>
+                        IDLE
+                    </div>
+</div>
+<div class="border-t border-outline-variant p-2 flex items-center gap-2 relative">
+<!-- Input Port -->
+<div class="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary-fixed-dim border border-background rounded-full glow-cyan"></div>
+<span class="font-mono-sm text-mono-sm text-outline uppercase">Input</span>
+</div>
+</div>
+<!-- Canvas Controls Overlay -->
+<div class="absolute bottom-6 left-6 flex gap-2">
+<div class="bg-surface-container-low border border-outline-variant p-1 flex gap-1">
+<button class="p-1.5 hover:bg-surface-container-high text-outline hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container-high text-outline hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">zoom_out</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container-high text-outline hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">center_focus_strong</span>
+</button>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-1 flex items-center px-3 font-mono-sm text-mono-sm text-outline">
+                    GRID: 24PX
+                </div>
+</div>
+</section>
+<!-- Right: Node Inspector -->
+<section class="w-80 bg-surface-container-lowest border-l border-outline-variant flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-headline-md text-headline-md font-bold">Node Inspector</h2>
+<span class="material-symbols-outlined text-outline cursor-pointer">close</span>
+</div>
+<p class="font-mono-label text-mono-label text-primary-fixed-dim">RISK_SCORER_023</p>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-6">
+<!-- Config Section -->
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="font-mono-label text-mono-label text-outline uppercase">Confidence Threshold</label>
+<div class="flex items-center gap-3">
+<input class="flex-1 accent-primary-fixed-dim h-1 bg-surface-container-highest appearance-none cursor-pointer" type="range"/>
+<span class="font-mono-data text-mono-data text-primary-fixed-dim w-8 text-right">0.85</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-mono-label text-mono-label text-outline uppercase">API Endpoint</label>
+<div class="flex">
+<input class="flex-1 bg-surface-container-lowest border border-outline-variant text-mono-data text-mono-data py-2 px-3 focus:border-primary-fixed-dim focus:ring-0 outline-none" type="text" value="https://api.finskalp.node/v4/score"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-mono-label text-mono-label text-outline uppercase">Analysis Mode</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant text-mono-data text-mono-data py-2 px-3 focus:border-primary-fixed-dim focus:ring-0 outline-none appearance-none">
+<option>Heuristic Core</option>
+<option selected="">Deep State Neural</option>
+<option>Vector Baseline</option>
+</select>
+</div>
+<div class="flex items-center justify-between py-2 border-t border-outline-variant/30 mt-4">
+<span class="font-body-md text-body-md text-on-surface">Enable Failover</span>
+<div class="w-10 h-5 bg-primary-fixed-dim rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-3 h-3 bg-background rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Debug Section -->
+<div class="space-y-3 pt-4 border-t border-outline-variant">
+<h3 class="font-mono-label text-mono-label text-outline uppercase">TELEMETRY FEED</h3>
+<div class="bg-surface-container-lowest border border-outline-variant p-2 h-40 overflow-hidden font-mono-sm text-mono-sm space-y-1">
+<div class="flex gap-2">
+<span class="text-primary-fixed-dim">[OK]</span>
+<span class="text-outline">Packet #9422 verified</span>
+</div>
+<div class="flex gap-2">
+<span class="text-primary-fixed-dim">[OK]</span>
+<span class="text-outline">Model inference complete (12ms)</span>
+</div>
+<div class="flex gap-2">
+<span class="text-secondary">[WN]</span>
+<span class="text-outline">Latency spike detected in ingress</span>
+</div>
+<div class="flex gap-2">
+<span class="text-primary-fixed-dim">[OK]</span>
+<span class="text-outline">Risk score updated: 0.122</span>
+</div>
+<div class="animate-pulse bg-primary-fixed-dim/10 text-primary-fixed-dim px-1 mt-2 inline-block">
+                            LISTENING FOR TRAFFIC...
+                        </div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-surface-container-low flex gap-2">
+<button class="flex-1 py-2 border border-outline-variant font-mono-label font-bold hover:bg-surface-container-high transition-colors">RESET</button>
+<button class="flex-1 py-2 bg-primary-fixed-dim text-background font-mono-label font-bold hover:opacity-90 transition-opacity">SAVE NODE</button>
+</div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="fixed bottom-0 left-64 h-8 px-4 flex justify-between items-center bg-surface-container-lowest border-t border-outline-variant w-[calc(100%-16rem)] z-50">
+<div class="flex items-center gap-4">
+<span class="font-mono-sm text-mono-sm text-outline">© 2024 FINSKALP FORENSICS // SOVEREIGN NODE SIGNATURE VERIFIED</span>
+<div class="h-3 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim shadow-[0_0_5px_#00dbe9]"></span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed-dim">SYSTEM NOMINAL</span>
+</div>
+</div>
+<div class="flex gap-4">
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface transition-opacity opacity-70 hover:opacity-100" href="#">Privacy</a>
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface transition-opacity opacity-70 hover:opacity-100" href="#">Protocol</a>
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface transition-opacity opacity-70 hover:opacity-100" href="#">Telemetry</a>
+</div>
+</footer>
+<!-- Atmosphere/Micro-Interactions Script -->
+<script>
+        // Simple micro-interaction for the canvas
+        const canvas = document.querySelector('.canvas-grid');
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.target !== canvas) return;
+            isDragging = true;
+            startX = e.pageX - canvas.offsetLeft;
+            startY = e.pageY - canvas.offsetTop;
+            scrollLeft = canvas.scrollLeft;
+            scrollTop = canvas.scrollTop;
+            canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            canvas.style.cursor = 'default';
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'default';
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - canvas.offsetLeft;
+            const y = e.pageY - canvas.offsetTop;
+            const walkX = (x - startX) * 1;
+            const walkY = (y - startY) * 1;
+            // Simulated panning for the demo
+        });
+    </script>
+</body></html>

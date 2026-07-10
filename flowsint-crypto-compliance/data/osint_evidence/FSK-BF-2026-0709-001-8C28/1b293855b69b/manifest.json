@@ -1,0 +1,14 @@
+{
+  "url": "https://rdap.org/domain/tronscan.org",
+  "discovery_at": "2026-07-09T19:40:30.537319+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": "data\\osint_evidence\\FSK-BF-2026-0709-001-8C28\\1b293855b69b\\page.html",
+  "html_sha256": "abaebc5367f2f59e84124000113d71d8278cab1121a606a3efab1ee94c457a9b",
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-8C28/abaebc5367f2f59e84124000113d71d8278cab1121a606a3efab1ee94c457a9b",
+  "report_link_ru": "Обнаружено: 2026-07-09T19:40:30.537319+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-8C28/abaebc5367f2f59e84124000113d71d8278cab1121a606a3efab1ee94c457a9b · SHA-256 HTML: abaebc5367f2f59e…",
+  "status": "pending",
+  "errors": []
+}

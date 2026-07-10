@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FinSkalp Platform Architecture v2.0</title>
+<style>
+  :root {
+    --bg: #0a1120;
+    --panel: #0f1a2e;
+    --panel-2: #0c1526;
+    --card: #131f38;
+    --card-hover: #17264a;
+    --line: #223252;
+    --line-soft: #1a2740;
+    --text: #eaf0fd;
+    --text-dim: #9db0d3;
+    --text-mute: #6b7da4;
+
+    --green: #34d399;  --green-line: rgba(52,211,153,.5);  --green-bg: rgba(52,211,153,.12);
+    --yellow: #fbbf24; --yellow-line: rgba(251,191,36,.5); --yellow-bg: rgba(251,191,36,.12);
+    --orange: #fb923c; --orange-line: rgba(251,146,60,.5); --orange-bg: rgba(251,146,60,.12);
+
+    --radius: 12px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background:
+      radial-gradient(1200px 620px at 82% -8%, #16233f 0%, transparent 60%),
+      radial-gradient(1000px 520px at -5% 0%, #101a30 0%, transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Inter, Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1500px; margin: 0 auto; padding: 40px 34px 60px; }
+
+  /* Header */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    padding: 26px 32px; border-radius: 18px;
+    background: linear-gradient(120deg, rgba(76,141,255,.14), rgba(52,211,153,.06) 55%, transparent), var(--panel);
+    border: 1px solid var(--line); box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .logo {
+    width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center;
+    font-weight: 800; font-size: 20px; color: #06122a;
+    background: linear-gradient(135deg, #6ea8ff, #34d399); box-shadow: 0 8px 22px rgba(76,141,255,.35);
+  }
+  .brand h1 { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: .3px; }
+  .brand p { margin: 6px 0 0; font-size: 12.5px; color: var(--text-dim); max-width: 640px; line-height: 1.5; }
+  .masthead .meta { text-align: right; font-size: 11.5px; color: var(--text-dim); line-height: 1.9; }
+  .meta .tag {
+    display: inline-block; padding: 4px 12px; border-radius: 999px; background: #1b2b4d;
+    border: 1px solid var(--line); color: #bcd2ff; font-weight: 600; letter-spacing: .4px; margin-bottom: 6px;
+  }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 22px 0 6px; }
+  .legend .item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 12px;
+    background: var(--panel-2); border: 1px solid var(--line-soft); flex: 1 1 280px;
+  }
+  .legend .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .legend .g { background: var(--green);  box-shadow: 0 0 12px var(--green-line); }
+  .legend .y { background: var(--yellow); box-shadow: 0 0 12px var(--yellow-line); }
+  .legend .o { background: var(--orange); box-shadow: 0 0 12px var(--orange-line); }
+  .legend .txt strong { display: block; font-size: 12.5px; }
+  .legend .txt span { display: block; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* Section band title */
+  .band {
+    margin: 30px 0 14px; display: flex; align-items: center; gap: 14px;
+  }
+  .band::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, var(--line), transparent); }
+  .band .b-idx {
+    font-size: 11px; font-weight: 800; color: #06122a; padding: 4px 10px; border-radius: 7px;
+    background: linear-gradient(135deg, #6ea8ff, #34d399); letter-spacing: .5px;
+  }
+  .band h2 { margin: 0; font-size: 13.5px; letter-spacing: 2px; text-transform: uppercase; color: #cfdbf4; font-weight: 700; }
+  .band .b-sub { font-size: 11px; color: var(--text-mute); letter-spacing: .5px; }
+
+  /* Grids */
+  .grid { display: grid; gap: 12px; }
+  .g6 { grid-template-columns: repeat(6, 1fr); }
+  .g5 { grid-template-columns: repeat(5, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+
+  /* Card */
+  .card {
+    position: relative; padding: 13px 13px 13px 16px; border-radius: var(--radius);
+    background: var(--card); border: 1px solid var(--line); min-height: 74px;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); }
+  .card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 4px; }
+  .card.green::before  { background: var(--green);  box-shadow: 0 0 12px var(--green-line); }
+  .card.yellow::before { background: var(--yellow); box-shadow: 0 0 12px var(--yellow-line); }
+  .card.orange::before { background: var(--orange); box-shadow: 0 0 12px var(--orange-line); }
+  .card.neutral::before { background: #3b4a67; }
+  .card .top { display: flex; align-items: flex-start; gap: 8px; }
+  .card .sdot { width: 9px; height: 9px; border-radius: 50%; margin-top: 4px; flex: none; }
+  .card.green .sdot  { background: var(--green);  box-shadow: 0 0 8px var(--green-line); }
+  .card.yellow .sdot { background: var(--yellow); box-shadow: 0 0 8px var(--yellow-line); }
+  .card.orange .sdot { background: var(--orange); box-shadow: 0 0 8px var(--orange-line); }
+  .card.neutral .sdot { background: #4a5b7d; }
+  .card h3 { margin: 0; font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .card .desc { margin: 6px 0 0 17px; font-size: 10.8px; color: var(--text-dim); line-height: 1.45; }
+
+  .card.hero {
+    min-height: auto; text-align: center; padding: 22px 20px;
+    background: radial-gradient(circle at 50% 0%, rgba(52,211,153,.10), transparent 70%), var(--card);
+    border-color: var(--green-line);
+  }
+  .card.hero .top { justify-content: center; }
+  .card.hero h3 { font-size: 18px; letter-spacing: .3px; }
+  .card.hero .desc { margin: 8px 0 0; font-size: 12px; }
+
+  .subhead {
+    font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute);
+    margin: 4px 2px 8px; font-weight: 700;
+  }
+
+  /* Three-column core zone */
+  .core-zone { display: grid; grid-template-columns: 1.05fr 1.15fr 1.25fr; gap: 16px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .col .grid { gap: 10px; }
+
+  footer {
+    margin-top: 42px; padding-top: 20px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    color: var(--text-dim); font-size: 11px; letter-spacing: .3px;
+  }
+  footer strong { color: var(--text); }
+
+  @media (max-width: 1100px) {
+    .g6, .g5 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(2, 1fr); }
+    .core-zone { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 620px) {
+    .g6, .g5, .g4, .g3, .g2 { grid-template-columns: 1fr; }
+    .page { padding: 22px 14px; }
+    .masthead { flex-direction: column; align-items: flex-start; }
+    .masthead .meta { text-align: left; }
+  }
+
+  /* Print / PDF — keep dark premium theme */
+  @media print {
+    @page { size: A2 landscape; margin: 8mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    html, body { background: var(--bg) !important; }
+    .page { max-width: none; padding: 6px; }
+    .card:hover { transform: none; }
+    .card, .legend .item, .masthead, .band { break-inside: avoid; }
+    .core-zone { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="masthead">
+    <div class="brand">
+      <div class="logo">FS</div>
+      <div>
+        <h1>FinSkalp Platform Architecture <span style="color:#7fe3b8">v2.0</span></h1>
+        <p>Расширенная архитектура корпоративной платформы для финансовых расследований и анализа данных</p>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="tag">ENTERPRISE ARCHITECTURE</div>
+      <div>Reference System Blueprint</div>
+      <div>Confidential · Prepared for Client Review</div>
+    </div>
+  </div>
+
+  <!-- LEGEND (STATUS) -->
+  <div class="legend">
+    <div class="item"><span class="dot g"></span><div class="txt"><strong>Production Ready</strong><span>Реализовано и работает</span></div></div>
+    <div class="item"><span class="dot y"></span><div class="txt"><strong>Integration Ready</strong><span>Архитектура готова — ожидает подключения внешних систем</span></div></div>
+    <div class="item"><span class="dot o"></span><div class="txt"><strong>Enterprise Hardening</strong><span>Реализовано — требуется усиление до промышленного уровня</span></div></div>
+  </div>
+
+  <!-- 01 ANALYST WORKSPACE -->
+  <div class="band"><span class="b-idx">01</span><h2>Аналитическое рабочее пространство</h2><span class="b-sub">Analyst Workspace</span></div>
+  <div class="grid g4">
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Dashboard и KPI</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Расследования</h3></div><p class="desc">Cases</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Граф связей</h3></div><p class="desc">Knowledge Graph</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Таймлайн событий</h3></div><p class="desc">Timeline</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Доказательства</h3></div><p class="desc">Evidence</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Отчёты</h3></div><p class="desc">Reports</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>AI Ассистент</h3></div><p class="desc">Чат / NLP</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Уведомления</h3></div><p class="desc">Alerts</p></div>
+  </div>
+
+  <!-- 02 API GATEWAY -->
+  <div class="band"><span class="b-idx">02</span><h2>API Gateway &amp; Security Layer</h2><span class="b-sub">Единая точка входа и безопасность</span></div>
+  <div class="grid g5">
+    <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Аутентификация</h3></div><p class="desc">OAuth2 / OIDC · IdP-ready</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Авторизация</h3></div><p class="desc">RBAC / ABAC</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Rate Limiting</h3></div><p class="desc">Квоты и защита</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Шифрование</h3></div><p class="desc">TLS / mTLS</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Аудит запросов</h3></div><p class="desc">Полное журналирование</p></div>
+  </div>
+
+  <!-- 03 CORE ZONE (3 columns) -->
+  <div class="band"><span class="b-idx">03</span><h2>Ядро расследований и потоки данных</h2><span class="b-sub">Fusion Core · Normalization · Connectors · Sources</span></div>
+  <div class="core-zone">
+
+    <!-- LEFT: analytics -->
+    <div class="col">
+      <div class="subhead">Аналитические модули</div>
+      <div class="grid">
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Поиск нелегализованной деятельности</h3></div><p class="desc">Обнальщики / фирмы-однодневки</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Незарегистрированные крипто-операции</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Кластеризация криптокошельков</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Ретроспективный анализ</h3></div><p class="desc">Транзакции и события</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Взаимосвязи и контрагенты</h3></div></div>
+      </div>
+      <div class="subhead">Дополнительные возможности</div>
+      <div class="grid">
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Оценка риска</h3></div><p class="desc">Risk Scoring</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Разрешение сущностей</h3></div><p class="desc">Entity Resolution</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Управление расследованиями</h3></div><p class="desc">Case Management</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Построение таймлайнов</h3></div></div>
+        <div class="card orange"><div class="top"><span class="sdot"></span><h3>Управление доказательствами</h3></div><p class="desc">Evidence · Chain of Custody</p></div>
+        <div class="card orange"><div class="top"><span class="sdot"></span><h3>AI-анализ и объяснения</h3></div><p class="desc">Explainable AI</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Конструктор отчётов</h3></div><p class="desc">Report Builder</p></div>
+      </div>
+    </div>
+
+    <!-- CENTER: core + normalization -->
+    <div class="col">
+      <div class="card green hero">
+        <div class="top"><span class="sdot"></span><h3>FUSION INTELLIGENCE CORE</h3></div>
+        <p class="desc">Ядро расследований · оркестрация анализа, корреляции и слияния данных</p>
+      </div>
+      <div class="subhead">Слой нормализации и обогащения (Data Normalization Layer)</div>
+      <div class="grid g2">
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Нормализация</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Entity Extraction</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Дедупликация</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Обогащение данных</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Оценка достоверности</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Quality &amp; Confidence</h3></div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: connectors + sources -->
+    <div class="col">
+      <div class="subhead">Коннекторы и ввод данных</div>
+      <div class="grid g2">
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Коннекторы с банками</h3></div><p class="desc">Выписки · платежи · SWIFT</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>KYT / KYC / KYB</h3></div><p class="desc">Chainalysis · Elliptic · Crystal</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Сканеры блокчейна</h3></div><p class="desc">Blockchain Scanners / индексаторы</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Мануальный ввод</h3></div><p class="desc">Ручное редактирование данных</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>API-шлюз локальных систем</h3></div></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Коннекторы к реестрам и БД</h3></div></div>
+      </div>
+      <div class="subhead">Внешние источники и OSINT</div>
+      <div class="grid g2">
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Внешний инфо-мониторинг</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Onion / Tor / Telegram</h3></div><p class="desc">Social Media / DarkWeb</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Крипто-ресурсы</h3></div><p class="desc">Сайты · форумы · leak'и</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Telegram / X / Reddit / Github</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Whois / DNS / IP / ASN / ENS</h3></div><p class="desc">Certificate Transparency</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Обнаружение утечек</h3></div><p class="desc">HaveIBeenPwned · IntelligenceX</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>OSINT-инструменты</h3></div><p class="desc">Sherlock · Maigret · SpiderFoot · Maltego</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Гео и картография</h3></div></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Цифровые идентификаторы</h3></div><p class="desc">Телефон / почта</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Платные / открытые источники</h3></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 KEY PLATFORM SERVICES -->
+  <div class="band"><span class="b-idx">04</span><h2>Ключевые сервисы платформы</h2><span class="b-sub">Key Platform Services</span></div>
+  <div class="grid g5">
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Investigation Engine</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Knowledge Graph</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Entity Resolution</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Timeline Engine</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Evidence Engine</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Risk Engine</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>AI Assistant &amp; NLP</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Report Engine</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Notification Service</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Audit &amp; Logging</h3></div></div>
+  </div>
+
+  <!-- 05 COMPLIANCE + INTEGRATIONS -->
+  <div class="core-zone" style="grid-template-columns: 1.4fr 1fr; margin-top: 8px;">
+    <div class="col">
+      <div class="band" style="margin-top:22px"><span class="b-idx">05</span><h2>Комплаенс и безопасность</h2></div>
+      <div class="grid g2">
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>115-ФЗ и требования регуляторов</h3></div></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Travel Rule / FATF</h3></div><p class="desc">VASP реестры</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>AML / CFT сценарии и правила</h3></div></div>
+        <div class="card orange"><div class="top"><span class="sdot"></span><h3>Chain of Custody</h3></div><p class="desc">Неизменяемость доказательств</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>SIEM / SOAR интеграция</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>RBAC / ABAC политики</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Шифрование at rest / in transit</h3></div></div>
+        <div class="card orange"><div class="top"><span class="sdot"></span><h3>Полный аудит и журналы</h3></div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="band" style="margin-top:22px"><span class="b-idx">06</span><h2>Интеграции и расширения</h2></div>
+      <div class="grid g2">
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>API</h3></div><p class="desc">REST / GraphQL / gRPC</p></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Webhooks</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>SDK для интеграции</h3></div></div>
+        <div class="card green"><div class="top"><span class="sdot"></span><h3>Плагинная архитектура</h3></div><p class="desc">Plugin First</p></div>
+        <div class="card orange"><div class="top"><span class="sdot"></span><h3>Marketplace</h3></div><p class="desc">Коннекторы и модули</p></div>
+        <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Внешние системы</h3></div><p class="desc">BI / DWH / CRM</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 DATA STORAGE -->
+  <div class="band"><span class="b-idx">07</span><h2>Хранилища данных и сообщений</h2><span class="b-sub">Data &amp; Message Storage</span></div>
+  <div class="grid g4">
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>PostgreSQL</h3></div><p class="desc">Реляционные данные</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Neo4j Cluster</h3></div><p class="desc">Граф знаний</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>OpenSearch Cluster</h3></div><p class="desc">Поиск и аналитика</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Redis Cluster</h3></div><p class="desc">Кэш / сессии / очереди</p></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Message Broker</h3></div><p class="desc">Kafka / RabbitMQ</p></div>
+    <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Object Storage</h3></div><p class="desc">S3 / MinIO · WORM-ready</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Data Lake / Archive</h3></div><p class="desc">Долгосрочное хранение</p></div>
+  </div>
+
+  <!-- 08 INFRASTRUCTURE -->
+  <div class="band"><span class="b-idx">08</span><h2>Инфраструктура и эксплуатация</h2><span class="b-sub">Infrastructure &amp; Operations</span></div>
+  <div class="grid g6">
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>Docker</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Kubernetes</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Helm</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Terraform</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>GitOps</h3></div></div>
+    <div class="card green"><div class="top"><span class="sdot"></span><h3>CI/CD Pipeline</h3></div></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Мониторинг</h3></div><p class="desc">Grafana / Alertmanager</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Логи</h3></div><p class="desc">Loki / ELK</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Трейсинг</h3></div><p class="desc">Jaeger / Tempo</p></div>
+    <div class="card orange"><div class="top"><span class="sdot"></span><h3>Backup &amp; DR</h3></div><p class="desc">Резервирование</p></div>
+    <div class="card yellow"><div class="top"><span class="sdot"></span><h3>Управление секретами</h3></div><p class="desc">Vault / KMS</p></div>
+  </div>
+
+  <!-- 09 PRINCIPLES -->
+  <div class="band"><span class="b-idx">09</span><h2>Ключевые принципы платформы</h2><span class="b-sub">Design Principles</span></div>
+  <div class="grid g6">
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Единая картина данных</h3></div><p class="desc">360° View</p></div>
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Единая модель</h3></div><p class="desc">Все источники вместе</p></div>
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Прозрачность</h3></div><p class="desc">Explainable AI</p></div>
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Модульность</h3></div><p class="desc">Plugin First</p></div>
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Безопасность</h3></div><p class="desc">Compliance by Design</p></div>
+    <div class="card neutral"><div class="top"><span class="sdot"></span><h3>Масштабируемость</h3></div><p class="desc">Отказоустойчивость</p></div>
+  </div>
+
+  <footer>
+    <div><strong>FinSkalp</strong> · Enterprise Investigation &amp; Intelligence Platform · v2.0</div>
+    <div>Architecture Blueprint · Confidential — Prepared for Client Review</div>
+  </footer>
+
+</div>
+</body>
+</html>

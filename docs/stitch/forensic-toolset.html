@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .module-border {
+            border: 1px solid #1F1F1F;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b494b;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(125, 244, 255, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#7df4ff",
+                        "tertiary-fixed": "#ffdea8",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-fixed-dim": "#ffb3ac",
+                        "surface-variant": "#353534",
+                        "on-secondary-fixed-variant": "#930010",
+                        "on-secondary": "#680008",
+                        "on-secondary-container": "#ffd2cd",
+                        "surface-bright": "#3a3939",
+                        "secondary": "#ffb3ac",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-container": "#ffd386",
+                        "on-tertiary": "#412d00",
+                        "on-primary-fixed": "#002022",
+                        "primary-container": "#00f0ff",
+                        "tertiary": "#fff4e8",
+                        "surface-container-highest": "#353534",
+                        "on-surface": "#e5e2e1",
+                        "on-primary": "#00363a",
+                        "primary-fixed-dim": "#00dbe9",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "secondary-fixed": "#ffdad6",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-tint": "#00dbe9",
+                        "on-primary-fixed-variant": "#004f54",
+                        "surface": "#131313",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#849495",
+                        "on-tertiary-fixed": "#271900",
+                        "secondary-container": "#c40019",
+                        "on-primary-container": "#006970",
+                        "background": "#131313",
+                        "inverse-primary": "#006970",
+                        "surface-dim": "#131313",
+                        "outline-variant": "#3b494b",
+                        "on-background": "#e5e2e1",
+                        "primary": "#dbfcff",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "surface-container": "#201f1f",
+                        "on-surface-variant": "#b9cacb",
+                        "on-secondary-fixed": "#410003",
+                        "surface-container-lowest": "#0e0e0e",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-fixed-variant": "#5e4200",
+                        "on-tertiary-container": "#7d5800"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "standard-inset": "8px",
+                        "module-gap": "1px",
+                        "container-padding": "12px",
+                        "tight-inset": "4px"
+                    },
+                    "fontFamily": {
+                        "mono-label": ["IBM Plex Mono"],
+                        "mono-data": ["IBM Plex Mono"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "mono-sm": ["IBM Plex Mono"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col z-50">
+<div class="p-container-padding h-12 flex items-center border-b border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface">FinSkalp</span>
+</div>
+<div class="p-tight-inset border-b border-outline-variant bg-surface-dim">
+<div class="flex items-center gap-2 px-2 py-1">
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_#7df4ff]"></div>
+<div class="flex flex-col">
+<span class="font-mono-label text-mono-label text-primary-fixed uppercase">Sovereign Node</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">ID: FSK-0912-TX</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 py-2 overflow-y-auto custom-scrollbar">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span>Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span>Flows</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">lock</span>
+<span>Vault</span>
+</a>
+<!-- Active Tab: Tools -->
+<a class="flex items-center gap-3 px-4 py-2 bg-secondary-container text-on-secondary-container border-l-2 border-primary-fixed transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">construction</span>
+<span>Tools</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profile</span>
+</a>
+</nav>
+<footer class="border-t border-outline-variant p-2">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-all font-mono-label text-mono-label" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</footer>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 min-h-screen flex flex-col relative">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full h-12 bg-background border-b border-outline-variant flex items-center justify-between px-container-padding z-40">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-surface-container border border-outline-variant px-2 h-8">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-mono-data font-mono-data text-on-surface placeholder:text-outline-variant w-48" placeholder="FILTER_TOOLS..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed transition-colors" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed transition-colors" data-icon="settings">settings</span>
+</div>
+<div class="h-8 w-8 bg-surface-container border border-outline-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional close-up of a digital analyst's face, illuminated by the cool blue glow of a computer screen in a dark, high-tech forensic lab. The style is sharp, cinematic, and low-key with high contrast neon highlights, emphasizing a mood of intense focus and cold precision. Minimalist UI elements are reflected in the safety glasses." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYyDbv2I6IKdZB3jkyu31bTXgQ4SwBxbykmTxe6eVCef0sCzQWCuJKfD28OqK9p6umDCpSbLada0X49ORVwowgMuR3wqhDusx8ZJtwR8ruJb4iE2S5ZkoLvSgTuXRX5DTs5Afi-dunfGKHdYUKpmxJLwD18g1-NMbHFiTWKhtgghEPeA-HVdCcybWzVtaOrFEYXTkFy4E_cbcUJE39rCAG1fwG-eSvjTDmzBs6met_2WQsZC7plthI"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 p-tight-inset bg-surface-container-lowest grid grid-cols-12 gap-module-gap overflow-hidden">
+<!-- Tools Header Module -->
+<section class="col-span-12 bg-surface p-container-padding border border-outline-variant flex justify-between items-end relative overflow-hidden">
+<div class="scanline"></div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-mono-sm text-mono-sm text-primary-fixed uppercase tracking-widest">[ SYSTEM // OSINT_CATALOG ]</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Forensic Tools Directory</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="bg-primary-fixed text-on-primary px-4 py-2 font-mono-label text-mono-label flex items-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">cached</span>
+                        UPDATE ALL NODES
+                    </button>
+</div>
+</section>
+<!-- Status Ticker Module -->
+<div class="col-span-12 bg-surface-container-low border border-outline-variant px-container-padding py-1 flex items-center gap-8 overflow-hidden whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">UPTIME:</span>
+<span class="font-mono-data text-mono-data text-primary-fixed">99.982%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">ACTIVE_COLLECTORS:</span>
+<span class="font-mono-data text-mono-data text-primary-fixed">14/14</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">AVG_LATENCY:</span>
+<span class="font-mono-data text-mono-data text-secondary-fixed-dim">124ms</span>
+</div>
+<div class="flex items-center gap-2 flex-1 justify-end">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant animate-pulse">NODE_STATUS: STABLE // ENCRYPTED</span>
+</div>
+</div>
+<!-- Tools Grid (Dense) -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-module-gap">
+<!-- Tool Card: Maigret -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer relative">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">person_search</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">ACTIVE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.2.0.4</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Maigret</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Username reconnaissance across 3000+ websites and services.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY</span>
+<span class="font-mono-data text-mono-data text-on-surface">42ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">THREADS</span>
+<span class="font-mono-data text-mono-data text-on-surface">64 [MAX]</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Sherlock -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">travel_explore</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">ACTIVE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.0.14.3</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Sherlock</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Hunt down social media accounts by username across social networks.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY</span>
+<span class="font-mono-data text-mono-data text-on-surface">88ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">TIMEOUT</span>
+<span class="font-mono-data text-mono-data text-on-surface">5000ms</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Holehe -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">alternate_email</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-secondary/30 text-secondary font-mono-sm text-mono-sm uppercase">Idle</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.1.1.0</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Holehe</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Checks if an email is used on different websites like Twitter, Instagram, etc.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY</span>
+<span class="font-mono-data text-mono-data text-on-surface">--</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">METHODS</span>
+<span class="font-mono-data text-mono-data text-on-surface">FORGOT_PASS</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Custom Scalpel Collector -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed" data-weight="fill">token</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">SCALPEL_CORE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.9.0.0-PRO</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Blockchain Node</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Direct telemetry ingestion from decentralized ledger verification nodes.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">INGESTION</span>
+<span class="font-mono-data text-mono-data text-on-surface">1.2 GB/S</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY</span>
+<span class="font-mono-data text-mono-data text-primary-fixed">12ms</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Repeating for density -->
+<!-- Tool Card: PhoneInfoga -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">call</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">ACTIVE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.2.1.0</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">PhoneInfoga</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Advanced information gathering &amp; OSINT framework for phone numbers.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">SCANNERS</span>
+<span class="font-mono-data text-mono-data text-on-surface">NUM_VERIFY</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY</span>
+<span class="font-mono-data text-mono-data text-on-surface">312ms</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Maltego Node -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">hub</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">LINKED</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">TRANSFORM_SDK</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Maltego Hub</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Graph visualization transform interface for link analysis.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">NODES</span>
+<span class="font-mono-data text-mono-data text-on-surface">12.4K</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">SYNC</span>
+<span class="font-mono-data text-mono-data text-on-surface">REAL_TIME</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Photon -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer">
+<div class="p-container-padding">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">public</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-primary-fixed/30 text-primary-fixed font-mono-sm text-mono-sm">ACTIVE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">v.1.3.2</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Photon</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Fast crawler designed for OSINT, extracts URLs, emails, files, keys.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">CRAWL_RATE</span>
+<span class="font-mono-data text-mono-data text-on-surface">200 URL/S</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">DEPTH</span>
+<span class="font-mono-data text-mono-data text-on-surface">RECURSIVE_3</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">CONFIG</a>
+</div>
+</div>
+<!-- Tool Card: Custom Collector II -->
+<div class="bg-surface border border-outline-variant hover:bg-surface-container transition-all group cursor-pointer relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+
+</div>
+<div class="p-container-padding relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div class="h-10 w-10 border border-outline-variant bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">memory</span>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 border border-error/30 text-error font-mono-sm text-mono-sm">OFFLINE</span>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant mt-1">SCALPEL_X</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Deep Mesh</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 h-10 mb-4">Advanced network mapping tool for air-gapped node discovery.</p>
+<div class="space-y-2 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">LAST_SYNC</span>
+<span class="font-mono-data text-mono-data text-on-surface">14:22:01</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono-sm text-mono-sm text-outline">ERROR</span>
+<span class="font-mono-data text-mono-data text-error uppercase">Connection Timed Out</span>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant flex divide-x divide-outline-variant">
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">RETRY</a>
+<a class="flex-1 py-2 text-center font-mono-label text-mono-label hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</div>
+</div>
+</div>
+<!-- Detail Module Pane (Bento Style) -->
+<section class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant p-container-padding flex flex-col justify-between">
+<div>
+<h2 class="font-mono-label text-mono-label text-on-surface-variant uppercase mb-4 tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed"></span>
+                        SCALPEL_NODE_TELEMETRY
+                    </h2>
+<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="col-span-1 border border-outline-variant p-2">
+<div class="font-mono-sm text-mono-sm text-outline">CPU_LOAD</div>
+<div class="font-mono-data text-mono-data text-primary-fixed">4.2%</div>
+</div>
+<div class="col-span-1 border border-outline-variant p-2">
+<div class="font-mono-sm text-mono-sm text-outline">MEM_USAGE</div>
+<div class="font-mono-data text-mono-data text-primary-fixed">1.8GB</div>
+</div>
+<div class="col-span-1 border border-outline-variant p-2">
+<div class="font-mono-sm text-mono-sm text-outline">PACKETS_IN</div>
+<div class="font-mono-data text-mono-data text-on-surface">1.2M/s</div>
+</div>
+<div class="col-span-1 border border-outline-variant p-2">
+<div class="font-mono-sm text-mono-sm text-outline">PACKETS_OUT</div>
+<div class="font-mono-data text-mono-data text-on-surface">450K/s</div>
+</div>
+</div>
+<div class="h-32 w-full border border-outline-variant bg-surface-container-lowest relative overflow-hidden">
+
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-mono-sm text-mono-sm text-outline-variant uppercase tracking-widest">LIVE_WAVEFORM_MONITOR</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Secondary Bento: Node Verification -->
+<section class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant p-container-padding">
+<h2 class="font-mono-label text-mono-label text-on-surface-variant uppercase mb-4 tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-tertiary-fixed"></span>
+                    BYTE_VERIFICATION
+                </h2>
+<div class="space-y-1">
+<div class="flex justify-between items-center p-2 border-b border-outline-variant/30">
+<span class="font-mono-data text-mono-data text-on-surface">Maigret.v2.0.4</span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed">[VERIFIED]</span>
+</div>
+<div class="flex justify-between items-center p-2 border-b border-outline-variant/30">
+<span class="font-mono-data text-mono-data text-on-surface">Sherlock.core</span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed">[VERIFIED]</span>
+</div>
+<div class="flex justify-between items-center p-2 border-b border-outline-variant/30">
+<span class="font-mono-data text-mono-data text-on-surface">Custom_Collector_A</span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed">[VERIFIED]</span>
+</div>
+<div class="flex justify-between items-center p-2 border-b border-outline-variant/30">
+<span class="font-mono-data text-mono-data text-on-surface">Deep_Mesh_01</span>
+<span class="font-mono-sm text-mono-sm text-secondary-fixed-dim">[RETRYING...]</span>
+</div>
+<div class="flex justify-between items-center p-2">
+<span class="font-mono-data text-mono-data text-on-surface-variant italic">System Check Pending...</span>
+<span class="material-symbols-outlined text-outline-variant animate-spin" style="font-size: 14px;">sync</span>
+</div>
+</div>
+</section>
+</div>
+<!-- System Footer -->
+<footer class="bg-surface-dim border-t border-outline-variant p-tight-inset flex justify-end gap-module-gap mt-auto">
+<div class="flex gap-4 px-4 py-1 items-center">
+<a class="font-mono-sm text-mono-sm text-on-surface-variant uppercase tracking-wider hover:text-primary-fixed transition-colors" href="#">Telemetry</a>
+<span class="text-outline-variant">|</span>
+<a class="font-mono-sm text-mono-sm text-on-surface-variant uppercase tracking-wider hover:text-primary-fixed transition-colors" href="#">Documentation</a>
+<span class="text-outline-variant">|</span>
+<a class="font-mono-sm text-mono-sm text-on-surface-variant uppercase tracking-wider hover:text-primary-fixed transition-colors" href="#">API</a>
+<span class="text-outline-variant ml-4">|</span>
+<span class="font-mono-label text-mono-label text-on-surface ml-4 tracking-tighter">SOVEREIGN NODE // BYTE-VERIFIED</span>
+</div>
+</footer>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                alert('Command Palette Invoked [SYSTEM_STUB]');
+            }
+        });
+
+        // Simple hover effect for tools
+        const toolCards = document.querySelectorAll('.group');
+        toolCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = '#7df4ff33';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = '#1F1F1F';
+            });
+        });
+    </script>
+</body></html>

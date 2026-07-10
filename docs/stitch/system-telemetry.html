@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic // System Telemetry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1f1f1f; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b494b; }
+        
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 219, 233, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0%; }
+            to { top: 100%; }
+        }
+        .glow-active {
+            box-shadow: 0 0 15px rgba(0, 219, 233, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#7df4ff",
+                      "tertiary-container": "#ffd386",
+                      "on-secondary-fixed-variant": "#930010",
+                      "on-surface-variant": "#b9cacb",
+                      "error": "#ffb4ab",
+                      "on-secondary": "#680008",
+                      "secondary-fixed": "#ffdad6",
+                      "outline": "#849495",
+                      "primary-fixed-dim": "#00dbe9",
+                      "on-primary-container": "#006970",
+                      "on-surface": "#e5e2e1",
+                      "primary-container": "#00f0ff",
+                      "on-tertiary-fixed-variant": "#5e4200",
+                      "on-primary-fixed": "#002022",
+                      "secondary": "#ffb3ac",
+                      "inverse-surface": "#e5e2e1",
+                      "tertiary-fixed": "#ffdea8",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-secondary-fixed": "#410003",
+                      "surface-container-low": "#1c1b1b",
+                      "secondary-container": "#c40019",
+                      "surface-tint": "#00dbe9",
+                      "surface-container-high": "#2a2a2a",
+                      "tertiary-fixed-dim": "#ffba20",
+                      "on-error": "#690005",
+                      "outline-variant": "#3b494b",
+                      "on-primary-fixed-variant": "#004f54",
+                      "error-container": "#93000a",
+                      "tertiary": "#fff4e8",
+                      "on-tertiary-container": "#7d5800",
+                      "on-error-container": "#ffdad6",
+                      "inverse-primary": "#006970",
+                      "surface-container": "#201f1f",
+                      "surface-container-highest": "#353534",
+                      "on-background": "#e5e2e1",
+                      "on-tertiary-fixed": "#271900",
+                      "background": "#131313",
+                      "secondary-fixed-dim": "#ffb3ac",
+                      "primary": "#dbfcff",
+                      "surface-bright": "#3a3939",
+                      "surface": "#131313",
+                      "on-tertiary": "#412d00",
+                      "on-secondary-container": "#ffd2cd",
+                      "on-primary": "#00363a",
+                      "surface-variant": "#353534",
+                      "surface-dim": "#131313",
+                      "inverse-on-surface": "#313030"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "tight-inset": "4px",
+                      "standard-inset": "8px",
+                      "unit": "4px",
+                      "module-gap": "1px",
+                      "container-padding": "12px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "mono-data": ["IBM Plex Mono"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "mono-sm": ["IBM Plex Mono"],
+                      "mono-label": ["IBM Plex Mono"]
+              },
+              "fontSize": {
+                      "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- SIDE NAVIGATION BAR -->
+<aside class="fixed h-full w-16 left-0 top-0 bg-surface-dim border-r border-outline-variant flex flex-col items-center py-4 z-50">
+<div class="mb-8">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface tracking-tighter">FS</span>
+</div>
+<nav class="flex flex-col gap-4 w-full items-center">
+<!-- Labels and Icons mapped from JSON -->
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="Command Center">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="OSINT Hub">
+<span class="material-symbols-outlined">public</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="Wallet Check">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="Investigations">
+<span class="material-symbols-outlined">search_insights</span>
+</button>
+<div class="w-8 h-[1px] bg-outline-variant my-2"></div>
+<!-- Status is active -->
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-primary bg-surface-container-high border-l-2 border-primary" title="Status">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="Microservices">
+<span class="material-symbols-outlined">settings_input_component</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest" title="Platform">
+<span class="material-symbols-outlined">settings_applications</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col gap-4 items-center">
+<button class="w-10 h-10 flex items-center justify-center transition-colors duration-75 text-outline hover:text-on-surface-variant" title="Sovereign Node">
+<span class="material-symbols-outlined">security</span>
+</button>
+</div>
+</aside>
+<!-- TOP NAVIGATION BAR -->
+<header class="flex justify-between items-center h-12 px-container-padding ml-16 w-[calc(100%-4rem)] bg-surface-container-low border-b border-outline-variant fixed top-0 z-40">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">FinSkalp Forensic</h1>
+<div class="flex gap-4">
+<a class="text-on-surface-variant font-mono-label hover:text-primary transition-all" href="#">CIS/FIU</a>
+<a class="text-primary font-mono-label border-b border-primary transition-all" href="#">PROD-ACTIVE</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-highest border border-outline-variant rounded-sm">
+<span class="material-symbols-outlined text-primary text-[14px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-mono-data p-0 w-48 placeholder:text-outline" placeholder="QUERY_ENTITY..." type="text"/>
+<span class="text-mono-sm text-outline">CTRL+K</span>
+</div>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-all">dark_mode</button>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-all">notifications_active</button>
+<div class="w-[1px] h-6 bg-outline-variant mx-1"></div>
+<button class="bg-primary text-black px-3 py-1 font-mono-label font-bold text-[10px] hover:opacity-80 transition-all">NEW_INVESTIGATION</button>
+</div>
+</header>
+<!-- MAIN CONTENT CANVAS -->
+<main class="ml-16 mt-12 mb-6 h-[calc(100vh-4.5rem)] overflow-y-auto bg-background p-module-gap grid grid-cols-12 grid-rows-[auto_1fr_auto] gap-module-gap">
+<!-- ROW 1: MISSION STATUS & CORE TELEMETRY -->
+<section class="col-span-12 md:col-span-4 bg-surface-container-low border border-outline-variant p-4 relative overflow-hidden group">
+<div class="scanline"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="font-mono-label text-outline uppercase">Mission_Protocol</p>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-widest mt-1">COMBAT MODE</h2>
+</div>
+<div class="flex flex-col items-end">
+<span class="flex items-center gap-1.5 px-2 py-0.5 bg-primary-container/10 border border-primary/30 text-primary-fixed font-mono-label rounded-sm">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+                        ACTIVE
+                    </span>
+<span class="font-mono-sm text-outline mt-1">Sovereign_01 // Auth: verified</span>
+</div>
+</div>
+<div class="h-32 flex items-center justify-center border-t border-outline-variant/30 mt-4">
+
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="text-center">
+<p class="font-mono-data text-headline-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(0,219,233,0.5)]">99.98%</p>
+<p class="font-mono-label text-outline uppercase">Node_Stability</p>
+</div>
+</div>
+</div>
+</section>
+<section class="col-span-12 md:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-module-gap">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-mono-label text-outline">TOTAL_INVESTIGATIONS</p>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-mono-data text-headline-lg text-on-surface">12,482</span>
+<span class="font-mono-sm text-primary mb-1.5">+2.4%</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-highest">
+<div class="h-full bg-primary" style="width: 75%"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-mono-label text-outline">SCREENING_VOLUME_24H</p>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-mono-data text-headline-lg text-on-surface">842K</span>
+<span class="font-mono-sm text-primary mb-1.5">LIVE</span>
+</div>
+<div class="mt-4 flex gap-0.5 items-end h-8">
+<div class="w-full bg-primary/20 h-[30%]"></div>
+<div class="w-full bg-primary/20 h-[45%]"></div>
+<div class="w-full bg-primary/40 h-[60%]"></div>
+<div class="w-full bg-primary/60 h-[85%]"></div>
+<div class="w-full bg-primary h-full"></div>
+<div class="w-full bg-primary/80 h-[70%]"></div>
+<div class="w-full bg-primary/50 h-[40%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-mono-label text-outline">KYT_WATCHLIST_HITS</p>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-mono-data text-headline-lg text-secondary">0014</span>
+<span class="font-mono-sm text-secondary-container mb-1.5">CRITICAL</span>
+</div>
+<div class="mt-4 flex items-center justify-between font-mono-sm text-outline">
+<span>LAST: 12m ago</span>
+<span class="text-secondary">[!]</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-mono-label text-outline">SESSION_UPTIME</p>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-mono-data text-headline-lg text-on-surface">148:12:04</span>
+</div>
+<p class="mt-4 font-mono-sm text-outline">RESET_COOLDOWN: 12:44:56</p>
+</div>
+</section>
+<!-- ROW 2: SCALPEL NODES TABLE -->
+<section class="col-span-12 bg-surface-container-low border border-outline-variant overflow-hidden flex flex-col">
+<div class="flex justify-between items-center px-4 py-2 border-b border-outline-variant bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[16px]">biotech</span>
+<h3 class="font-mono-label text-on-surface uppercase tracking-wider">SCALPEL_NODES_TELEMETRY [24_ACTIVE]</h3>
+</div>
+<div class="flex items-center gap-4 text-mono-sm">
+<span class="text-outline">FILTER: <span class="text-primary-fixed">ALL</span></span>
+<span class="text-outline">SORT: <span class="text-primary-fixed">LATENCY</span></span>
+</div>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse font-mono-data text-mono-data">
+<thead>
+<tr class="text-outline border-b border-outline-variant sticky top-0 bg-surface-container-low z-10">
+<th class="px-4 py-2 font-mono-label">NODE_ID</th>
+<th class="px-4 py-2 font-mono-label">GEOGRAPHIC_SHARD</th>
+<th class="px-4 py-2 font-mono-label">HEARTBEAT</th>
+<th class="px-4 py-2 font-mono-label">LATENCY</th>
+<th class="px-4 py-2 font-mono-label">THROUGHPUT</th>
+<th class="px-4 py-2 font-mono-label">RESOURCES</th>
+<th class="px-4 py-2 font-mono-label text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Node 01 -->
+<tr class="hover:bg-surface-container-highest group transition-all">
+<td class="px-4 py-2 text-primary-fixed font-bold">ALPHA-001</td>
+<td class="px-4 py-2 text-on-surface-variant">US-EAST-1 (VA)</td>
+<td class="px-4 py-2">
+<span class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed shadow-[0_0_5px_rgba(0,219,233,0.8)]"></span>
+                                    STABLE
+                                </span>
+</td>
+<td class="px-4 py-2">08ms</td>
+<td class="px-4 py-2">12.4 GB/s</td>
+<td class="px-4 py-2">
+<div class="w-24 h-1.5 bg-surface-container-highest border border-outline-variant">
+<div class="h-full bg-primary" style="width: 45%"></div>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<button class="opacity-0 group-hover:opacity-100 material-symbols-outlined text-outline hover:text-primary transition-all">settings</button>
+</td>
+</tr>
+<!-- Repeat/Simulate data -->
+<tr class="hover:bg-surface-container-highest group transition-all">
+<td class="px-4 py-2 text-primary-fixed font-bold">BETA-092</td>
+<td class="px-4 py-2 text-on-surface-variant">EU-WEST-2 (LDN)</td>
+<td class="px-4 py-2">
+<span class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+                                    STABLE
+                                </span>
+</td>
+<td class="px-4 py-2">14ms</td>
+<td class="px-4 py-2">8.9 GB/s</td>
+<td class="px-4 py-2">
+<div class="w-24 h-1.5 bg-surface-container-highest border border-outline-variant">
+<div class="h-full bg-primary" style="width: 72%"></div>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<button class="opacity-0 group-hover:opacity-100 material-symbols-outlined text-outline hover:text-primary transition-all">settings</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-highest group transition-all">
+<td class="px-4 py-2 text-secondary font-bold">GAMMA-112</td>
+<td class="px-4 py-2 text-on-surface-variant">AP-SOUTH-1 (SG)</td>
+<td class="px-4 py-2">
+<span class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container animate-pulse"></span>
+                                    THROTTLED
+                                </span>
+</td>
+<td class="px-4 py-2 text-secondary">422ms</td>
+<td class="px-4 py-2">1.2 GB/s</td>
+<td class="px-4 py-2">
+<div class="w-24 h-1.5 bg-surface-container-highest border border-outline-variant">
+<div class="h-full bg-secondary" style="width: 98%"></div>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<button class="opacity-0 group-hover:opacity-100 material-symbols-outlined text-outline hover:text-primary transition-all">settings</button>
+</td>
+</tr>
+<!-- Placeholder rows for density -->
+<script>
+                            const nodes = [
+                                {id: 'DELTA-012', loc: 'US-WEST-2', lat: '12ms', tp: '10.1', res: 22, status: 'STABLE'},
+                                {id: 'EPSILON-004', loc: 'SA-EAST-1', lat: '88ms', tp: '4.5', res: 60, status: 'STABLE'},
+                                {id: 'ZETA-991', loc: 'ME-SOUTH-1', lat: '124ms', tp: '3.1', res: 81, status: 'STABLE'},
+                                {id: 'KAPPA-234', loc: 'AF-SOUTH-1', lat: '150ms', tp: '2.4', res: 44, status: 'STABLE'},
+                                {id: 'OMICRON-08', loc: 'US-EAST-2', lat: '09ms', tp: '11.8', res: 31, status: 'STABLE'},
+                                {id: 'SIGMA-442', loc: 'EU-CENTRAL-1', lat: '21ms', tp: '9.2', res: 55, status: 'STABLE'},
+                                {id: 'THETA-003', loc: 'CA-CENTRAL-1', lat: '18ms', tp: '7.8', res: 12, status: 'STABLE'},
+                            ];
+                            nodes.forEach(node => {
+                                document.write(`
+                                    <tr class="hover:bg-surface-container-highest group transition-all">
+                                        <td class="px-4 py-2 text-on-surface font-bold">${node.id}</td>
+                                        <td class="px-4 py-2 text-on-surface-variant">${node.loc}</td>
+                                        <td class="px-4 py-2">
+                                            <span class="flex items-center gap-2">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-primary-fixed opacity-70"></span>
+                                                ${node.status}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2">${node.lat}</td>
+                                        <td class="px-4 py-2">${node.tp} GB/s</td>
+                                        <td class="px-4 py-2">
+                                            <div class="w-24 h-1.5 bg-surface-container-highest border border-outline-variant">
+                                                <div class="h-full bg-primary/60" style="width: ${node.res}%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-2 text-right">
+                                            <button class="opacity-0 group-hover:opacity-100 material-symbols-outlined text-outline hover:text-primary transition-all">settings</button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        </script>
+</tbody>
+</table>
+</div>
+</section>
+<!-- ROW 3: SYSTEM LOGS -->
+<section class="col-span-12 bg-surface-container-lowest border border-outline-variant h-48 flex flex-col font-mono-sm">
+<div class="px-4 py-1.5 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<div class="flex gap-4">
+<span class="text-primary-fixed uppercase tracking-widest font-bold">SYSTEM_LOG_STREAM</span>
+<span class="text-outline">PID: 8820</span>
+</div>
+<div class="flex gap-4 text-outline">
+<span>FILTER: ALL_EVENTS</span>
+<span>AUTO_SCROLL: ON</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-4 text-on-surface-variant space-y-0.5 whitespace-nowrap" id="log-terminal">
+<div>[<span class="text-outline">14:22:01</span>] <span class="text-primary">INFO</span> Initializing Scalpel v4.0.2-ALPHA on node ALPHA-001...</div>
+<div>[<span class="text-outline">14:22:02</span>] <span class="text-primary">INFO</span> WebSocket handshake successful. Entropy pool generated.</div>
+<div>[<span class="text-outline">14:22:05</span>] <span class="text-primary">INFO</span> Loading KYT Watchlist Shard 12... 1.2M entries cached.</div>
+<div>[<span class="text-outline">14:22:08</span>] <span class="text-secondary-fixed-dim">WARN</span> Latency spike detected on node GAMMA-112 (422ms). Re-routing non-critical packet headers.</div>
+<div>[<span class="text-outline">14:22:12</span>] <span class="text-primary">INFO</span> Investigation session ID_882012_A9 started for entity "TRX_9281...".</div>
+<div>[<span class="text-outline">14:22:15</span>] <span class="text-primary">INFO</span> Heartbeat signal received from 24/24 distributed nodes.</div>
+<div>[<span class="text-outline">14:22:19</span>] <span class="text-tertiary">ACTION</span> Automated export triggered for daily compliance report.</div>
+<div>[<span class="text-outline">14:22:21</span>] <span class="text-primary">INFO</span> OSINT Hub connected to DarkNet feed 0x82.</div>
+<div class="animate-pulse">_</div>
+</div>
+</section>
+</main>
+<!-- FOOTER SYSTEM SIGNATURE -->
+<footer class="fixed bottom-0 right-0 w-[calc(100%-4rem)] h-6 flex justify-between items-center px-4 bg-surface-container-lowest border-t border-outline-variant z-40">
+<div class="flex items-center gap-6 font-mono-sm text-outline">
+<span class="text-on-surface uppercase tracking-widest font-mono-label">SOVEREIGN NODE // SYSTEM SIGNATURE</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span> LATENCY: 12ms</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span> UPTIME: 99.99%</span>
+</div>
+<div class="font-mono-sm text-outline flex gap-4">
+<span class="hover:text-primary cursor-pointer transition-all">SYSTEM_MAP</span>
+<span class="hover:text-primary cursor-pointer transition-all">RECOVERY_KEY</span>
+<span class="text-on-surface-variant">© 2024 FINSKALP FORENSICS</span>
+</div>
+</footer>
+<!-- INTERACTION SCRIPTS -->
+<script>
+        // Micro-interaction for logs
+        const terminal = document.getElementById('log-terminal');
+        const logLines = [
+            "[14:23:01] INFO New forensic evidence identified on ETH block 192831.",
+            "[14:23:04] INFO Re-indexing node DELTA-012 database for faster query throughput.",
+            "[14:23:09] INFO Heartbeat synchronized with Global Registry.",
+            "[14:23:14] WARN Minor packet loss on EU-WEST-2 link. Adjusting MTU."
+        ];
+        
+        let lineIdx = 0;
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const line = document.createElement('div');
+            const logContent = logLines[lineIdx % logLines.length].replace(/\[\d{2}:\d{2}:\d{2}\]/, `[<span class="text-outline">${time}</span>]`);
+            line.innerHTML = logContent;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+            lineIdx++;
+        }, 5000);
+
+        // Simple Combat Mode Toggle Simulation
+        const combatModeBtn = document.querySelector('h2').parentElement.parentElement;
+        combatModeBtn.addEventListener('click', () => {
+            const indicator = document.querySelector('.bg-primary-container\\/10');
+            const title = document.querySelector('h2');
+            if (title.textContent === 'COMBAT MODE') {
+                title.textContent = 'STANDBY';
+                title.classList.replace('text-primary', 'text-outline');
+                indicator.classList.replace('bg-primary-container/10', 'bg-surface-container-highest');
+                indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-outline"></span> IDLE';
+            } else {
+                title.textContent = 'COMBAT MODE';
+                title.classList.replace('text-outline', 'text-primary');
+                indicator.classList.replace('bg-surface-container-highest', 'bg-primary-container/10');
+                indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span> ACTIVE';
+            }
+        });
+    </script>
+</body></html>

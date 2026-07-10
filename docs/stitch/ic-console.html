@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic | Instruments Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .instrument-module {
+            background-color: #0d0d0d;
+            border: 1px solid #1f1f1f;
+            transition: border-color 0.15s ease-in-out;
+        }
+        .instrument-module:hover {
+            border-color: #3b494b;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f1f1f;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 219, 233, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        .glitch-text:hover {
+            animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#7df4ff",
+                        "tertiary-container": "#ffd386",
+                        "on-secondary-fixed-variant": "#930010",
+                        "on-surface-variant": "#b9cacb",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#680008",
+                        "secondary-fixed": "#ffdad6",
+                        "outline": "#849495",
+                        "primary-fixed-dim": "#00dbe9",
+                        "on-primary-container": "#006970",
+                        "on-surface": "#e5e2e1",
+                        "primary-container": "#00f0ff",
+                        "on-tertiary-fixed-variant": "#5e4200",
+                        "on-primary-fixed": "#002022",
+                        "secondary": "#ffb3ac",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdea8",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary-fixed": "#410003",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-container": "#c40019",
+                        "surface-tint": "#00dbe9",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "on-error": "#690005",
+                        "outline-variant": "#3b494b",
+                        "on-primary-fixed-variant": "#004f54",
+                        "error-container": "#93000a",
+                        "tertiary": "#fff4e8",
+                        "on-tertiary-container": "#7d5800",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006970",
+                        "surface-container": "#201f1f",
+                        "surface-container-highest": "#353534",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-fixed": "#271900",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#ffb3ac",
+                        "primary": "#dbfcff",
+                        "surface-bright": "#3a3939",
+                        "surface": "#131313",
+                        "on-tertiary": "#412d00",
+                        "on-secondary-container": "#ffd2cd",
+                        "on-primary": "#00363a",
+                        "surface-variant": "#353534",
+                        "surface-dim": "#131313",
+                        "inverse-on-surface": "#313030"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "mono-data": ["IBM Plex Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "mono-sm": ["IBM Plex Mono"],
+                        "mono-label": ["IBM Plex Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background flex flex-row overflow-hidden h-screen">
+<!-- SideNavBar Shell -->
+<aside class="flex flex-col h-screen items-center py-4 bg-surface-dim dark:bg-surface-dim docked h-full w-16 left-0 top-0 border-r border-outline-variant z-50">
+<div class="mb-8">
+<span class="material-symbols-outlined text-primary text-2xl font-bold">terminal</span>
+</div>
+<nav class="flex flex-col gap-4 flex-1 items-center">
+<div class="p-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div class="p-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<div class="p-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">search_insights</span>
+</div>
+<div class="p-2 text-primary bg-surface-container-high border-l-2 border-primary transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">biotech</span>
+</div>
+<div class="p-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+</div>
+<div class="p-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+</nav>
+<div class="mt-auto flex flex-col items-center gap-4">
+<div class="p-2 text-outline hover:text-primary transition-colors duration-75 cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div class="w-8 h-8 rounded bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A futuristic biometric profile avatar representing a sovereign node operator in a high-tech intelligence environment. The image features a stylized, blue-tinted digital portrait with geometric overlays and data telemetry graphics, conveying an authoritative and technical role in a crypto-forensic firm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNnyFOMGTcQYGYhCzVyRoxcUdr_OsBJ3uzH35F84aEC0stGGR1IwEeb4aYWw0NDecn_iAj2cnr13D5wlygiWJ3AfQMDmdfzc-nIlu8Vqll62rKakmpQO_mLgN_s3JKJ5Bb1cJl5XIiRH1AXnsvh8a8C4Z2KOdZCZ8kbLn1Haz0Sct2SIcyEFFHd6tH4zN4DWUEe-Paems8oOsVGDr8JphXJ2VueaEnKwz0C4AelvzZ7W3D021F3_2a"/>
+</div>
+</div>
+</aside>
+<main class="flex flex-col flex-1 relative overflow-hidden">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center h-12 px-4 bg-surface-container-low docked full-width top-0 border-b border-outline-variant z-40">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tighter">FinSkalp Forensic</h1>
+<div class="h-4 w-px bg-outline-variant"></div>
+<nav class="flex gap-4">
+<span class="text-primary font-mono-label border-b border-primary cursor-pointer uppercase">Instruments</span>
+<span class="text-on-surface-variant font-mono-label hover:text-on-surface transition-all cursor-pointer uppercase">CIS/FIU</span>
+<span class="text-on-surface-variant font-mono-label hover:text-on-surface transition-all cursor-pointer uppercase">PROD-ACTIVE</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-fixed text-on-primary-fixed px-3 py-1 text-mono-label font-bold uppercase tracking-tight flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+                    NEW_INVESTIGATION
+                </button>
+<div class="flex items-center gap-2 text-outline">
+<span class="material-symbols-outlined p-1 cursor-pointer hover:bg-surface-container-highest rounded">dark_mode</span>
+<span class="material-symbols-outlined p-1 cursor-pointer hover:bg-surface-container-highest rounded">notifications_active</span>
+</div>
+</div>
+</header>
+<!-- Main Instrumentation Grid -->
+<div class="flex-1 overflow-auto bg-background p-module-gap grid grid-cols-4 grid-rows-3 gap-px h-[calc(100vh-3.5rem)]">
+<!-- IC-01 Bank Message Hub -->
+<div class="instrument-module relative flex flex-col group overflow-hidden">
+<div class="scanline"></div>
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-01 // BANK_MSG_HUB</span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed animate-pulse">LIVE_STREAM</span>
+</div>
+<div class="flex-1 p-2 font-mono-data text-mono-sm text-primary overflow-hidden space-y-1 custom-scrollbar">
+<div class="opacity-80">09:12:04 [SWIFT] MT103_INBOUND -&gt; $42,000.00 [CHASE]</div>
+<div class="text-error">09:12:10 [CHAPS] DELAY_WARN: PKT_LOSS_04%</div>
+<div class="opacity-80">09:12:15 [SEP-A] AUTH_SUCCESS: P2P_NODE_77</div>
+<div class="opacity-60">09:12:18 [SWIFT] MT202_ACK RECEIVED</div>
+<div class="opacity-80">09:12:22 [FED] RTGS_ENTRY_POINT: 0x82f...a1</div>
+<div class="text-tertiary-fixed">09:12:30 [SWIFT] MT103_OUT -&gt; FLAG_RISK_L3</div>
+</div>
+<div class="h-8 border-t border-outline-variant p-1 flex items-center gap-1">
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-2/3 h-full bg-primary-fixed animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- IC-02 Transactional Pattern Monitor -->
+<div class="instrument-module relative flex flex-col col-span-2 overflow-hidden bg-[#0d0d0d]">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-02 // TXN_PATTERN_MONITOR</span>
+<div class="flex items-center gap-2">
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY: 4ms</span>
+<span class="material-symbols-outlined text-sm text-outline">settings</span>
+</div>
+</div>
+<div class="flex-1 flex gap-px p-1">
+<div class="flex-1 bg-surface-container-lowest relative overflow-hidden">
+
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="text-center">
+<div class="font-mono-label text-headline-lg text-primary-fixed font-bold">12,482</div>
+<div class="font-mono-sm text-mono-sm text-outline uppercase">TX/SEC GLOBAL</div>
+</div>
+</div>
+</div>
+<div class="w-32 bg-surface-container-lowest flex flex-col p-2 space-y-2">
+<div class="border border-outline-variant p-1">
+<div class="text-mono-sm text-outline">BURST</div>
+<div class="text-mono-label text-error font-bold">HIGH</div>
+</div>
+<div class="border border-outline-variant p-1">
+<div class="text-mono-sm text-outline">SYNC</div>
+<div class="text-mono-label text-primary-fixed">99.8%</div>
+</div>
+</div>
+</div>
+</div>
+<!-- IC-03 OSINT Fusion Engine -->
+<div class="instrument-module relative flex flex-col overflow-hidden">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-03 // OSINT_FUSION</span>
+</div>
+<div class="flex-1 overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-700" data-alt="A dark-themed forensic mapping interface showing high-density data clusters and geographic node connections across a stylized world map. The map uses a palette of deep obsidian and tactical blue, with highlighted nodes in glowing cyan and crimson to represent OSINT targets and signal fusion points in a mission-critical digital environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNDr84yHP20Lcs7_2-1vmZDMRjqLJ6mOaB9pM-asxRFpqw4cetuEjCg7nz2K5tjBGSE55mnP9o6fefFuUVQG64MgrUDyOho-uY9tpB9y_2DxmIywa_gc9Jkf7X_T2fCHvOsEjJ8z8ovaf7hhSmBhE03xfmVoGN1HRip_rEqMpkbUsnD7ayvtkaxILkCzCpeFNfuVDsi8QtbbqovUnSUGtF-UrCs3cmZZaullx3lZeyz3ZwWhEVCbT9"/>
+<div class="absolute bottom-2 left-2 right-2 bg-background/80 border border-outline-variant p-1 font-mono-sm text-mono-sm">
+<div class="flex justify-between">
+<span>SENSORS:</span>
+<span class="text-primary">82/82 ACTIVE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- IC-04 Sovereign Crypto-attribution -->
+<div class="instrument-module relative flex flex-col overflow-hidden">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-04 // CRYPTO_ATTR</span>
+</div>
+<div class="flex-1 p-2 flex flex-col gap-2">
+<div class="p-2 border border-outline-variant bg-surface-container-lowest flex flex-col">
+<span class="text-mono-sm text-outline">ADDRESS_MATCH:</span>
+<span class="text-mono-label text-primary truncate">bc1qxy2kgdy627zx...</span>
+<div class="mt-2 flex justify-between items-center">
+<span class="text-mono-sm px-1 bg-secondary-container text-on-secondary-container">ENTITY: LAZARUS</span>
+<span class="text-mono-sm text-outline">98% CONF</span>
+</div>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-lowest flex flex-col">
+<span class="text-mono-sm text-outline">ADDRESS_MATCH:</span>
+<span class="text-mono-label text-primary truncate">0x71c765...b6f3a</span>
+<div class="mt-2 flex justify-between items-center">
+<span class="text-mono-sm px-1 bg-surface-container-highest text-on-surface">ENTITY: UNKNOWN</span>
+<span class="text-mono-sm text-outline">12% CONF</span>
+</div>
+</div>
+</div>
+</div>
+<!-- IC-05 Risk-label Registry -->
+<div class="instrument-module relative flex flex-col overflow-hidden">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-05 // RISK_REGISTRY</span>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar">
+<table class="w-full text-left font-mono-data text-mono-sm">
+<thead class="sticky top-0 bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="p-2 font-mono-label">TAG</th>
+<th class="p-2 font-mono-label">SCORE</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-highest cursor-default">
+<td class="p-2 text-error">DARKNET_MIXER</td>
+<td class="p-2">0.98</td>
+</tr>
+<tr class="hover:bg-surface-container-highest cursor-default">
+<td class="p-2 text-tertiary-fixed">HIGH_VELOCITY</td>
+<td class="p-2">0.76</td>
+</tr>
+<tr class="hover:bg-surface-container-highest cursor-default">
+<td class="p-2 text-outline">SANCTION_PROX</td>
+<td class="p-2">0.45</td>
+</tr>
+<tr class="hover:bg-surface-container-highest cursor-default">
+<td class="p-2 text-primary-fixed">EXCHANGE_HOT</td>
+<td class="p-2">0.12</td>
+</tr>
+<tr class="hover:bg-surface-container-highest cursor-default">
+<td class="p-2 text-error">RANSOM_AFFIL</td>
+<td class="p-2">0.89</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- IC-06 Corridor Analyzer -->
+<div class="instrument-module relative flex flex-col col-span-2 overflow-hidden bg-[#050505]">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-06 // CORRIDOR_ANALYZER</span>
+<span class="font-mono-sm text-mono-sm text-outline">AXIS: FIAT-TO-CRYPTO</span>
+</div>
+<div class="flex-1 relative">
+
+<div class="absolute inset-0 p-4 flex flex-col justify-end pointer-events-none">
+<div class="flex gap-4">
+<div class="bg-surface/80 border border-outline-variant p-2">
+<div class="text-mono-sm text-outline">VOLUME_FLOW</div>
+<div class="text-headline-md text-primary-fixed">Ξ 4.2K / HR</div>
+</div>
+<div class="bg-surface/80 border border-outline-variant p-2">
+<div class="text-mono-sm text-outline">CORRIDOR_EFF</div>
+<div class="text-headline-md text-tertiary-fixed">92.4%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- IC-07 Illegal Flow Detector -->
+<div class="instrument-module relative flex flex-col overflow-hidden">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-07 // FLOW_DETECTOR</span>
+</div>
+<div class="flex-1 flex flex-col p-2 space-y-2">
+<div class="flex items-center justify-between border-b border-outline-variant pb-1">
+<span class="text-mono-sm text-outline">ANOMALY_INDEX</span>
+<span class="text-mono-label text-error">CRITICAL</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest border border-outline-variant p-1">
+<div class="h-full w-full relative flex items-end gap-1 px-1">
+<!-- Simple sparkline simulation with divs -->
+<div class="flex-1 bg-error/20 h-[40%]"></div>
+<div class="flex-1 bg-error/40 h-[60%]"></div>
+<div class="flex-1 bg-error/30 h-[50%]"></div>
+<div class="flex-1 bg-error/60 h-[85%]"></div>
+<div class="flex-1 bg-error h-[95%] animate-pulse"></div>
+<div class="flex-1 bg-error/50 h-[70%]"></div>
+<div class="flex-1 bg-error/20 h-[30%]"></div>
+</div>
+</div>
+<div class="text-mono-sm text-on-surface-variant italic">PEAK_DETECTED: 09:11:42 UTC</div>
+</div>
+</div>
+<!-- IC-08 AML Reporting Engine -->
+<div class="instrument-module relative flex flex-col overflow-hidden">
+<div class="px-2 py-1 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-mono-label text-on-surface-variant">IC-08 // AML_REPORT_ENG</span>
+<span class="material-symbols-outlined text-sm text-primary">verified</span>
+</div>
+<div class="flex-1 p-2 space-y-2">
+<div class="bg-surface-container border border-outline-variant p-2 flex justify-between items-center cursor-pointer hover:bg-surface-container-highest transition-all group">
+<div class="flex flex-col">
+<span class="text-mono-label text-on-surface uppercase">SAR_2023_991</span>
+<span class="text-mono-sm text-outline">PENDING_APPROVAL</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary">description</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 flex justify-between items-center cursor-pointer hover:bg-surface-container-highest transition-all group">
+<div class="flex flex-col">
+<span class="text-mono-label text-on-surface uppercase">KYC_RE_VERIF_8</span>
+<span class="text-mono-sm text-primary">COMPLETED</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary">check_circle</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 flex justify-between items-center cursor-pointer hover:bg-surface-container-highest transition-all group">
+<div class="flex flex-col">
+<span class="text-mono-label text-on-surface uppercase">WHALE_ALERT_A</span>
+<span class="text-mono-sm text-tertiary-fixed">PROCESSING</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary">hourglass_top</span>
+</div>
+</div>
+<div class="p-2">
+<button class="w-full border border-primary-fixed text-primary-fixed py-1 text-mono-label uppercase hover:bg-primary-fixed hover:text-background transition-all">GENERATE_ALL</button>
+</div>
+</div>
+</div>
+<!-- Terminal Audit Log -->
+<footer class="h-48 border-t border-outline-variant bg-surface-container-lowest flex flex-col overflow-hidden relative">
+<div class="flex justify-between items-center px-4 py-1 bg-surface-container border-b border-outline-variant">
+<div class="flex gap-4 items-center">
+<span class="text-mono-label text-on-surface-variant uppercase tracking-widest">Autonomous Execution Audit Log</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-ping"></span>
+<span class="text-mono-sm text-primary-fixed">KERNEL_READY</span>
+</div>
+</div>
+<div class="flex gap-2 text-outline text-mono-sm uppercase">
+<span>UPTIME: 99.99%</span>
+<span>//</span>
+<span>LATENCY: 12ms</span>
+</div>
+</div>
+<div class="flex-1 p-4 font-mono-data text-mono-sm overflow-y-auto custom-scrollbar bg-black/40" id="terminal-log">
+<div class="flex gap-4 opacity-50"><span class="text-primary-fixed">[SYSTEM]</span> Initializing forensic environment...</div>
+<div class="flex gap-4 opacity-50"><span class="text-primary-fixed">[SYSTEM]</span> IC_MODULES active. Version 4.0.2-ALPHA.</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:01]</span> <span class="text-primary">EXEC:</span> Fetching mempool deltas for 0xETH_NODE...</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:05]</span> <span class="text-tertiary-fixed">WARN:</span> Unexpected hop detected in transaction cluster 882.</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:10]</span> <span class="text-primary">EXEC:</span> Running recursive trace on 0x71c... (Depth: 12)</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:15]</span> <span class="text-error">ALERT:</span> Pattern match 94% with known wash-trading wallet group.</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:18]</span> <span class="text-primary">EXEC:</span> Syncing IC-05 registry with global sanction lists.</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:22]</span> <span class="text-primary">EXEC:</span> 422 records updated.</div>
+<div class="flex gap-4"><span class="text-on-surface-variant">[09:12:30]</span> <span class="text-primary">EXEC:</span> Inbound SWIFT message parity check: OK.</div>
+<!-- Dynamic logs will appear here -->
+</div>
+<!-- System Signature Footer -->
+<div class="absolute bottom-0 right-0 px-4 py-1 flex items-center gap-4 bg-surface-container border-tl border-outline-variant z-10">
+<span class="font-mono-label text-mono-label uppercase tracking-widest text-on-surface">SOVEREIGN NODE // SYSTEM SIGNATURE</span>
+</div>
+</footer>
+</main>
+<script>
+        const logContainer = document.getElementById('terminal-log');
+        const eventTypes = [
+            { label: 'EXEC:', color: 'text-primary' },
+            { label: 'WARN:', color: 'text-tertiary-fixed' },
+            { label: 'ALERT:', color: 'text-error' },
+            { label: 'INFO:', color: 'text-outline' }
+        ];
+        const eventMessages = [
+            'Packet sequence verified via multi-sig gateway.',
+            'Neural network recalculating flow vectors for node 71.',
+            'Encrypted handshake detected on unauthorized port 8081.',
+            'Blockchain height synchronized: block #18,221,492.',
+            'Risk label applied to address cluster: MIXER_INTERACTION.',
+            'Heuristic analysis complete for cross-chain bridge 0x4.',
+            'API heartbeat stable. All telemetry active.',
+            'Direct instrumentation access granted to OPERATOR_LEVEL_4.'
+        ];
+
+        function addLog() {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            const message = eventMessages[Math.floor(Math.random() * eventMessages.length)];
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex gap-4 animate-in fade-in slide-in-from-left-2 duration-300';
+            logEntry.innerHTML = `
+                <span class="text-on-surface-variant">[${time}]</span>
+                <span class="${event.color}">${event.label}</span>
+                <span>${message}</span>
+            `;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        setInterval(addLog, 2500);
+    </script>
+</body></html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic Framework | AML Investigation Board</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 18px;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b494b; }
+        
+        .kanban-column {
+            min-width: 280px;
+            flex: 1;
+        }
+        .instr-module {
+            border: 1px solid #1f1f1f;
+            background-color: #0d0d0d;
+        }
+        .risk-gradient {
+            background: linear-gradient(90deg, #00dbe9 0%, #c40019 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#00dbe9",
+                      "background": "#131313",
+                      "surface-tint": "#00dbe9",
+                      "secondary-fixed": "#ffdad6",
+                      "surface": "#131313",
+                      "on-background": "#e5e2e1",
+                      "tertiary-container": "#ffd386",
+                      "on-tertiary-container": "#7d5800",
+                      "on-surface": "#e5e2e1",
+                      "surface-container": "#201f1f",
+                      "secondary": "#ffb3ac",
+                      "outline": "#849495",
+                      "on-secondary-fixed": "#410003",
+                      "error": "#ffb4ab",
+                      "tertiary": "#fff4e8",
+                      "on-primary-fixed-variant": "#004f54",
+                      "inverse-on-surface": "#313030",
+                      "on-secondary-container": "#ffd2cd",
+                      "on-primary-fixed": "#002022",
+                      "primary-fixed": "#7df4ff",
+                      "secondary-container": "#c40019",
+                      "on-tertiary-fixed": "#271900",
+                      "tertiary-fixed-dim": "#ffba20",
+                      "on-secondary": "#680008",
+                      "inverse-primary": "#006970",
+                      "surface-variant": "#353534",
+                      "surface-bright": "#3a3939",
+                      "surface-container-low": "#1c1b1b",
+                      "secondary-fixed-dim": "#ffb3ac",
+                      "outline-variant": "#3b494b",
+                      "on-tertiary": "#412d00",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed": "#ffdea8",
+                      "surface-container-lowest": "#0e0e0e",
+                      "surface-dim": "#131313",
+                      "inverse-surface": "#e5e2e1",
+                      "on-primary": "#00363a",
+                      "on-surface-variant": "#b9cacb",
+                      "primary-container": "#00f0ff",
+                      "surface-container-highest": "#353534",
+                      "on-primary-container": "#006970",
+                      "on-error": "#690005",
+                      "surface-container-high": "#2a2a2a",
+                      "error-container": "#93000a",
+                      "on-secondary-fixed-variant": "#930010",
+                      "primary": "#dbfcff",
+                      "on-tertiary-fixed-variant": "#5e4200"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "standard-inset": "8px",
+                      "tight-inset": "4px",
+                      "module-gap": "1px",
+                      "container-padding": "12px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "mono-sm": ["IBM Plex Mono"],
+                      "mono-label": ["IBM Plex Mono"],
+                      "mono-data": ["IBM Plex Mono"],
+                      "headline-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-hidden h-screen flex">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full z-40 bg-surface-container-lowest dark:bg-surface-container-lowest h-screen w-64 flex-col border-r border-outline-variant flex">
+<div class="p-6">
+<div class="font-headline-lg text-headline-lg font-semibold text-on-surface dark:text-on-surface mb-1">FinSkalp</div>
+<div class="font-mono-label text-mono-label text-outline uppercase tracking-widest">Forensic Ops v4.2</div>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full py-2 px-4 bg-primary-fixed-dim text-on-primary font-bold text-mono-label uppercase cursor-pointer active:opacity-80 transition-colors duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                NEW INVESTIGATION
+            </button>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Navigation Items Mapping -->
+<div class="flex items-center gap-3 px-6 py-3 text-primary-fixed-dim font-bold border-l-2 border-primary-fixed-dim bg-surface-container-low cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-high cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="font-body-md text-body-md">Compliance</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-high cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-body-md text-body-md">Flows</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-high cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span class="font-body-md text-body-md">Vault</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-high cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="construction">construction</span>
+<span class="font-body-md text-body-md">Tools</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-high cursor-pointer active:opacity-80 transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-body-md text-body-md">Profile</span>
+</div>
+</nav>
+<div class="mt-auto border-t border-outline-variant p-4 space-y-2">
+<div class="flex items-center gap-3 px-2 py-1 text-on-surface-variant font-mono-label text-mono-label hover:text-on-surface transition-colors duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                System Status
+            </div>
+<div class="flex items-center gap-3 px-2 py-1 text-on-surface-variant font-mono-label text-mono-label hover:text-on-surface transition-colors duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="fingerprint" data-weight="fill" style="font-variation-settings: 'FILL' 1;">fingerprint</span>
+                Sovereign Node
+            </div>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center h-12 w-full px-4 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="font-headline-md text-headline-md font-semibold text-on-surface">FinSkalp Forensic Framework</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<div class="relative group">
+<input class="bg-surface-container-lowest border-none text-mono-data text-on-surface-variant placeholder:text-outline w-64 focus:ring-0 focus:border-none p-0 h-full" placeholder="QUERY INVESTIGATION..." type="text"/>
+<div class="absolute bottom-0 left-0 w-0 h-[1px] bg-primary-fixed-dim group-focus-within:w-full transition-all duration-300"></div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim transition-opacity active:scale-90" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim transition-opacity active:scale-90" data-icon="settings">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim transition-opacity active:scale-90" data-icon="terminal">terminal</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 border border-outline-variant text-mono-label text-outline hover:text-primary-fixed-dim transition-opacity active:scale-90 uppercase">QUERY</button>
+<button class="px-3 py-1 bg-primary-fixed-dim text-on-primary font-bold text-mono-label active:scale-90 uppercase">EXECUTE</button>
+</div>
+</div>
+</header>
+<!-- Dynamic Content Canvas -->
+<div class="flex-1 flex flex-col overflow-hidden">
+<!-- XGBoost Risk Indicators Header -->
+<section class="p-4 grid grid-cols-4 gap-module-gap bg-outline-variant border-b border-outline-variant">
+<div class="bg-surface-container-lowest p-4 flex flex-col justify-between">
+<span class="text-mono-label text-outline uppercase">Global Risk Coefficient</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-mono-data text-headline-lg text-primary-fixed-dim">0.842</span>
+<div class="w-16 h-4 bg-surface-container flex items-end">
+<div class="w-full bg-primary-fixed-dim" style="height: 84%"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 flex flex-col justify-between">
+<span class="text-mono-label text-outline uppercase">XGBoost Confidence</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-mono-data text-headline-lg text-secondary">92.1%</span>
+<div class="flex gap-1 items-end h-6">
+<div class="w-1 bg-secondary h-2"></div>
+<div class="w-1 bg-secondary h-4"></div>
+<div class="w-1 bg-secondary h-6"></div>
+<div class="w-1 bg-secondary h-3"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 flex flex-col justify-between">
+<span class="text-mono-label text-outline uppercase">Pending Triggers</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-mono-data text-headline-lg text-on-surface">14</span>
+<button class="bg-primary-fixed-dim text-on-primary px-3 py-1 font-mono-label uppercase text-[10px] hover:bg-primary-container transition-colors">Fusion Run</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 flex flex-col justify-between">
+<span class="text-mono-label text-outline uppercase">Active Analysts</span>
+<div class="flex items-end justify-between mt-2">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-none border border-outline-variant bg-surface-container" data-alt="Close up portrait of a digital forensic analyst, high contrast lighting, techwear aesthetic, neon blue rim lighting, minimalist studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa40xGMnQJFs3LqzZB3s-_OW845bcEbXr7f0ITi-jrBfpisKluZArPGAqKQCnNjRyPA944GtZR4S9_bxZNmgis1442dHHVHiL61f-gzbs909tljA3x5PTfOeSacOiU3Xb-nxJ8_ulSLOPYHkcWwgzALr6z9zsIhxZaatgGKZ4bHsRzTYBkzV1CucXSb2w_b5V3LlCJmDGZ17tQMvM0sbDX1rQcFaWbNW9DRygGtQpnjIqksTurAhL5"/>
+<img class="w-8 h-8 rounded-none border border-outline-variant bg-surface-container" data-alt="Portrait of a data scientist specialist, monochrome aesthetic with sharp cyan highlights, professional and serious expression, futuristic atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxAGOeEOEUyjep6p_VNMgO-dTtJju36MlsVB37p34k-laNXMv-y41mvLQxZWh-SRuEoSBgO5JqPJyaX179cPOoOwtCkzDKJJVKXrte2jmYkxWjiExg-EvclTRK7BJLkwo_EaZ_a8u8IvkqLjHMu5P6Weqbx1ZEPcen--yTWbEIEq_Kch4MkGLGY2aK6o68vOoy8pGcbUxdHgS3FW4ksGaEha6-reuJ6f_Y39ZZrL2pk4X4EivuwQ3A"/>
+<img class="w-8 h-8 rounded-none border border-outline-variant bg-surface-container" data-alt="Corporate security investigator avatar, clean sharp focus, tech-driven design elements, dark background with subtle grid overlay." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFHuAat9-FvMhpEyUIh6eIeAtV2O33OjKxDoIIXlBTTD-Y2n8d16xH2zZlt7i1Gi0vFjccTcry6Bw3vzgnM7FzqI0-2cSM4SY-5KZqafGOCNkQg-BxBv5KHxFfexguFPiqT0nXVgeYfB1kDfgEaaHLalBpNoLlbsphAAJZDVVkOWMu7vNHvtvitO5HyiGaW7OcgLD2tUphnTu2QmggDYxLiD0kqpyfonYHpyVdY0LhgMbIMb7NJY8Z"/>
+</div>
+<span class="font-mono-label text-outline">+11 online</span>
+</div>
+</div>
+</section>
+<!-- Kanban Board -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden bg-outline-variant flex gap-module-gap">
+<!-- NEW_INGRESS -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<span class="font-mono-label text-outline">NEW_INGRESS <span class="text-primary-fixed-dim ml-2">[04]</span></span>
+<span class="material-symbols-outlined text-outline cursor-pointer" data-icon="filter_list">filter_list</span>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2">
+<!-- Case Card -->
+<div class="instr-module p-3 cursor-pointer hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-on-surface group-hover:text-primary-fixed-dim">CASE-0922</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-secondary-container"></div>
+<div class="w-1 h-3 bg-secondary-container opacity-50"></div>
+</div>
+</div>
+<div class="text-mono-sm text-outline mb-3">Sovereign Node Signature: #A9F2..92</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img class="w-5 h-5 border border-outline-variant" data-alt="Headshot of a senior risk analyst, minimalist cyberpunk photography style, deep shadows and neon cyan lighting, futuristic professional attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkDD3iAvvPuQFjOnV5WO1wnyvxxk6uQvVub9hacJq45IUjWa4oOWN85MaZuk36e8w3y460mORl1nkM21w3qykXFzP8UudJTNYsXWQoezbf9FKF9MJTRDpNFReywugQ_0m8097rbAMhQHhgE0PUaCuc0DCppY8OMk9LLmfvNFMah8yWDhMLlUMa7Qkk95nuNVDF-ok5PLrjzpq6le-hc1iT0TO9TDhdjQkIN6aJY1Uid3U4GNpiaiJk"/>
+<span class="text-mono-sm text-outline">T. VANCE</span>
+</div>
+<span class="text-mono-sm font-mono-data text-secondary">0.92 RISK</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant flex justify-between items-center text-mono-sm">
+<span class="text-outline">TIS: 04h 12m</span>
+<span class="text-primary-fixed-dim">[V]</span>
+</div>
+</div>
+<!-- Case Card -->
+<div class="instr-module p-3 cursor-pointer hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-on-surface group-hover:text-primary-fixed-dim">CASE-0925</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-primary-fixed-dim opacity-20"></div>
+</div>
+</div>
+<div class="text-mono-sm text-outline mb-3">Pattern Match: Layering Alpha-7</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img class="w-5 h-5 border border-outline-variant" data-alt="Abstract minimalist representation of a digital identity, clean lines and monochromatic blue lighting, architectural precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp3i70hFY2D-IYNw6ldyhCayD5EFLW4NA9NSeW0DraO7jp5zym0MW1Ka8YRmQJNB8VQiPbr9PwBC2Fbs4HtsflSmxtOCQyQWnBuSnWgVwk5jLvfhxujjp-0GWH57dr9US3Cc2GoZFWWQTvzVPHVsbb_VUF09dkmRdQd-RuR6t4CvWJJ3rgRORLuqsEKou4TikO_XF3BhIoCpXnkQDYulcQ5cZWtCMvZFBOf7SGpqn2VP96-240c9Rg"/>
+<span class="text-mono-sm text-outline">L. CHEN</span>
+</div>
+<span class="text-mono-sm font-mono-data text-primary-fixed-dim">0.41 RISK</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant flex justify-between items-center text-mono-sm">
+<span class="text-outline">TIS: 01h 05m</span>
+<span class="text-outline">[!]</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TRIAGE -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<span class="font-mono-label text-outline">TRIAGE <span class="text-primary-fixed-dim ml-2">[02]</span></span>
+<span class="material-symbols-outlined text-outline cursor-pointer" data-icon="sort">sort</span>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2">
+<div class="instr-module p-3 cursor-pointer hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-on-surface group-hover:text-primary-fixed-dim">CASE-0811</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-secondary-container"></div>
+<div class="w-1 h-3 bg-secondary-container"></div>
+</div>
+</div>
+<div class="text-mono-sm text-outline mb-3">High Volume Velocity: Crypto-Node</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img class="w-5 h-5 border border-outline-variant" data-alt="Forensic analyst avatar, sharp cinematic portrait in a dark data center environment, glowing terminal reflections on face, technical professional style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiPw4bEqfLWNupzfoRAxmfwlx82STyQ53ss7bIy-z-zktmUDYVnGaAG8QpNR_tgjNpEIzvGJT1JT7aZB_AS_zi3G3zIIsyj7lEuy4XUEwcR_xoaS0sBvU6QBS6KZPx1KdP-2eqSkI0wdvVwLfjA1ycHc2tBF0EQvjKoA4sfnZBMErvEQpJHXMexKWB9clnSkQpec_6ZcNIDpAjpKcVZAyuXNv98OO96b2P1G1BSqC5ydPIR7vWphgK"/>
+<span class="text-mono-sm text-outline">M. ROSS</span>
+</div>
+<span class="text-mono-sm font-mono-data text-secondary">0.98 RISK</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant flex justify-between items-center text-mono-sm">
+<span class="text-outline">TIS: 12h 45m</span>
+<span class="text-secondary">[CRIT]</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ANALYSIS_ACTIVE -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<span class="font-mono-label text-on-surface">ANALYSIS_ACTIVE <span class="text-primary-fixed-dim ml-2">[05]</span></span>
+<div class="w-2 h-2 bg-primary-fixed-dim animate-pulse"></div>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2">
+<div class="instr-module p-3 bg-surface-container-low border-primary-fixed-dim/40">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-primary-fixed-dim font-bold">CASE-0742</span>
+<span class="text-[9px] bg-primary-fixed-dim text-on-primary px-1">ANALYZING...</span>
+</div>
+<div class="text-mono-sm text-outline mb-2">Shell Correlation: 42% Match</div>
+<div class="w-full h-1 bg-surface mb-3 overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-1/2 animate-[shimmer_2s_infinite]"></div>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 bg-outline-variant flex items-center justify-center text-[8px] font-mono-label">AI</div>
+<span class="text-mono-sm text-outline">SCALPEL-V4</span>
+</div>
+<span class="text-mono-sm font-mono-data text-on-surface">0.62 SCORE</span>
+</div>
+</div>
+<div class="instr-module p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-on-surface">CASE-0731</span>
+</div>
+<div class="text-mono-sm text-outline mb-3">Complex Entity Tree Resolved</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img class="w-5 h-5 border border-outline-variant" data-alt="Portrait of a technical investigator, low key lighting, focus on analytical intensity, clean dark aesthetic with minimal cyan accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgP0J98kH9v1ttg8yAfJ7uVEHphAWn6J_MLg3q6mIDinTdAIKJwt1k1FmuUqrcd_XtsAGp6YXNyZDPfwkBdBfCsgQg6WZBf21sbss8WKmNE3F1wZJx7c1P6nvHBqMQu2b-rP5lgpmFwkRu_dS-BP-lr4AMJThjs4YohDNXWelDmazPURFZ55MWwMNmjAyE2GaXBKJVBM_41FTApcLh9T_hFN27KioUV1W3m-jg4gsthlswkAbqFCM2"/>
+<span class="text-mono-sm text-outline">K. SLATER</span>
+</div>
+<span class="text-mono-sm font-mono-data text-on-surface">0.55 RISK</span>
+</div>
+</div>
+</div>
+</div>
+<!-- REPORTING -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest">
+<span class="font-mono-label text-outline">REPORTING <span class="text-primary-fixed-dim ml-2">[01]</span></span>
+</div>
+<div class="flex-1 overflow-y-auto p-2">
+<div class="instr-module p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-data text-on-surface">CASE-0599</span>
+</div>
+<div class="text-mono-sm text-outline mb-3">Drafting SAR Filing...</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img class="w-5 h-5 border border-outline-variant" data-alt="Minimalist modern business portrait of a legal analyst, high definition clarity, monochromatic color palette with subtle tech overlays." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2K8MzeWvUBJybtF3xTEHyN5K1l6zUTVjFUsvhF6IDJZ9t9SEcExZUf9PJzGMEMeIEzeq7J4llfKeNpELg9jxqpeGhUyMm1Eqjk4V7oopmSviugQ8rkNjATUkokSCTH5bZ_IdD598cCuWIrMglZ21uDtt7MzOL7JbOXjZkaIT7Qcfxsw9Ysa0yTXfBbjF2tkmhj0X71UXPtF61ldi2hzTjubGRj3R1i6-chsDAWjeVrRjdpeKeXvdh"/>
+<span class="text-mono-sm text-outline">J. DOE</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="description">description</span>
+</div>
+</div>
+</div>
+</div>
+<!-- FILING_PENDING -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest">
+<span class="font-mono-label text-outline">FILING_PENDING <span class="text-primary-fixed-dim ml-2">[00]</span></span>
+</div>
+<div class="flex-1 p-4 flex flex-col items-center justify-center opacity-20">
+<span class="material-symbols-outlined text-outline mb-2" data-icon="folder_zip" style="font-size: 32px;">folder_zip</span>
+<span class="text-mono-sm text-outline">QUEUE EMPTY</span>
+</div>
+</div>
+<!-- ARCHIVED -->
+<div class="kanban-column flex flex-col bg-surface">
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest">
+<span class="font-mono-label text-outline">ARCHIVED <span class="text-primary-fixed-dim ml-2">[128]</span></span>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2 opacity-50">
+<div class="instr-module p-3 grayscale">
+<div class="flex justify-between items-start mb-1">
+<span class="font-mono-data text-on-surface">CASE-0012</span>
+</div>
+<span class="text-mono-sm text-outline">Closed: No illicit activity detected.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (Shared Component) -->
+<footer class="flex justify-between items-center h-8 px-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="font-mono-sm text-mono-sm text-outline uppercase">© 2024 FINSKALP FORENSICS // SOVEREIGN NODE SIGNATURE VERIFIED</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface opacity-70 hover:opacity-100 transition-opacity" href="#">Privacy</a>
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface opacity-70 hover:opacity-100 transition-opacity" href="#">Protocol</a>
+<a class="font-mono-sm text-mono-sm text-outline hover:text-on-surface opacity-70 hover:opacity-100 transition-opacity" href="#">Telemetry</a>
+</div>
+<div class="font-mono-label text-mono-label text-outline uppercase tracking-widest flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lock</span>
+                    Sovereign Node
+                </div>
+</div>
+</footer>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                // Command Palette logic would trigger here
+                console.log('Command Palette Triggered');
+            }
+        });
+
+        // Simple shimmer animation control for analysis state
+        const shimmerStyle = document.createElement('style');
+        shimmerStyle.textContent = `
+            @keyframes shimmer {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+        `;
+        document.head.appendChild(shimmerStyle);
+    </script>
+</body></html>

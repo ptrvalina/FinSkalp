@@ -1,0 +1,14 @@
+{
+  "url": "https://rdap.org/domain/ahmia.fi",
+  "discovery_at": "2026-07-09T14:45:31.376885+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": "data\\osint_evidence\\FSK-BF-2026-0709-001-33BE\\3e60f0cbf893\\page.html",
+  "html_sha256": "d6003855605ad9ba95a935bd1f27d9f6f0db810587c27303a62a73eaa767b012",
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-33BE/d6003855605ad9ba95a935bd1f27d9f6f0db810587c27303a62a73eaa767b012",
+  "report_link_ru": "Обнаружено: 2026-07-09T14:45:31.376885+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-33BE/d6003855605ad9ba95a935bd1f27d9f6f0db810587c27303a62a73eaa767b012 · SHA-256 HTML: d6003855605ad9ba…",
+  "status": "pending",
+  "errors": []
+}

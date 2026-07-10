@@ -1,0 +1,16 @@
+{
+  "url": "https://tronscan.org/#/transaction/3aab92a18d1077d2e5f4a0aa36e168fcee531f8d03f1aa2b755e5cfb1d577ec2",
+  "discovery_at": "2026-07-09T10:41:11.382675+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": null,
+  "html_sha256": null,
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-D9B8/unknown",
+  "report_link_ru": "Обнаружено: 2026-07-09T10:41:11.382675+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-D9B8/unknown",
+  "status": "pending",
+  "errors": [
+    "playwright_unavailable_or_fetch_failed"
+  ]
+}

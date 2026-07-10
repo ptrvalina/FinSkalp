@@ -1,0 +1,14 @@
+{
+  "url": "https://dns.google/query?name=t.me&type=A",
+  "discovery_at": "2026-07-09T20:07:44.812786+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": "data\\osint_evidence\\FSK-BF-2026-0709-001-AA50\\7c9b8ab73e19\\page.html",
+  "html_sha256": "d5c34085635e683039c32ad1ea3e3f2df4f491176be54e9a15842b1be72bd9f2",
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-AA50/d5c34085635e683039c32ad1ea3e3f2df4f491176be54e9a15842b1be72bd9f2",
+  "report_link_ru": "Обнаружено: 2026-07-09T20:07:44.812786+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-AA50/d5c34085635e683039c32ad1ea3e3f2df4f491176be54e9a15842b1be72bd9f2 · SHA-256 HTML: d5c34085635e6830…",
+  "status": "pending",
+  "errors": []
+}

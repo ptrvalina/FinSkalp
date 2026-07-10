@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FinSkalp — Enterprise Architecture</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg-2: #0f172a;
+    --panel: #111a2e;
+    --panel-2: #0c1526;
+    --card: #131f38;
+    --card-hover: #17264a;
+    --line: #223252;
+    --line-soft: #1a2740;
+    --text: #e8eefc;
+    --text-dim: #9fb0d0;
+    --text-mute: #6b7da4;
+    --accent: #4c8dff;
+    --accent-soft: #1b2b4d;
+
+    --green: #34d399;
+    --green-bg: rgba(52, 211, 153, 0.12);
+    --green-line: rgba(52, 211, 153, 0.45);
+
+    --yellow: #fbbf24;
+    --yellow-bg: rgba(251, 191, 36, 0.12);
+    --yellow-line: rgba(251, 191, 36, 0.45);
+
+    --orange: #fb923c;
+    --orange-bg: rgba(251, 146, 60, 0.12);
+    --orange-line: rgba(251, 146, 60, 0.45);
+
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #16233f 0%, transparent 60%),
+      radial-gradient(1000px 500px at 0% 0%, #101a30 0%, transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Inter", Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 48px 40px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px 34px;
+    border-radius: 18px;
+    background:
+      linear-gradient(120deg, rgba(76, 141, 255, 0.14), rgba(52, 211, 153, 0.06) 55%, transparent),
+      var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(76,141,255,0.08) 100%);
+    pointer-events: none;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    z-index: 1;
+  }
+  .logo {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    color: #06122a;
+    background: linear-gradient(135deg, #6ea8ff, #34d399);
+    box-shadow: 0 8px 22px rgba(76, 141, 255, 0.35);
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+  }
+  .brand p {
+    margin: 6px 0 0;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .masthead .meta {
+    text-align: right;
+    z-index: 1;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .meta .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    color: #bcd2ff;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 26px 0 8px;
+  }
+  .legend .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--line-soft);
+    flex: 1 1 260px;
+  }
+  .legend .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    flex: none;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.03);
+  }
+  .legend .g { background: var(--green); box-shadow: 0 0 12px var(--green-line); }
+  .legend .y { background: var(--yellow); box-shadow: 0 0 12px var(--yellow-line); }
+  .legend .o { background: var(--orange); box-shadow: 0 0 12px var(--orange-line); }
+  .legend .txt strong { display: block; font-size: 13px; }
+  .legend .txt span { display: block; font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ---------- Layers ---------- */
+  .layer {
+    margin-top: 26px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent), var(--panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .layer-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--line);
+  }
+  .layer-head .idx {
+    font-size: 11px;
+    font-weight: 700;
+    color: #06122a;
+    background: linear-gradient(135deg, #6ea8ff, #34d399);
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .layer-head h2 {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #cdd9f2;
+    font-weight: 700;
+  }
+  .layer-head .sub {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.4px;
+  }
+  .layer-body { padding: 22px; }
+
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+  .g5 { grid-template-columns: repeat(5, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g1 { grid-template-columns: 1fr; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    position: relative;
+    padding: 16px 16px 16px 18px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1px solid var(--line);
+    transition: transform .15s ease, background .15s ease;
+    min-height: 92px;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); }
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 12px; bottom: 12px;
+    width: 4px;
+    border-radius: 4px;
+  }
+  .card.green::before  { background: var(--green);  box-shadow: 0 0 14px var(--green-line); }
+  .card.yellow::before { background: var(--yellow); box-shadow: 0 0 14px var(--yellow-line); }
+  .card.orange::before { background: var(--orange); box-shadow: 0 0 14px var(--orange-line); }
+
+  .card .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    line-height: 1.25;
+  }
+  .card .desc {
+    margin: 9px 0 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+  }
+  .badge {
+    flex: none;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge.green  { color: var(--green);  background: var(--green-bg);  border: 1px solid var(--green-line); }
+  .badge.yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-line); }
+  .badge.orange { color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-line); }
+
+  .card.hero { min-height: auto; padding: 20px 22px; text-align: center; }
+  .card.hero h3 { font-size: 17px; }
+  .card.hero .top { justify-content: center; gap: 12px; }
+  .card.hero .desc { font-size: 12.5px; margin-top: 8px; }
+
+  /* ---------- Flow connector ---------- */
+  .flow {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+  }
+  .flow svg { display: block; }
+  .flow .connector {
+    stroke: var(--line);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .flow-label {
+    text-align: center;
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin: 6px 0;
+  }
+
+  .section-title {
+    margin: 40px 0 2px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-title::before,
+  .section-title::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+  .section-title span {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-dim);
+    font-size: 11.5px;
+    letter-spacing: 0.4px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer strong { color: var(--text); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1000px) {
+    .g5, .g4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 620px) {
+    .g5, .g4, .g2 { grid-template-columns: 1fr; }
+    .page { padding: 24px 16px; }
+    .masthead { flex-direction: column; align-items: flex-start; }
+    .masthead .meta { text-align: left; }
+  }
+
+  /* ---------- Print (PDF export) — keeps the premium dark theme ---------- */
+  @media print {
+    @page { size: A3 portrait; margin: 10mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    html, body {
+      background: var(--bg) !important;
+    }
+    .page { max-width: none; padding: 8px 6px; }
+    .card:hover { transform: none; }
+    .layer, .card, .masthead, .legend .item { break-inside: avoid; }
+    .flow, .flow-label { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="masthead">
+    <div class="brand">
+      <div class="logo">FS</div>
+      <div>
+        <h1>FinSkalp Enterprise Investigation Platform</h1>
+        <p>Financial Intelligence · AML · Blockchain · OSINT · Compliance</p>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="tag">ENTERPRISE ARCHITECTURE</div>
+      <div>Reference System Blueprint</div>
+      <div>Confidential · Prepared for Client Review</div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="item">
+      <span class="dot g"></span>
+      <div class="txt"><strong>Production Ready</strong><span>Полностью реализовано и работает</span></div>
+    </div>
+    <div class="item">
+      <span class="dot y"></span>
+      <div class="txt"><strong>Integration Ready</strong><span>Архитектура готова — ожидает внешних интеграций</span></div>
+    </div>
+    <div class="item">
+      <span class="dot o"></span>
+      <div class="txt"><strong>Enterprise Hardening</strong><span>Реализовано — идёт промышленное усиление</span></div>
+    </div>
+  </div>
+
+  <!-- LAYER 1: ANALYST & OPERATIONS -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">01</span>
+      <h2>Analyst &amp; Operations Layer</h2>
+      <span class="sub">Presentation &amp; Human Interface</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g5">
+        <div class="card green">
+          <div class="top"><h3>Analyst Workspace</h3><span class="badge green">Prod</span></div>
+          <p class="desc">React / Operations UI</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Investigation Center</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Case management console</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Dashboard</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Metrics &amp; overview</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Reports</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Screening · SAR · Forensic</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>AI Assistant</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">Explainable Intelligence (EIA)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg width="2" height="30"><line class="connector" x1="1" y1="0" x2="1" y2="30"/></svg></div>
+
+  <!-- LAYER 2: INVESTIGATION CORE -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">02</span>
+      <h2>Investigation Core</h2>
+      <span class="sub">Orchestration Engine</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g1">
+        <div class="card green hero">
+          <div class="top"><h3>Investigation Engine</h3><span class="badge green">Production Ready</span></div>
+          <p class="desc">Cases · Timeline · Workflow · Tasks · Fusion Orchestration</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-label">Intelligence Collection</div>
+
+  <!-- LAYER 3: INTELLIGENCE SOURCES -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">03</span>
+      <h2>Intelligence Domains</h2>
+      <span class="sub">Data Acquisition &amp; Enrichment</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g4">
+        <div class="card green">
+          <div class="top"><h3>Blockchain Intel</h3><span class="badge green">Prod</span></div>
+          <p class="desc">BTC · ETH · TRON tracing</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>OSINT Intelligence</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Telegram · DNS · Tor · Leaks</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Registry Intelligence</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">EGRUL · CBR · FNS ready</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>Document Intelligence</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">OCR · PDF · Image parsing</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg width="2" height="30"><line class="connector" x1="1" y1="0" x2="1" y2="30"/></svg></div>
+
+  <!-- LAYER 4: FUSION -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">04</span>
+      <h2>Fusion Intelligence Engine</h2>
+      <span class="sub">Correlation &amp; Attribution</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g1">
+        <div class="card green hero">
+          <div class="top"><h3>Fusion Intelligence Engine</h3><span class="badge green">Production Ready</span></div>
+          <p class="desc">Entity Resolution · Correlation · Confidence Scoring · Attribution</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg width="2" height="30"><line class="connector" x1="1" y1="0" x2="1" y2="30"/></svg></div>
+
+  <!-- LAYER 5: KNOWLEDGE GRAPH -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">05</span>
+      <h2>Knowledge Graph Platform</h2>
+      <span class="sub">Unified Intelligence Model</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g1">
+        <div class="card green hero">
+          <div class="top"><h3>Knowledge Graph Platform</h3><span class="badge green">Production Ready</span></div>
+          <p class="desc">Wallets · Persons · Companies · Assets · Relations · Timeline</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-label">Analysis &amp; Decisioning</div>
+
+  <!-- LAYER 6: RISK + EVIDENCE -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">06</span>
+      <h2>Risk &amp; Evidence</h2>
+      <span class="sub">Decisioning &amp; Chain of Custody</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g2">
+        <div class="card green">
+          <div class="top"><h3>Risk Decision Engine</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Explainable Risk Scoring (RDE)</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>Evidence Platform</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">ECCF · Chain of Custody · WORM-ready</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg width="2" height="30"><line class="connector" x1="1" y1="0" x2="1" y2="30"/></svg></div>
+
+  <!-- LAYER 7: REPORT ENGINE -->
+  <div class="layer">
+    <div class="layer-head">
+      <span class="idx">07</span>
+      <h2>Enterprise Report Engine</h2>
+      <span class="sub">Regulatory &amp; Forensic Output</span>
+    </div>
+    <div class="layer-body">
+      <div class="grid g1">
+        <div class="card green hero">
+          <div class="top"><h3>Enterprise Report Engine</h3><span class="badge green">Production Ready</span></div>
+          <p class="desc">Screening · SAR · Forensic · Seizure · PDF · HTML</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLATFORM SERVICES -->
+  <div class="section-title"><span>Enterprise Platform Services</span></div>
+  <div class="layer">
+    <div class="layer-body">
+      <div class="grid g4">
+        <div class="card orange">
+          <div class="top"><h3>ESA Security</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">Audit · RBAC · Policy</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>ASPP Plugins</h3><span class="badge green">Prod</span></div>
+          <p class="desc">SDK · Plugin Registry</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>IDOO Operations</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">Health · Metrics · DR</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Event Bus</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Celery · Redis · Async</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA PLATFORM -->
+  <div class="section-title"><span>Data Platform</span></div>
+  <div class="layer">
+    <div class="layer-body">
+      <div class="grid g4">
+        <div class="card green">
+          <div class="top"><h3>PostgreSQL</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Core relational database</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Neo4j</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Knowledge graph store</p>
+        </div>
+        <div class="card green">
+          <div class="top"><h3>Redis</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Queue · Cache</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Object Storage</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">WORM-ready evidence store</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTERNAL SOURCES -->
+  <div class="section-title"><span>External Data Sources</span></div>
+  <div class="layer">
+    <div class="layer-body">
+      <div class="grid g4">
+        <div class="card green">
+          <div class="top"><h3>Blockchain APIs</h3><span class="badge green">Prod</span></div>
+          <p class="desc">TronGrid · BTC nodes</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Gov Registries</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">EGRUL · CBR · FNS</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Banking Hub</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">STR · CTR · FIU</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Sanctions Feed</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">OFAC · OpenSanctions</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFRASTRUCTURE -->
+  <div class="section-title"><span>Enterprise Infrastructure</span></div>
+  <div class="layer">
+    <div class="layer-body">
+      <div class="grid g4">
+        <div class="card green">
+          <div class="top"><h3>Docker</h3><span class="badge green">Prod</span></div>
+          <p class="desc">Production container stack</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>Kubernetes</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">Production-ready deployment</p>
+        </div>
+        <div class="card orange">
+          <div class="top"><h3>Observability</h3><span class="badge orange">Hardening</span></div>
+          <p class="desc">Prometheus · Grafana · Loki</p>
+        </div>
+        <div class="card yellow">
+          <div class="top"><h3>Enterprise IAM</h3><span class="badge yellow">Integration</span></div>
+          <p class="desc">Keycloak · SIEM · IdP</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div><strong>FinSkalp</strong> · Enterprise Investigation &amp; Intelligence Platform</div>
+    <div>Architecture Blueprint · Confidential — Prepared for Client Review</div>
+  </footer>
+
+</div>
+</body>
+</html>

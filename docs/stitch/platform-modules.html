@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic | Platform Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Load Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#7df4ff",
+                    "tertiary-container": "#ffd386",
+                    "on-secondary-fixed-variant": "#930010",
+                    "on-surface-variant": "#b9cacb",
+                    "error": "#ffb4ab",
+                    "on-secondary": "#680008",
+                    "secondary-fixed": "#ffdad6",
+                    "outline": "#849495",
+                    "primary-fixed-dim": "#00dbe9",
+                    "on-primary-container": "#006970",
+                    "on-surface": "#e5e2e1",
+                    "primary-container": "#00f0ff",
+                    "on-tertiary-fixed-variant": "#5e4200",
+                    "on-primary-fixed": "#002022",
+                    "secondary": "#ffb3ac",
+                    "inverse-surface": "#e5e2e1",
+                    "tertiary-fixed": "#ffdea8",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-secondary-fixed": "#410003",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary-container": "#c40019",
+                    "surface-tint": "#00dbe9",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary-fixed-dim": "#ffba20",
+                    "on-error": "#690005",
+                    "outline-variant": "#3b494b",
+                    "on-primary-fixed-variant": "#004f54",
+                    "error-container": "#93000a",
+                    "tertiary": "#fff4e8",
+                    "on-tertiary-container": "#7d5800",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#006970",
+                    "surface-container": "#201f1f",
+                    "surface-container-highest": "#353534",
+                    "on-background": "#e5e2e1",
+                    "on-tertiary-fixed": "#271900",
+                    "background": "#131313",
+                    "secondary-fixed-dim": "#ffb3ac",
+                    "primary": "#dbfcff",
+                    "surface-bright": "#3a3939",
+                    "surface": "#131313",
+                    "on-tertiary": "#412d00",
+                    "on-secondary-container": "#ffd2cd",
+                    "on-primary": "#00363a",
+                    "surface-variant": "#353534",
+                    "surface-dim": "#131313",
+                    "inverse-on-surface": "#313030"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "tight-inset": "4px",
+                    "standard-inset": "8px",
+                    "unit": "4px",
+                    "module-gap": "1px",
+                    "container-padding": "12px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "mono-data": ["IBM Plex Mono"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "mono-sm": ["IBM Plex Mono"],
+                    "mono-label": ["IBM Plex Mono"]
+            },
+            "fontSize": {
+                    "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            font-size: 18px;
+        }
+        /* Custom scrollbar for tactical feel */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #3b494b; }
+        ::-webkit-scrollbar-thumb:hover { background: #00dbe9; }
+
+        .instrument-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px;
+            background-color: #1F1F1F;
+            border: 1px solid #1F1F1F;
+        }
+        .instrument-card {
+            background-color: #0D0D0D;
+            transition: background-color 0.1s ease;
+        }
+        .instrument-card:hover {
+            background-color: #1A1A1A;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .status-active { background-color: #00dbe9; box-shadow: 0 0 8px #00dbe9; }
+        .status-inactive { background-color: #3b494b; }
+        
+        /* Tactical HUD overlay */
+        .hud-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00dbe9, transparent);
+            height: 1px;
+            width: 100%;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full w-16 bg-surface-dim border-r border-outline-variant flex flex-col items-center py-4 z-50">
+<div class="mb-8">
+<span class="material-symbols-outlined text-primary-fixed text-2xl">terminal</span>
+</div>
+<nav class="flex flex-col gap-4 flex-1">
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">terminal</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">public</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">account_balance_wallet</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">search_insights</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-primary bg-surface-container-high border-l-2 border-primary opacity-80 transition-colors duration-75"><span class="material-symbols-outlined">settings_input_component</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">settings_applications</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">biotech</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">inventory_2</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">description</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-75"><span class="material-symbols-outlined">analytics</span></button>
+</nav>
+<div class="mt-auto">
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-primary"><span class="material-symbols-outlined">security</span></button>
+</div>
+</aside>
+<!-- TopNavBar (Execution from JSON) -->
+<header class="fixed top-0 left-16 right-0 h-12 bg-surface-container-low border-b border-outline-variant flex justify-between items-center px-container-padding z-40">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">FinSkalp Forensic</span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<nav class="flex gap-4">
+<a class="text-on-surface-variant font-mono-label hover:text-primary transition-all" href="#">CIS/FIU</a>
+<a class="text-primary font-mono-label border-b border-primary" href="#">PROD-ACTIVE</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-3 py-1 bg-primary-fixed text-on-primary-fixed font-mono-label text-[10px] uppercase font-bold tracking-wider hover:opacity-90">NEW_INVESTIGATION</button>
+<button class="px-3 py-1 border border-outline-variant text-on-surface-variant font-mono-label text-[10px] uppercase hover:bg-surface-container-highest transition-all">EXPORT</button>
+<div class="flex gap-2 text-outline">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">dark_mode</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">notifications_active</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A futuristic headshot of a cyber-intelligence operator with sleek neon-blue eye implants and tactical gear, illuminated by the cold glow of multiple data screens in a dark, high-tech command center environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs4gfCa2gs-b8wRHthR0zOu1s5f9ESv-Sgyd9HPKtK-laIYSQbO1IeJP5lP5r8uEkhRtxFvGoyFiZS9-at-fpgNgJ9L71WjiqCvIBmNdMB11Z-bpWSdHWeZP14G33OhRYwCCOjrM4MjVF25AYvE1lhG3Y7MlvvXbpRiTEkCrRmzcrAmYFz3q1mEu19zWZzSqD7ZxFW64XOJVFEOfC-PYApstD8t3xj_Ex6R5tKsXfejHAg9hvR1CAc"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-16 mt-12 mb-6 p-4">
+<!-- Platform Header Section -->
+<div class="mb-6 flex flex-col md:flex-row justify-between items-end gap-4 border-b border-outline-variant pb-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tighter mb-1">PLATFORM_CATALOG</h1>
+<p class="font-mono-data text-mono-data text-outline">INTELLIGENCE_LAYER_V4.0.2 // ARCHITECTURE: DISTRIBUTED_TRUST</p>
+</div>
+<div class="flex gap-4 font-mono-sm text-mono-sm">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-lowest border border-outline-variant">
+<span class="status-dot status-active"></span>
+<span class="text-on-surface">CORE_ENGINES: ONLINE</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-lowest border border-outline-variant">
+<span class="status-dot status-active"></span>
+<span class="text-on-surface">UPLINK: 4.8 GB/S</span>
+</div>
+</div>
+</div>
+<!-- High-Density Component Grid -->
+<div class="instrument-grid mb-1">
+<!-- IC-01 Banking Hub -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0001</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-01 Banking Hub</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Centralized telemetry for fiat-on-ramp institutions and SWIFT corridor monitoring.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">LATENCY: 4ms</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-02 KYT Monitor -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0002</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-02 KYT Monitor</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Real-time Know Your Transaction layer with heuristic taint-tracking and whale alerts.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">THROUGHPUT: HIGH</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-03 OSINT Fusion -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0003</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-03 OSINT Fusion</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Cross-platform intelligence gathering across darknets and social telemetry feeds.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">SENSORS: 48</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-04 Sovereign Screening -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0004</span>
+<span class="status-dot status-inactive"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-04 Sovereign Screening</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Automated sanctions screening against OFAC, EU, and sovereign-specific lists.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">STATUS: STANDBY</span>
+<button class="text-outline border border-outline-variant px-2 py-1 text-[10px] font-mono-label uppercase hover:border-primary-fixed hover:text-primary-fixed">Initialize</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-05 Risk Labels Registry -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0005</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-05 Risk Labels</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Global database of wallet attributions, entity tagging, and risk classification.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">ENTRIES: 1.2M</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-06 Cross-border Analytics -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0006</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-06 Cross-border</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Multivariate flow analysis for international capital migration and shell-entity detection.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">REGIONS: GLOBAL</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-07 Risk Engine -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0007</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-07 Risk Engine</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Programmable risk scoring via neural-weights and custom jurisdictional thresholds.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">LOAD: 12%</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+<!-- IC-08 115-FZ Reporting -->
+<div class="instrument-card p-4 flex flex-col group relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-primary-fixed opacity-60">RFC-0008</span>
+<span class="status-dot status-active"></span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">IC-08 115-FZ</h3>
+<p class="text-mono-sm text-outline mb-4 leading-relaxed">Automated regulatory filing module specifically tuned for local AML compliance signatures.</p>
+<div class="mt-auto flex justify-between items-center">
+<span class="font-mono-label text-[9px] text-outline-variant uppercase tracking-widest">SIGS: 2,401</span>
+<button class="text-primary-fixed border border-primary-fixed/20 px-2 py-1 text-[10px] font-mono-label uppercase hover:bg-primary-fixed hover:text-on-primary">Deploy</button>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary-fixed scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+</div>
+</div>
+<!-- Bridge & Studio Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-px bg-outline-variant mt-px border border-outline-variant">
+<!-- KYC/KYB Bridge -->
+<div class="bg-surface-container-low p-6 group hover:bg-surface-container">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 flex items-center justify-center bg-primary-fixed text-on-primary-fixed">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">KYC/KYB Bridge</h2>
+<p class="font-mono-sm text-outline">CROSS-PROTOCOL IDENTITY LAYER</p>
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant mb-6 max-w-lg">
+                    Unify fragmented identity data across on-chain wallets and traditional corporate structures. Features 1:N entity resolution and ultimate beneficial owner (UBO) discovery.
+                </p>
+<div class="flex gap-4">
+<button class="px-4 py-2 bg-primary-fixed text-on-primary-fixed font-mono-label text-[11px] uppercase tracking-wider font-bold">Initialize Sync</button>
+<button class="px-4 py-2 border border-outline-variant text-outline font-mono-label text-[11px] uppercase hover:text-on-surface transition-colors">Documentation</button>
+</div>
+</div>
+<!-- Scenario Studio -->
+<div class="bg-surface-container-low p-6 group hover:bg-surface-container">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 flex items-center justify-center border border-primary-fixed text-primary-fixed">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Scenario Studio</h2>
+<p class="font-mono-sm text-outline">STRESS-TESTING &amp; SANDBOXING</p>
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant mb-6 max-w-lg">
+                    Design and simulate complex money laundering patterns. Battle-test your Risk Engine IC-07 against synthetic attack vectors and historic wash-trading signatures.
+                </p>
+<div class="flex gap-4">
+<button class="px-4 py-2 bg-on-surface text-background font-mono-label text-[11px] uppercase tracking-wider font-bold">Open Studio</button>
+<div class="flex items-center gap-2 font-mono-sm text-outline ml-auto">
+<span class="material-symbols-outlined text-[14px]">history</span>
+<span>LAST_RUN: 12H AGO</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Feed Overlay (Tactical Detail) -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-mono-label text-[10px] text-outline uppercase">System_Load</span>
+<span class="font-mono-data text-primary-fixed">24.1%</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full relative">
+<div class="absolute left-0 top-0 h-full bg-primary-fixed" style="width: 24%"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-mono-label text-[10px] text-outline uppercase">Active_Nodes</span>
+<span class="font-mono-data text-primary-fixed">1,094</span>
+</div>
+<div class="flex gap-1">
+<div class="h-1 flex-1 bg-primary-fixed opacity-80"></div>
+<div class="h-1 flex-1 bg-primary-fixed opacity-60"></div>
+<div class="h-1 flex-1 bg-primary-fixed opacity-40"></div>
+<div class="h-1 flex-1 bg-primary-fixed opacity-20"></div>
+<div class="h-1 flex-1 bg-surface-container-highest"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-mono-label text-[10px] text-outline uppercase">Security_Auth</span>
+<span class="font-mono-data text-on-secondary-fixed-variant">VERIFIED</span>
+</div>
+<div class="flex justify-center gap-4">
+<span class="material-symbols-outlined text-outline-variant text-sm">lock</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">key</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">shield</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer (Execution from JSON) -->
+<footer class="fixed bottom-0 right-0 w-[calc(100%-4rem)] h-6 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-4 z-40">
+<div class="flex items-center gap-4">
+<span class="font-mono-label text-mono-label uppercase tracking-widest text-on-surface">SOVEREIGN NODE // SYSTEM SIGNATURE</span>
+<span class="font-mono-sm text-mono-sm text-outline">LATENCY: 12ms</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-mono-sm text-mono-sm text-outline">UPTIME: 99.99%</span>
+<span class="font-mono-sm text-mono-sm text-primary">SESSION_ACTIVE</span>
+</div>
+</footer>
+<!-- Atmosphere/Micro-Interactions Script -->
+<script>
+        // Subtle data-stream simulation
+        setInterval(() => {
+            const dataPoints = document.querySelectorAll('.font-mono-data');
+            const randomPoint = dataPoints[Math.floor(Math.random() * dataPoints.length)];
+            if(randomPoint.innerText.includes('%')) {
+                const current = parseFloat(randomPoint.innerText);
+                const next = (current + (Math.random() - 0.5) * 2).toFixed(1);
+                randomPoint.innerText = `${next}%`;
+            }
+        }, 2000);
+
+        // Command Palette Placeholder Interaction (Ctrl+K)
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                alert('Command Palette: [SEARCH_COMPONENTS_INITIALIZED]');
+            }
+        });
+    </script>
+</body></html>

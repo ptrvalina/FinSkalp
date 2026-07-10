@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic | Investigation Ops Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;450;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @id tailwind-config;
+        /* Custom scrollbar for tactical minimalism */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1F1F1F; }
+        ::-webkit-scrollbar-thumb:hover { background: #00dbe9; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        
+        .risk-gradient {
+            background: linear-gradient(90deg, #00dbe9 0%, #ffba20 50%, #ffb3ac 100%);
+        }
+
+        .scanning-line {
+            height: 2px;
+            background: #00dbe9;
+            box-shadow: 0 0 8px #00dbe9;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(400px); opacity: 0; }
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1px;
+            background-color: #1F1F1F;
+        }
+
+        .mono-label { font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; }
+        .mono-data { font-family: 'IBM Plex Mono'; font-size: 13px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#ffba20",
+                      "error": "#ffb4ab",
+                      "on-primary-fixed-variant": "#004f54",
+                      "inverse-primary": "#006970",
+                      "surface": "#131313",
+                      "tertiary-fixed": "#ffdea8",
+                      "secondary-fixed": "#ffdad6",
+                      "surface-container-high": "#2a2a2a",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-container": "#ffd2cd",
+                      "secondary": "#ffb3ac",
+                      "surface-tint": "#00dbe9",
+                      "surface-variant": "#353534",
+                      "surface-bright": "#3a3939",
+                      "surface-container-low": "#1c1b1b",
+                      "outline-variant": "#3b494b",
+                      "secondary-fixed-dim": "#ffb3ac",
+                      "on-surface": "#e5e2e1",
+                      "on-tertiary": "#412d00",
+                      "primary-fixed": "#7df4ff",
+                      "on-tertiary-fixed": "#271900",
+                      "on-background": "#e5e2e1",
+                      "error-container": "#93000a",
+                      "primary-container": "#00f0ff",
+                      "on-surface-variant": "#b9cacb",
+                      "surface-container-highest": "#353534",
+                      "on-error": "#690005",
+                      "on-primary": "#00363a",
+                      "outline": "#849495",
+                      "inverse-on-surface": "#313030",
+                      "on-primary-fixed": "#002022",
+                      "surface-dim": "#131313",
+                      "on-secondary-fixed": "#410003",
+                      "inverse-surface": "#e5e2e1",
+                      "surface-container": "#201f1f",
+                      "on-secondary-fixed-variant": "#930010",
+                      "on-tertiary-fixed-variant": "#5e4200",
+                      "tertiary-container": "#ffd386",
+                      "on-primary-container": "#006970",
+                      "surface-container-lowest": "#0e0e0e",
+                      "primary": "#dbfcff",
+                      "background": "#131313",
+                      "tertiary": "#fff4e8",
+                      "primary-fixed-dim": "#00dbe9",
+                      "secondary-container": "#c40019",
+                      "on-secondary": "#680008",
+                      "on-tertiary-container": "#7d5800"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Inter"],
+                      "mono-sm": ["IBM Plex Mono"],
+                      "mono-data": ["IBM Plex Mono"],
+                      "mono-label": ["IBM Plex Mono"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"]
+              },
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-surface-container-lowest text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- SideNavBar (JSON Derived) -->
+<aside class="fixed h-screen w-16 left-0 top-0 bg-surface-dim border-r border-outline-variant flex flex-col items-center py-4 z-50">
+<div class="mb-8">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<nav class="flex flex-col gap-4 flex-1">
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-primary bg-surface-container-high border-l-2 border-primary" title="Command Center">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors" title="OSINT Hub">
+<span class="material-symbols-outlined">public</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors" title="Investigations">
+<span class="material-symbols-outlined">search_insights</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors" title="Wallet Check">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors" title="Platform">
+<span class="material-symbols-outlined">settings_applications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-sm text-outline hover:text-on-surface-variant hover:bg-surface-container-highest transition-colors" title="Reports">
+<span class="material-symbols-outlined">description</span>
+</button>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-4 flex flex-col gap-4">
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface" title="Sovereign Node">
+<span class="material-symbols-outlined">security</span>
+</button>
+</div>
+</aside>
+<!-- TopNavBar (JSON Derived) -->
+<header class="fixed top-0 left-16 right-0 h-12 bg-surface-container-low border-b border-outline-variant flex items-center justify-between px-4 z-40">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">FinSkalp Forensic</h1>
+<div class="flex gap-4">
+<a class="text-primary font-mono-label border-b border-primary h-12 flex items-center px-2" href="#">CIS/FIU</a>
+<a class="text-on-surface-variant font-mono-label hover:text-primary h-12 flex items-center px-2" href="#">PROD-ACTIVE</a>
+</div>
+<div class="relative flex items-center ml-4">
+<span class="material-symbols-outlined absolute left-2 text-outline text-sm">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant text-mono-data font-mono-data px-8 py-1 w-64 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="PORT 8877/OPS COMMAND..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-surface-container-highest border border-outline-variant px-3 py-1 hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-sm">file_download</span>
+<span class="font-mono-label text-on-surface">EXPORT</span>
+</button>
+<button class="flex items-center gap-2 bg-primary-container px-3 py-1 hover:opacity-80 transition-all">
+<span class="material-symbols-outlined text-sm text-on-primary">add</span>
+<span class="font-mono-label text-on-primary font-bold">NEW_INVESTIGATION</span>
+</button>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">dark_mode</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary relative">
+                    notifications_active
+                    <span class="absolute top-0 right-0 w-1.5 h-1.5 bg-error rounded-full"></span>
+</span>
+<img class="w-8 h-8 bg-surface-variant border border-outline-variant object-cover" data-alt="A close up high-detail profile avatar of a tactical analyst operator wearing dark glass visors with data reflections in a neon-cyan laboratory setting. High-contrast dark room photography with sharp focus on technical details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFILtdLXCc5lhskidlG5w_v2Rvp9JhyOtwM3ChIgnN4GPLiqdZqm6yUrlw0AjhANRNYFuXtiMQ_eD9cAx9fHQ-sTTVpgc8YFIs-yNUJX08tVtpNNioUYaiASZOkBz2xlYaWaMr_vsa6ZHLvEP924w91zSLt5CJoaECurnO8OGap24d2egrs1kjzZrau5S4Eyc_X1fsJDA2lf_5pxchQdm_FxRhNVQAFfwU5EnmKP0EXzX4gMUKwrx-"/>
+</div>
+</div>
+</header>
+<!-- Main Workspace Area -->
+<main class="ml-16 mt-12 h-[calc(100vh-12px)] bento-grid overflow-hidden">
+<!-- Left Rail: Case Queue -->
+<section class="col-span-2 bg-surface-container-lowest flex flex-col border-r border-outline-variant h-full overflow-hidden">
+<div class="p-3 border-b border-outline-variant bg-surface-dim flex justify-between items-center">
+<span class="font-mono-label text-primary">Priority Queue</span>
+<span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="overflow-y-auto flex-1">
+<!-- Case Item 1 (Active) -->
+<div class="p-3 border-b border-outline-variant bg-surface-container-high border-l-4 border-l-primary cursor-pointer relative group">
+<div class="absolute top-0 left-0 w-full overflow-hidden pointer-events-none h-full">
+<div class="scanning-line"></div>
+</div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-sm text-primary-fixed-dim">CRIT-A09</span>
+<span class="bg-error/20 text-error px-1 text-[9px] font-mono-label">PRIORITY: 1</span>
+</div>
+<h3 class="font-headline-md text-sm mb-1">X-Chain Laundering</h3>
+<p class="font-mono-sm text-outline mb-2">Target: 0x4f...991a</p>
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1 bg-surface-container-highest">
+<div class="h-full bg-error w-[88%]"></div>
+</div>
+<span class="font-mono-sm text-error">88%</span>
+</div>
+</div>
+<!-- Case Items -->
+<div class="p-3 border-b border-outline-variant hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-sm text-on-surface-variant">MED-B12</span>
+<span class="bg-tertiary-fixed-dim/20 text-tertiary-fixed-dim px-1 text-[9px] font-mono-label">PRIORITY: 3</span>
+</div>
+<h3 class="font-headline-md text-sm mb-1">Mirror Proxy Loop</h3>
+<p class="font-mono-sm text-outline mb-2">Target: 0xbc...f3e2</p>
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1 bg-surface-container-highest">
+<div class="h-full bg-tertiary-fixed-dim w-[42%]"></div>
+</div>
+<span class="font-mono-sm text-tertiary-fixed-dim">42%</span>
+</div>
+</div>
+<div class="p-3 border-b border-outline-variant hover:bg-surface-container transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-mono-sm text-on-surface-variant">LOW-C88</span>
+<span class="bg-outline/20 text-outline px-1 text-[9px] font-mono-label">PRIORITY: 5</span>
+</div>
+<h3 class="font-headline-md text-sm mb-1">Stale Account Trigger</h3>
+<p class="font-mono-sm text-outline mb-2">Target: 0x92...aa11</p>
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1 bg-surface-container-highest">
+<div class="h-full bg-primary w-[12%]"></div>
+</div>
+<span class="font-mono-sm text-primary">12%</span>
+</div>
+</div>
+<!-- Repeat list... -->
+<div class="p-3 border-b border-outline-variant hover:bg-surface-container transition-colors cursor-pointer" v-for="i in 5">
+<span class="font-mono-sm text-outline italic opacity-50">SYNCING LIVE FEED...</span>
+</div>
+</div>
+<div class="p-3 bg-surface-dim border-t border-outline-variant">
+<button class="w-full text-center border border-dashed border-outline-variant p-2 font-mono-label text-outline hover:text-primary hover:border-primary transition-all">
+                    LOAD ARCHIVED BATCH
+                </button>
+</div>
+</section>
+<!-- Center Workspace: Tabs and Data Grid -->
+<section class="col-span-6 bg-surface flex flex-col h-full overflow-hidden border-r border-outline-variant">
+<!-- Workspace Tabs -->
+<div class="h-10 bg-surface-container-low border-b border-outline-variant flex items-center px-4 gap-4">
+<button class="text-primary font-mono-label border-b border-primary h-full flex items-center px-4">TRANSACTIONS_LOG</button>
+<button class="text-on-surface-variant font-mono-label hover:text-on-surface h-full flex items-center px-4">WALLET_GRAPH</button>
+<button class="text-on-surface-variant font-mono-label hover:text-on-surface h-full flex items-center px-4">ENTITY_DNA</button>
+<button class="text-on-surface-variant font-mono-label hover:text-on-surface h-full flex items-center px-4">ST.6_ANALYTICS</button>
+<div class="ml-auto flex items-center gap-3">
+<span class="font-mono-sm text-error animate-pulse">[ 3 ALERT FLAGS ]</span>
+</div>
+</div>
+<!-- Toolbar Actions -->
+<div class="h-10 bg-surface-dim border-b border-outline-variant flex items-center justify-between px-4">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-1.5 font-mono-label text-on-surface-variant hover:text-on-surface text-[10px]">
+<span class="material-symbols-outlined text-[14px]">filter_list</span> FILTER
+                    </button>
+<button class="flex items-center gap-1.5 font-mono-label text-on-surface-variant hover:text-on-surface text-[10px]">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span> RANGE: 24H
+                    </button>
+</div>
+<div class="flex items-center gap-2">
+<button class="bg-surface-container border border-outline-variant px-2 py-0.5 font-mono-label text-on-surface text-[10px] hover:border-primary">PDF_REP</button>
+<button class="bg-surface-container border border-outline-variant px-2 py-0.5 font-mono-label text-on-surface text-[10px] hover:border-primary">XLS_RAW</button>
+<button class="bg-secondary-container px-2 py-0.5 font-mono-label text-on-secondary text-[10px] font-bold">SAR_FILING</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="flex-1 overflow-auto bg-surface-container-lowest">
+<table class="w-full border-collapse">
+<thead class="sticky top-0 bg-surface-dim z-10 border-b border-outline-variant">
+<tr class="font-mono-label text-on-surface-variant text-left">
+<th class="px-4 py-2 border-r border-outline-variant font-medium">TIMESTAMP</th>
+<th class="px-4 py-2 border-r border-outline-variant font-medium">HASH_FRAGMENT</th>
+<th class="px-4 py-2 border-r border-outline-variant font-medium">DESTINATION_ADDR</th>
+<th class="px-4 py-2 border-r border-outline-variant font-medium">VALUE_SKL</th>
+<th class="px-4 py-2 border-r border-outline-variant font-medium">ST.6_TRIGGER</th>
+<th class="px-4 py-2 font-medium">RISK_SIG</th>
+</tr>
+</thead>
+<tbody class="font-mono-data text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors">
+<td class="px-4 py-2 text-outline">14:22:01.002</td>
+<td class="px-4 py-2 text-primary">0x...fE21</td>
+<td class="px-4 py-2 group cursor-pointer">
+<span class="hover:underline">0x921a...4f9b</span>
+<span class="material-symbols-outlined text-[12px] opacity-0 group-hover:opacity-100 ml-1">content_copy</span>
+</td>
+<td class="px-4 py-2 text-on-surface font-semibold">1,200.45</td>
+<td class="px-4 py-2">
+<span class="bg-error/10 text-error px-1.5 py-0.5 rounded-sm text-[10px] font-mono-label">STR_6.1_FR_HIGH</span>
+</td>
+<td class="px-4 py-2 min-w-[120px]">
+<div class="flex items-center gap-2">
+<div class="w-full h-2 bg-surface-container border border-outline-variant relative overflow-hidden">
+<div class="h-full risk-gradient w-[92%]"></div>
+</div>
+<span class="text-[10px]">92%</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors">
+<td class="px-4 py-2 text-outline">14:21:58.941</td>
+<td class="px-4 py-2 text-primary">0x...aA92</td>
+<td class="px-4 py-2 group">
+<span class="hover:underline">0x442b...cc01</span>
+</td>
+<td class="px-4 py-2 text-on-surface font-semibold">45.00</td>
+<td class="px-4 py-2">
+<span class="bg-tertiary-fixed-dim/10 text-tertiary-fixed-dim px-1.5 py-0.5 rounded-sm text-[10px] font-mono-label">STR_6.3_MIXER</span>
+</td>
+<td class="px-4 py-2 min-w-[120px]">
+<div class="flex items-center gap-2">
+<div class="w-full h-2 bg-surface-container border border-outline-variant relative overflow-hidden">
+<div class="h-full risk-gradient w-[64%]"></div>
+</div>
+<span class="text-[10px]">64%</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors">
+<td class="px-4 py-2 text-outline">14:21:44.221</td>
+<td class="px-4 py-2 text-primary">0x...88BC</td>
+<td class="px-4 py-2 group">
+<span class="hover:underline">0xee92...999b</span>
+</td>
+<td class="px-4 py-2 text-on-surface font-semibold">12.20</td>
+<td class="px-4 py-2">
+<span class="text-outline text-[10px] font-mono-label">CLEAN_PASS</span>
+</td>
+<td class="px-4 py-2 min-w-[120px]">
+<div class="flex items-center gap-2">
+<div class="w-full h-2 bg-surface-container border border-outline-variant relative overflow-hidden">
+<div class="h-full bg-primary w-[08%]"></div>
+</div>
+<span class="text-[10px]">08%</span>
+</div>
+</td>
+</tr>
+<!-- Row 4-10 (Auto Filler) -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors" v-for="i in 10">
+<td class="px-4 py-2 text-outline">14:20:--.---</td>
+<td class="px-4 py-2 text-primary">0x...----</td>
+<td class="px-4 py-2 group"><span class="opacity-20 italic">AWAITING SYSTEM HOOK...</span></td>
+<td class="px-4 py-2 text-on-surface font-semibold">--.--</td>
+<td class="px-4 py-2"><span class="opacity-10">-</span></td>
+<td class="px-4 py-2">
+<div class="w-full h-2 bg-surface-container border border-outline-variant opacity-20"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right Panel: Live Evidence Graph -->
+<section class="col-span-4 bg-surface-dim flex flex-col h-full border-l border-outline-variant">
+<div class="p-3 border-b border-outline-variant flex justify-between items-center">
+<span class="font-mono-label text-primary">Evidence Graph (Live)</span>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary">zoom_in</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary">center_focus_weak</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary">settings</span>
+</div>
+</div>
+<!-- Graph Canvas -->
+<div class="flex-1 relative bg-[#050505] overflow-hidden">
+<!-- Dot Grid Overlay -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#849495 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- Mock Graph Nodes/Lines (Absolute Positioned for UI Feel) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<line stroke="#1F1F1F" stroke-width="1.5" x1="50%" x2="30%" y1="50%" y2="40%"></line>
+<line stroke="#00dbe9" stroke-dasharray="4 4" stroke-width="2" x1="50%" x2="70%" y1="50%" y2="30%">
+<animate attributename="stroke-dashoffset" dur="2s" from="0" repeatcount="indefinite" to="20"></animate>
+</line>
+<line stroke="#1F1F1F" stroke-width="1.5" x1="50%" x2="60%" y1="50%" y2="70%"></line>
+</svg>
+<!-- Central Node -->
+<div class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="w-12 h-12 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center shadow-[0_0_15px_rgba(0,219,233,0.3)]">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+<span class="mt-2 font-mono-sm text-primary text-[9px] bg-black/80 px-2">TARGET_ALPHA</span>
+</div>
+<!-- Leaf Node 1 -->
+<div class="absolute top-[35%] left-[28%] flex flex-col items-center">
+<div class="w-10 h-10 rounded-full border border-outline bg-surface-container flex items-center justify-center hover:border-primary transition-all cursor-move">
+<span class="material-symbols-outlined text-outline text-lg">store</span>
+</div>
+<span class="mt-1 font-mono-sm text-on-surface-variant text-[8px]">MERCHANT_04</span>
+</div>
+<!-- Leaf Node 2 (Risk) -->
+<div class="absolute top-[25%] left-[72%] flex flex-col items-center group">
+<div class="w-10 h-10 rounded-full border-2 border-error bg-error/10 flex items-center justify-center animate-pulse">
+<span class="material-symbols-outlined text-error text-lg">emergency_home</span>
+</div>
+<span class="mt-1 font-mono-sm text-error text-[8px] bg-black/80 px-1 border border-error/20">DARK_EXCHANGE</span>
+</div>
+<!-- Legend / Status HUD -->
+<div class="absolute bottom-4 left-4 p-2 bg-black/60 border border-outline-variant backdrop-blur-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-mono-sm text-[9px]">HIGH RISK</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-mono-sm text-[9px]">PRIMARY TARGET</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-mono-sm text-[9px]">NEUTRAL NODE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Temporal Scrubbing Timeline -->
+<div class="h-32 border-t border-outline-variant bg-surface-container-low p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-mono-label text-[10px] text-outline">TEMPORAL_SEQUENCE</span>
+<span class="font-mono-sm text-[10px] text-primary">T-Minus 48:12:00</span>
+</div>
+<!-- Timeline Visualization -->
+<div class="relative w-full h-12 bg-surface-container-lowest border border-outline-variant mb-2 group cursor-crosshair">
+<!-- Event markers -->
+<div class="absolute left-[10%] top-0 h-full w-[2px] bg-primary/40"></div>
+<div class="absolute left-[35%] top-0 h-full w-[2px] bg-error"></div>
+<div class="absolute left-[40%] top-0 h-full w-[1px] bg-primary/20"></div>
+<div class="absolute left-[80%] top-0 h-full w-[3px] bg-tertiary-fixed-dim"></div>
+<!-- Scrubbing Head -->
+<div class="absolute left-[35%] top-0 h-full w-[2px] bg-primary z-10 shadow-[0_0_10px_#00dbe9]" id="scrub-head">
+<div class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-primary rotate-45"></div>
+</div>
+<!-- Sparkline Trend in timeline -->
+<div class="absolute inset-0 flex items-end px-1 opacity-20">
+<div class="flex-1 bg-primary h-[10%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[30%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[80%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[20%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[60%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[90%] mx-[1px]"></div>
+<div class="flex-1 bg-error h-[100%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[40%] mx-[1px]"></div>
+<div class="flex-1 bg-primary h-[20%] mx-[1px]"></div>
+</div>
+</div>
+<div class="flex justify-between font-mono-sm text-[8px] text-outline">
+<span>OCT 22 00:00</span>
+<span>OCT 23 00:00</span>
+<span>OCT 24 00:00</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (JSON Derived) -->
+<footer class="fixed bottom-0 right-0 w-[calc(100%-4rem)] h-6 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-4 z-40">
+<div class="flex gap-4">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">LATENCY: 12ms</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">UPTIME: 99.99%</span>
+<span class="font-mono-sm text-mono-sm text-primary opacity-80 border-l border-outline-variant pl-4">STATUS: SECURE_CHANNEL_ACTIVE</span>
+</div>
+<div class="font-mono-label text-mono-label uppercase tracking-widest text-on-surface">
+            SOVEREIGN NODE // SYSTEM SIGNATURE
+        </div>
+</footer>
+<!-- Tactical Micro-interations Script -->
+<script>
+        // Simple scrubbing animation mock
+        const scrubHead = document.getElementById('scrub-head');
+        let pos = 35;
+        let direction = 0.05;
+
+        function animateTimeline() {
+            pos += direction;
+            if (pos > 95 || pos < 5) direction *= -1;
+            scrubHead.style.left = pos + '%';
+            requestAnimationFrame(animateTimeline);
+        }
+        
+        // Start minimal atmospheric movement
+        setTimeout(animateTimeline, 1000);
+
+        // Hover sounds/effects simulation can be added here
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                // Potential tactile sound trigger
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinSkalp Forensic | Registries</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 18px;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1F1F1F; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b494b; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .scanline {
+            width: 100%;
+            height: 1px;
+            background: rgba(219, 252, 255, 0.05);
+            position: absolute;
+            top: 0;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            from { transform: translateY(0); }
+            to { transform: translateY(100vh); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#7df4ff",
+                      "tertiary-container": "#ffd386",
+                      "on-secondary-fixed-variant": "#930010",
+                      "on-surface-variant": "#b9cacb",
+                      "error": "#ffb4ab",
+                      "on-secondary": "#680008",
+                      "secondary-fixed": "#ffdad6",
+                      "outline": "#849495",
+                      "primary-fixed-dim": "#00dbe9",
+                      "on-primary-container": "#006970",
+                      "on-surface": "#e5e2e1",
+                      "primary-container": "#00f0ff",
+                      "on-tertiary-fixed-variant": "#5e4200",
+                      "on-primary-fixed": "#002022",
+                      "secondary": "#ffb3ac",
+                      "inverse-surface": "#e5e2e1",
+                      "tertiary-fixed": "#ffdea8",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-secondary-fixed": "#410003",
+                      "surface-container-low": "#1c1b1b",
+                      "secondary-container": "#c40019",
+                      "surface-tint": "#00dbe9",
+                      "surface-container-high": "#2a2a2a",
+                      "tertiary-fixed-dim": "#ffba20",
+                      "on-error": "#690005",
+                      "outline-variant": "#3b494b",
+                      "on-primary-fixed-variant": "#004f54",
+                      "error-container": "#93000a",
+                      "tertiary": "#fff4e8",
+                      "on-tertiary-container": "#7d5800",
+                      "on-error-container": "#ffdad6",
+                      "inverse-primary": "#006970",
+                      "surface-container": "#201f1f",
+                      "surface-container-highest": "#353534",
+                      "on-background": "#e5e2e1",
+                      "on-tertiary-fixed": "#271900",
+                      "background": "#131313",
+                      "secondary-fixed-dim": "#ffb3ac",
+                      "primary": "#dbfcff",
+                      "surface-bright": "#3a3939",
+                      "surface": "#131313",
+                      "on-tertiary": "#412d00",
+                      "on-secondary-container": "#ffd2cd",
+                      "on-primary": "#00363a",
+                      "surface-variant": "#353534",
+                      "surface-dim": "#131313",
+                      "inverse-on-surface": "#313030"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "tight-inset": "4px",
+                      "standard-inset": "8px",
+                      "unit": "4px",
+                      "module-gap": "1px",
+                      "container-padding": "12px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "mono-data": ["IBM Plex Mono"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "mono-sm": ["IBM Plex Mono"],
+                      "mono-label": ["IBM Plex Mono"]
+              },
+              "fontSize": {
+                      "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<div class="scanline pointer-events-none"></div>
+<aside class="fixed left-0 top-0 h-full w-16 bg-surface-dim border-r border-outline-variant flex flex-col items-center py-4 z-50">
+<div class="mb-8">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface tracking-tighter">FS</span>
+</div>
+<nav class="flex flex-col gap-2 flex-grow">
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="Command Center">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="OSINT Hub">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="Wallet Check">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="Investigations">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="Microservices">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-primary bg-surface-container-high border-l-2 border-primary transition-colors duration-75 cursor-pointer" title="Registries">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+</div>
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:bg-surface-container-highest transition-colors duration-75 cursor-pointer" title="Reports">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+</nav>
+<div class="mt-auto flex flex-col items-center gap-4">
+<div class="w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant cursor-pointer" title="Sovereign Node">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Close-up professional macro photography of a high-tech biometric identity profile avatar, minimalist glowing cyan circuitry patterns on a deep obsidian mask, hyper-focused lighting, cinematic sci-fi intelligence operator aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3gCsKvZR1Hnadoit1g_Avg2v2dof0H5KYSwNHqlCaKjrO3qQPll-sAE5SbtuPTYfPCDyoiurbGP6Z4rM52pT0qai4ToJxNWQmUaY2hXwjA6fJGMUaB4H6A58dHKJGWa-QZP_ZgeiLgLU9RkffOvknYNlb11uRQIIiBrdaXUN_W7EVlGQmKGL50d0-yku7yEJSKqp7ZeBqrUtjKs7lvOSFekDQaVdZfHKG11wARjGJTocVFyl7eUMo"/>
+</div>
+</div>
+</aside>
+<header class="ml-16 h-12 bg-surface-container-low border-b border-outline-variant flex justify-between items-center px-container-padding z-40">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">FinSkalp Forensic</h1>
+<div class="hidden md:flex gap-4">
+<span class="text-primary font-mono-label border-b border-primary cursor-pointer h-12 flex items-center">REGISTRIES</span>
+<span class="text-on-surface-variant font-mono-label hover:bg-surface-container-highest transition-all cursor-pointer h-12 flex items-center px-2">PROD-ACTIVE</span>
+<span class="text-on-surface-variant font-mono-label hover:bg-surface-container-highest transition-all cursor-pointer h-12 flex items-center px-2">CIS/FIU</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-lowest border border-outline-variant px-2 h-8">
+<span class="material-symbols-outlined text-outline text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-mono-data font-mono-data text-xs w-48 text-on-surface placeholder:text-outline-variant" placeholder="QUERY DATABASE..." type="text"/>
+</div>
+<button class="flex items-center gap-1 bg-primary text-on-primary px-3 h-8 text-mono-label font-mono-label font-bold hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                NEW_INVESTIGATION
+            </button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-on-surface transition-colors" data-icon="dark_mode">dark_mode</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-on-surface transition-colors" data-icon="notifications_active">notifications_active</span>
+</div>
+</div>
+</header>
+<main class="ml-16 flex-grow flex flex-col overflow-hidden bg-background">
+<div class="flex border-b border-outline-variant bg-surface-container-lowest">
+<button class="px-6 h-10 border-r border-outline-variant flex items-center gap-2 text-mono-label font-mono-label text-primary bg-surface-container-low border-b-2 border-b-primary transition-all" id="tab-banks" onclick="switchTab('banks')">
+<span class="material-symbols-outlined text-sm" data-icon="account_balance">account_balance</span>
+                BANKING_INSTITUTIONS
+            </button>
+<button class="px-6 h-10 border-r border-outline-variant flex items-center gap-2 text-mono-label font-mono-label text-outline hover:text-on-surface transition-all" id="tab-vasp" onclick="switchTab('vasp')">
+<span class="material-symbols-outlined text-sm" data-icon="currency_bitcoin">currency_bitcoin</span>
+                VASP_REGISTRY
+            </button>
+<div class="flex-grow flex justify-end items-center px-4 gap-4">
+<div class="text-mono-sm font-mono-sm text-outline-variant">TOTAL_RECORDS: 1,429</div>
+<div class="text-mono-sm font-mono-sm text-outline-variant">SYNC: 100%</div>
+</div>
+</div>
+<div class="flex-grow overflow-auto" id="content-banks">
+<table class="w-full text-left border-collapse border-spacing-0">
+<thead class="sticky top-0 bg-surface-container-high z-10 border-b border-outline-variant">
+<tr>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase">Institution Name</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-32">BIK</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-24">Tier</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-48">Hub Connection</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-32">Jurisdiction</th>
+<th class="p-2 text-mono-label font-mono-label text-outline-variant uppercase w-16 text-center">Op</th>
+</tr>
+</thead>
+<tbody class="bg-surface-container-low" id="bank-table-body">
+</tbody>
+</table>
+</div>
+<div class="flex-grow overflow-auto hidden" id="content-vasp">
+<table class="w-full text-left border-collapse border-spacing-0">
+<thead class="sticky top-0 bg-surface-container-high z-10 border-b border-outline-variant">
+<tr>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase">Entity / Platform</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-48">Registration ID</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-32">License Type</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-40">Status</th>
+<th class="p-2 border-r border-outline-variant text-mono-label font-mono-label text-outline-variant uppercase w-32">Wallet Count</th>
+<th class="p-2 text-mono-label font-mono-label text-outline-variant uppercase w-16 text-center">Link</th>
+</tr>
+</thead>
+<tbody class="bg-surface-container-low" id="vasp-table-body">
+</tbody>
+</table>
+</div>
+</main>
+<footer class="ml-16 h-6 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-4 z-40 fixed bottom-0 right-0 w-[calc(100%-4rem)]">
+<div class="flex items-center gap-4">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">LATENCY: 12ms</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">UPTIME: 99.99%</span>
+</div>
+<div class="font-mono-label text-mono-label uppercase tracking-widest text-on-surface">
+            SOVEREIGN NODE // SYSTEM SIGNATURE
+        </div>
+</footer>
+<script>
+        function switchTab(tab) {
+            const banksTab = document.getElementById('tab-banks');
+            const vaspTab = document.getElementById('tab-vasp');
+            const banksContent = document.getElementById('content-banks');
+            const vaspContent = document.getElementById('content-vasp');
+
+            if (tab === 'banks') {
+                banksTab.classList.add('text-primary', 'bg-surface-container-low', 'border-b-primary');
+                banksTab.classList.remove('text-outline');
+                vaspTab.classList.remove('text-primary', 'bg-surface-container-low', 'border-b-primary');
+                vaspTab.classList.add('text-outline');
+                banksContent.classList.remove('hidden');
+                vaspContent.classList.add('hidden');
+            } else {
+                vaspTab.classList.add('text-primary', 'bg-surface-container-low', 'border-b-primary');
+                vaspTab.classList.remove('text-outline');
+                banksTab.classList.remove('text-primary', 'bg-surface-container-low', 'border-b-primary');
+                banksTab.classList.add('text-outline');
+                vaspContent.classList.remove('hidden');
+                banksContent.classList.add('hidden');
+            }
+        }
+
+        const bankData = [
+            { name: "Global Reserve Alpha", bik: "044525225", tier: 1, status: "Active", juri: "CH" },
+            { name: "Nordic Clearance Group", bik: "128472911", tier: 2, status: "Active", juri: "SE" },
+            { name: "Pacific Rim Custodial", bik: "099128374", tier: 1, status: "Warn", juri: "SG" },
+            { name: "Capital Core Zurich", bik: "001229384", tier: 1, status: "Active", juri: "CH" },
+            { name: "Vanguard Mutual Assets", bik: "445129384", tier: 3, status: "Critical", juri: "US" },
+            { name: "Euro-Baltic Union Bank", bik: "551229300", tier: 2, status: "Active", juri: "EE" },
+            { name: "Deep State Federal", bik: "000000001", tier: 1, status: "Active", juri: "US" },
+            { name: "Neo Tokyo Financial", bik: "882193844", tier: 2, status: "Warn", juri: "JP" },
+            { name: "South Emirates Reserve", bik: "123000921", tier: 1, status: "Active", juri: "AE" },
+            { name: "Offshore Trust LTD", bik: "999122384", tier: 3, status: "Critical", juri: "KY" }
+        ];
+
+        const vaspData = [
+            { name: "Binance Int.", id: "CIS-9293-84", type: "Exchange", status: "Verified", wallets: "12.4M" },
+            { name: "Kraken Digital", id: "CIS-1102-22", type: "Custodial", status: "Verified", wallets: "8.1M" },
+            { name: "Coinbase Prime", id: "CIS-8821-00", type: "Institutional", status: "Verified", wallets: "25.0M" },
+            { name: "ByBit Global", id: "CIS-7721-33", type: "Exchange", status: "Pending", wallets: "4.2M" },
+            { name: "LocalBitcoins Node", id: "CIS-0012-99", type: "P2P", status: "Suspended", wallets: "0.5M" },
+            { name: "Bitfinex Core", id: "CIS-4432-11", type: "Exchange", status: "Verified", wallets: "9.9M" },
+            { name: "Nexo Yield", id: "CIS-9090-21", type: "Lending", status: "Verified", wallets: "1.2M" },
+            { name: "Uniswap Labs V3", id: "CIS-DX-0001", type: "DEX (Relayer)", status: "Unregulated", wallets: "114M" }
+        ];
+
+        function populateTables() {
+            const bankBody = document.getElementById('bank-table-body');
+            const vaspBody = document.getElementById('vasp-table-body');
+
+            for (let i = 0; i < 100; i++) {
+                const item = bankData[i % bankData.length];
+                const row = document.createElement('tr');
+                row.className = "hover:bg-surface-container-highest transition-colors border-b border-outline-variant group";
+                
+                let statusColor = "text-primary";
+                if (item.status === "Warn") statusColor = "text-tertiary-fixed-dim";
+                if (item.status === "Critical") statusColor = "text-on-secondary-fixed-variant";
+
+                row.innerHTML = `
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-on-surface">${item.name} #${i+100}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-outline">${item.bik}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-on-surface text-center">T${item.tier}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data ${statusColor}">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                            ${item.status.toUpperCase()}
+                        </div>
+                    </td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-outline">${item.juri}</td>
+                    <td class="p-2 text-center">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary cursor-pointer transition-colors" data-icon="open_in_new">open_in_new</span>
+                    </td>
+                `;
+                bankBody.appendChild(row);
+            }
+
+            for (let i = 0; i < 50; i++) {
+                const item = vaspData[i % vaspData.length];
+                const row = document.createElement('tr');
+                row.className = "hover:bg-surface-container-highest transition-colors border-b border-outline-variant group";
+
+                let statusColor = "text-primary-fixed-dim";
+                if (item.status === "Pending") statusColor = "text-tertiary-fixed-dim";
+                if (item.status === "Suspended") statusColor = "text-on-secondary-fixed-variant";
+                if (item.status === "Unregulated") statusColor = "text-outline";
+
+                row.innerHTML = `
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-on-surface">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm text-outline-variant" data-icon="account_tree">account_tree</span>
+                            ${item.name}
+                        </div>
+                    </td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-outline-variant">${item.id}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-on-surface">${item.type}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data ${statusColor}">${item.status.toUpperCase()}</td>
+                    <td class="p-2 border-r border-outline-variant font-mono-data text-mono-data text-on-surface-variant">${item.wallets}</td>
+                    <td class="p-2 text-center">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary cursor-pointer transition-colors" data-icon="terminal">terminal</span>
+                    </td>
+                `;
+                vaspBody.appendChild(row);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', populateTables);
+    </script>
+</body></html>

@@ -1,0 +1,16 @@
+{
+  "url": "https://tronscan.org/#/transaction/ad52b5fb0a29d04b58f57b962c56554836d6b30764973ad9812c9a07c40bb55c",
+  "discovery_at": "2026-07-09T13:41:24.927277+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": null,
+  "html_sha256": null,
+  "wayback_url": "http://web.archive.org/web/20260705085219/https://tronscan.org/",
+  "wayback_timestamp": "20260705085219",
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-50AB/unknown",
+  "report_link_ru": "Обнаружено: 2026-07-09T13:41:24.927277+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0709-001-50AB/unknown · Wayback: http://web.archive.org/web/20260705085219/https://tronscan.org/",
+  "status": "pending",
+  "errors": [
+    "playwright_unavailable_or_fetch_failed"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "url": "https://dns.google/query?name=ahmia.fi&type=A",
+  "discovery_at": "2026-07-10T05:56:43.432793+00:00",
+  "screenshot_path": null,
+  "screenshot_sha256": null,
+  "html_path": "data\\osint_evidence\\FSK-BF-2026-0710-001-7A53\\2e7bbda41138\\page.html",
+  "html_sha256": "9671128ad271b435719f5b5055bf46f96ab9bb2109aa94e2bc6f479711fe1f2e",
+  "wayback_url": null,
+  "wayback_timestamp": null,
+  "snapshot_api_url": "http://localhost:8877/api/osint/evidence/FSK-BF-2026-0710-001-7A53/9671128ad271b435719f5b5055bf46f96ab9bb2109aa94e2bc6f479711fe1f2e",
+  "report_link_ru": "Обнаружено: 2026-07-10T05:56:43.432793+00:00 · Снимок: http://localhost:8877/api/osint/evidence/FSK-BF-2026-0710-001-7A53/9671128ad271b435719f5b5055bf46f96ab9bb2109aa94e2bc6f479711fe1f2e · SHA-256 HTML: 9671128ad271b435…",
+  "status": "pending",
+  "errors": []
+}
