@@ -266,3 +266,25 @@ def test_rde_auto_acquires_subsystem_signals():
     assert result.factor_scores.get("blockchain", 0) >= 0
     assert result.explain.get("why") or result.explain.get("facts")
 
+
+def test_rde_handles_missing_transaction_count():
+    """Smoke path — minimal blockchain_signals without tx_count must not crash rule context."""
+    import asyncio
+    import uuid
+
+    async def _run():
+        return await run_rde_assessment(
+            entity_key="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+            tenant_id=uuid.UUID("00000000-0000-0000-0000-000000000001"),
+            case_ref="FSK-LIVE-001",
+            signals={
+                "blockchain_signals": {
+                    "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+                    "chain": "tron",
+                }
+            },
+        )
+
+    result = asyncio.run(_run())
+    assert result.ok, result.errors
+

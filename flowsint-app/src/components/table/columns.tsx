@@ -1,4 +1,4 @@
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef, CellContext, HeaderContext } from '@tanstack/table-core'
 import { useIcon } from '@/hooks/use-icon'
 import { MoreVertical, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,20 @@ import { Checkbox } from '../ui/checkbox'
 import { useCallback, memo } from 'react'
 import { useGraphStore } from '@/stores/graph-store'
 import { GraphNode } from '@/types'
+
+function nodeData(node: GraphNode): Record<string, unknown> {
+  return node.data ?? {}
+}
+
+function nodeString(node: GraphNode, key: string, fallback: string): string {
+  const value = nodeData(node)[key]
+  return typeof value === 'string' ? value : fallback
+}
+
+function nodeNumber(node: GraphNode, key: string, fallback: number): number {
+  const value = nodeData(node)[key]
+  return typeof value === 'number' ? value : fallback
+}
 
 // Memoized icon component to prevent unnecessary re-renders
 const MemoizedIcon = memo(({ type, size = 16 }: { type: string; size?: number }) => {
@@ -119,7 +133,7 @@ export const columns: ColumnDef<GraphNode>[] = [
         </div>
       )
     },
-    cell: ({ row }) => {
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
       const toggleNodeSelection = useGraphStore((s) => s.toggleNodeSelection)
       const selectedNodes = useGraphStore((s) => s.selectedNodes)
       const toggleNode = useCallback(() => toggleNodeSelection(row.original, true), [])
@@ -142,7 +156,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     minSize: 120,
     maxSize: 500,
     accessorKey: 'nodeLabel',
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -154,7 +168,7 @@ export const columns: ColumnDef<GraphNode>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => {
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
       const setCurrentNodeId = useGraphStore((s) => s.setCurrentNodeId)
       // const IconComponent = useIcon(row.original.nodeType)
       const setOpenNodeEditorModal = useGraphStore((s) => s.setOpenNodeEditorModal)
@@ -176,7 +190,7 @@ export const columns: ColumnDef<GraphNode>[] = [
                         <IconComponent size={16} />
                     </div> */}
           <span className="hover:text-primary truncate text-[.9rem] block font-medium transition-colors duration-500">
-            {row.original.data.label}
+            {nodeString(row.original, 'label', '')}
           </span>
         </button>
       )
@@ -184,7 +198,7 @@ export const columns: ColumnDef<GraphNode>[] = [
   },
   {
     enableResizing: true,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -200,7 +214,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     minSize: 80,
     maxSize: 200,
     accessorKey: 'nodeType',
-    cell: ({ row }) => {
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
       const type = row.original.nodeType
       return (
         <div className="text-center flex justify-center w-full font-medium flex items-center gap-2">
@@ -214,7 +228,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     size: 200,
     minSize: 120,
     maxSize: 500,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -227,8 +241,8 @@ export const columns: ColumnDef<GraphNode>[] = [
       )
     },
     accessorKey: 'data.status',
-    cell: ({ row }) => {
-      const status = row.original.data.status || 'Active'
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
+      const status = nodeString(row.original, 'status', 'Active')
       const style = getStatusStyle(status)
       const IconComponent = style.icon
 
@@ -247,7 +261,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     size: 200,
     minSize: 120,
     maxSize: 500,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -260,8 +274,8 @@ export const columns: ColumnDef<GraphNode>[] = [
       )
     },
     accessorKey: 'data.source',
-    cell: ({ row }) => {
-      const source = row.original.data.source || 'Enricher'
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
+      const source = nodeString(row.original, 'source', 'Enricher')
       return <div className="text-left font-medium text-gray-700 dark:text-gray-200">{source}</div>
     }
   },
@@ -270,7 +284,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     size: 200,
     minSize: 120,
     maxSize: 500,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -283,8 +297,8 @@ export const columns: ColumnDef<GraphNode>[] = [
       )
     },
     accessorKey: 'data.confidence',
-    cell: ({ row }) => {
-      const confidence = row.original.data.confidence || 85
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
+      const confidence = nodeNumber(row.original, 'confidence', 85)
       const color = getConfidenceColor(confidence)
 
       return (
@@ -305,7 +319,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     size: 200,
     minSize: 120,
     maxSize: 500,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -318,8 +332,8 @@ export const columns: ColumnDef<GraphNode>[] = [
       )
     },
     accessorKey: 'data.riskLevel',
-    cell: ({ row }) => {
-      const risk = row.original.data.riskLevel || 'N/A'
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
+      const risk = nodeString(row.original, 'riskLevel', 'N/A')
       const style = getRiskStyle(risk)
 
       return (
@@ -336,7 +350,7 @@ export const columns: ColumnDef<GraphNode>[] = [
     size: 200,
     minSize: 120,
     maxSize: 500,
-    header: ({ column }) => {
+    header: ({ column }: HeaderContext<GraphNode, unknown>) => {
       return (
         <Button
           variant="ghost"
@@ -349,8 +363,8 @@ export const columns: ColumnDef<GraphNode>[] = [
       )
     },
     accessorKey: 'data.lastUpdated',
-    cell: ({ row }) => {
-      const date = row.original.data.lastUpdated || '2024-01-15'
+    cell: ({ row }: CellContext<GraphNode, unknown>) => {
+      const date = nodeString(row.original, 'lastUpdated', '2024-01-15')
       return (
         <div className="text-left font-medium text-gray-500 dark:text-gray-400 text-xs">{date}</div>
       )

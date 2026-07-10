@@ -55,4 +55,13 @@ jobs:
             tests/test_graph_phase3.py \
             tests/test_on_chain_provider.py \
             tests/test_solana_collector.py \
+            tests/test_enterprise_report_sections.py \
+            tests/test_eccf_postgres_persistence.py \
+            tests/test_idoo_maturity_hardening.py \
+            tests/test_rfc0021_idoo.py \
+            tests/test_wave5_closure.py \
+            tests/test_infrastructure.py \
+            tests/test_forensic_enrichment.py \
+            tests/test_demo_compliance.py \
+            tests/test_fz115_report.py \
             -q --tb=short

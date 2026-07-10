@@ -110,6 +110,86 @@ services:
 
 
 
+  prometheus:
+
+    image: prom/prometheus:v3.1.0
+
+    container_name: flowsint-prometheus
+
+    command:
+
+      - --config.file=/etc/prometheus/prometheus.yml
+
+      - --storage.tsdb.path=/prometheus
+
+      - --web.enable-lifecycle
+
+    ports:
+
+      - "127.0.0.1:${PROMETHEUS_HOST_PORT:-9090}:9090"
+
+    volumes:
+
+      - ./flowsint-crypto-compliance/infra/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+      - ./flowsint-crypto-compliance/infra/prometheus-alerts.yml:/etc/prometheus/alerts.yml:ro
+
+      - prometheus_data:/prometheus
+
+    networks:
+
+      - flowsint_network
+
+
+
+  loki:
+
+    image: grafana/loki:3.3.2
+
+    container_name: flowsint-loki
+
+    command: ["-config.file=/etc/loki/loki-config.yaml"]
+
+    ports:
+
+      - "127.0.0.1:${LOKI_HOST_PORT:-3100}:3100"
+
+    volumes:
+
+      - ./flowsint-crypto-compliance/infra/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+
+      - loki_data:/loki
+
+    networks:
+
+      - flowsint_network
+
+
+
+  promtail:
+
+    image: grafana/promtail:3.3.2
+
+    container_name: flowsint-promtail
+
+    command: ["-config.file=/etc/promtail/promtail-config.yaml"]
+
+    volumes:
+
+      - ./flowsint-crypto-compliance/infra/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+
+      - flowsint_network
+
+    depends_on:
+
+      - loki
+
+
+
   meilisearch:
 
     image: getmeili/meilisearch:v1.12
@@ -203,6 +283,10 @@ volumes:
   grafana_data:
 
   meili_data:
+
+  prometheus_data:
+
+  loki_data:
 
 
 

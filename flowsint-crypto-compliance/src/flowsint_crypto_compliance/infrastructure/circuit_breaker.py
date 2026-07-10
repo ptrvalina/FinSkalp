@@ -38,7 +38,7 @@ class CollectorCircuitBreaker:
             os.getenv("FINSKALP_CB_RECOVERY_SEC", "60")
         )
         self._state = _BreakerState()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     def allow_request(self) -> bool:
         now = time.monotonic()

@@ -15,8 +15,12 @@ def normalize_signals(raw: dict[str, Any]) -> dict[str, dict[str, Any]]:
     blockchain = raw.get("blockchain_signals") or raw.get("blockchain") or {}
     if blockchain:
         normalized["blockchain"] = {
-            "transaction_count": blockchain.get("transaction_count") or blockchain.get("tx_count"),
-            "volume_usd": blockchain.get("volume_usd") or blockchain.get("total_volume"),
+            "transaction_count": blockchain.get("transaction_count")
+            if blockchain.get("transaction_count") is not None
+            else (blockchain.get("tx_count") if blockchain.get("tx_count") is not None else 0),
+            "volume_usd": blockchain.get("volume_usd")
+            if blockchain.get("volume_usd") is not None
+            else (blockchain.get("total_volume") if blockchain.get("total_volume") is not None else 0.0),
             "risk_flags": blockchain.get("risk_flags") or blockchain.get("flags") or [],
             "mixer_exposure": blockchain.get("mixer_exposure") or blockchain.get("has_mixer"),
             "high_risk_counterparty": blockchain.get("high_risk_counterparty"),

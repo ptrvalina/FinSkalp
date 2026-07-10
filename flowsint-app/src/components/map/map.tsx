@@ -86,12 +86,12 @@ function useResolvedTheme() {
     if (theme === 'system') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
-    return theme
+    return theme === 'high-contrast' ? 'dark' : theme
   })
 
   useEffect(() => {
     if (theme !== 'system') {
-      setResolved(theme)
+      setResolved(theme === 'high-contrast' ? 'dark' : theme)
       return
     }
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -121,7 +121,7 @@ export const MapFromAddress: React.FC<MapFromAddressProps> = ({
   } | null>(null)
   const [isGlobe, setIsGlobe] = useState(true)
   const isGlobeRef = useRef(true)
-  const [styleVariant, setStyleVariant] = useState<MapStyleVariant>('standard')
+  const [styleVariant] = useState<MapStyleVariant>('standard')
   const [zoomLevel, setZoomLevel] = useState(2)
   const isDarkStyle = resolvedTheme === 'dark' || styleVariant === 'satellite'
   const showDetails = zoomLevel >= 6
@@ -193,7 +193,7 @@ export const MapFromAddress: React.FC<MapFromAddressProps> = ({
   const DEFAULT_MARKER_COLOR = '#6366f1'
 
   // Preload icons for all unique node types
-  const [iconsReady, setIconsReady] = useState(false)
+  const [, setIconsReady] = useState(false)
   useEffect(() => {
     const uniqueTypes = new Set<string>()
     validLocations.forEach((loc) => {
@@ -434,7 +434,6 @@ export const MapFromAddress: React.FC<MapFromAddressProps> = ({
           const color = loc.color || DEFAULT_MARKER_COLOR
           const cachedImg = showDetails && loc.nodeType ? getCachedImage(loc.nodeType, '#ffffff') : undefined
           const dotSize = showDetails ? 24 : 10
-          const glowSize = showDetails ? 36 : 16
           return (
             <Marker
               key={loc.nodeId || `${lat}-${lon}-${i}`}

@@ -461,3 +461,69 @@ class FinskalpSyncLock(Base):
     holder_id: Mapped[str] = mapped_column(String(128), nullable=False)
     acquired_at = mapped_column(DateTime(timezone=True), server_default=func.now())
     expires_at = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class EccfEvidenceRecord(Base):
+    """RFC-0017 ECCF evidence — append-only content, metadata lifecycle updates only."""
+
+    __tablename__ = "eccf_evidence_records"
+
+    evidence_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, server_default="1")
+    content_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    lifecycle: Mapped[str] = mapped_column(String(32), server_default="registered")
+    source_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    entity_value: Mapped[str] = mapped_column(String(512), nullable=False)
+    case_ref: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    kg_evidence_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    payload: Mapped[dict] = mapped_column(JSONB, server_default="{}")
+    provenance: Mapped[dict] = mapped_column(JSONB, server_default="{}")
+    prior_version_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    immutable: Mapped[bool] = mapped_column(Boolean, server_default="true")
+    archived: Mapped[bool] = mapped_column(Boolean, server_default="false")
+    created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index("uq_eccf_evidence_tenant_hash", "tenant_id", "content_hash", unique=True),
+        Index("ix_eccf_evidence_content_hash", "content_hash"),
+    )
+
+
+class EccfAuditLogEntry(Base):
+    """RFC-0017 append-only audit trail with tamper-evident hash chain."""
+
+    __tablename__ = "eccf_audit_log"
+
+    entry_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    evidence_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    action: Mapped[str] = mapped_column(String(64), nullable=False)
+    actor: Mapped[str] = mapped_column(String(128), nullable=False)
+    timestamp = mapped_column(DateTime(timezone=True), server_default=func.now())
+    details: Mapped[dict] = mapped_column(JSONB, server_default="{}")
+    prev_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    entry_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+
+    __table_args__ = (
+        Index("ix_eccf_audit_evidence_ts", "evidence_id", "timestamp"),
+    )
+
+
+class EsaSecurityAuditEntry(Base):
+    """RFC-0020 append-only security audit (Wave 5 Postgres persistence)."""
+
+    __tablename__ = "esa_security_audit"
+
+    entry_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_type: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    actor: Mapped[str] = mapped_column(String(128), nullable=False)
+    action: Mapped[str] = mapped_column(String(128), nullable=False)
+    resource: Mapped[str] = mapped_column(String(256), server_default="", nullable=False)
+    outcome: Mapped[str] = mapped_column(String(32), server_default="success", nullable=False)
+    timestamp = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    details: Mapped[dict] = mapped_column(JSONB, server_default="{}")

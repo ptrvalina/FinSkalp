@@ -42,6 +42,15 @@ COMPLIANCE_SLA_BREACH_TOTAL = Counter(
     "compliance_sla_breach_total",
     "Case SLA breaches detected",
 )
+IDOO_HEALTH_PROBE_TOTAL = Counter(
+    "idoo_health_probe_total",
+    "IDOO infrastructure health probes",
+    ["service", "status", "mode"],
+)
+
+
+def record_idoo_health_probe(*, service: str, status: str, mode: str) -> None:
+    IDOO_HEALTH_PROBE_TOTAL.labels(service=service, status=status, mode=mode).inc()
 
 
 def metrics_payload() -> bytes:

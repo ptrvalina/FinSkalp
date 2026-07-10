@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@xyflow/react'
 import { Save, Trash2, ZoomIn, ZoomOut, Maximize, LayoutGrid } from 'lucide-react'
@@ -26,7 +27,7 @@ export function FlowControls({
   zoomOut,
   isSaved,
   flow
-}: FlowControlsProps): JSX.Element {
+}: FlowControlsProps): ReactElement {
   return (
     <TooltipProvider>
       <FlowNamePanel flow={flow} />

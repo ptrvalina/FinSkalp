@@ -33,6 +33,9 @@ import { sketchService } from '@/api/sketch-service'
 import { toast } from 'sonner'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { usePermissions } from '@/hooks/use-can'
+import { Badge } from '../ui/badge'
+import { Bell } from 'lucide-react'
+import { NavUser } from '../nav-user'
 
 export const TopNavbar = memo(() => {
   const { investigationId, id, type } = useParams({ strict: false })
@@ -49,36 +52,48 @@ export const TopNavbar = memo(() => {
 
   return (
     <header
-      className="flex items-center bg-card h-11 border-b shrink-0 px-4"
+      className="flex h-14 shrink-0 items-center gap-4 border-b border-[var(--fs-border)] bg-[var(--fs-bg-primary)] px-4"
       data-tour-id="navigation"
     >
-      <div className="flex items-center gap-4">
-        <Link to="/dashboard" className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-4">
+        <Link to="/dashboard" className="flex items-center gap-3">
           <img src="/icon.png" alt="FinSkalp" className="h-8 w-8" />
-          <span className="text-lg font-semibold">FinSkalp</span>
+          <div className="min-w-0">
+            <span className="block truncate text-sm font-semibold tracking-[0.08em] text-[var(--fs-text-primary)]">
+              FinSkalp
+            </span>
+            <span className="block text-[11px] uppercase tracking-[0.16em] text-[var(--fs-text-tertiary)]">
+              Sovereign Investigation Platform
+            </span>
+          </div>
         </Link>
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden items-center gap-2 xl:flex">
           {investigationId && <InvestigationSelector />}
           {id && (
             <>
-              <span className="opacity-30 text-sm">/</span>
+              <span className="text-sm opacity-30">/</span>
               <SketchSelector />
             </>
           )}
         </div>
       </div>
-      <div className="grow flex items-center justify-center">
-        <div>
+
+      <div className="flex flex-1 items-center justify-center">
+        <div className="w-full max-w-md">
           <Command />
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        {investigationId && collaborators.length > 0 && (
+
+      <div className="flex items-center gap-2">
+        <Badge className="hidden rounded-sm border border-[var(--fs-border)] bg-[var(--fs-surface)] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--fs-accent)] md:inline-flex">
+          Self-hosted
+        </Badge>
+        {investigationId && collaborators.length > 0 ? (
           <>
             <AvatarGroup users={collaborators.map((c) => c.user)} size="sm" max={5} />
             <Separator orientation="vertical" className="h-5" />
           </>
-        )}
+        ) : null}
         <div className="flex items-center space-x-2">
           {type === 'graph' && (
             <>
@@ -90,8 +105,15 @@ export const TopNavbar = memo(() => {
             </>
           )}
         </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-9 w-9 rounded-sm border border-[var(--fs-border)] text-[var(--fs-text-secondary)]"
+        >
+          <Bell className="h-4 w-4" />
+        </Button>
         {id && <InvestigationMenu investigationId={investigationId} sketchId={id} />}
-        {/* <NavUser /> */}
+        <NavUser />
       </div>
     </header>
   )

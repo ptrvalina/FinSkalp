@@ -1,0 +1,13 @@
+# Optional TLS overlay for docker-compose.prod.yml
+# Generate certs (dev): openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#   -keyout tls/privkey.pem -out tls/fullchain.pem -subj "/CN=localhost"
+name: flowsint-prod-tls
+
+services:
+  app:
+    ports:
+      - "443:8443"
+      - "80:8080"
+    volumes:
+      - ./flowsint-app/nginx.tls.conf:/etc/nginx/nginx.conf:ro
+      - ${FINSKALP_TLS_CERT_DIR:-./tls}:/etc/nginx/certs:ro

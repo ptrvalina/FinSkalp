@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from flowsint_crypto_compliance.feature_flags import idoo_backup_runner_enabled
+
 
 def backup_manifest() -> dict[str, Any]:
-    return {
+    manifest: dict[str, Any] = {
         "rfc": "RFC-0021",
         "chapter": 14,
         "targets": [
@@ -51,3 +53,10 @@ def backup_manifest() -> dict[str, Any]:
         },
         "principle_ru": "Резервное копирование postgres, neo4j, evidence, audit",
     }
+    if idoo_backup_runner_enabled():
+        from flowsint_crypto_compliance.platform.v2.idoo.backup_runner import backup_runtime_status
+        from flowsint_crypto_compliance.platform.v2.idoo.disaster_recovery import dr_readiness_snapshot
+
+        manifest["runtime"] = backup_runtime_status()
+        manifest["dr_readiness"] = dr_readiness_snapshot()
+    return manifest

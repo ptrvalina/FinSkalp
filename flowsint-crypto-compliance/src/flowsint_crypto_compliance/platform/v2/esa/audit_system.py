@@ -68,6 +68,12 @@ class SecurityAuditLog:
             )
             self._next_id += 1
             self._entries.append(entry)
+            try:
+                from flowsint_crypto_compliance.platform.v2.esa.postgres_audit import persist_security_audit_entry
+
+                persist_security_audit_entry(entry)
+            except Exception:
+                pass
             return entry
 
     def all_entries(self) -> list[SecurityAuditEntry]:

@@ -104,7 +104,7 @@ function VaultPage() {
   return (
     <PageLayout
       title="Vault"
-      description="Securely manage your API keys for third-party services."
+      description="Secure gateway for investigation credentials, encrypted provider keys, and self-hosted connector access."
       isLoading={keysLoading}
       loadingComponent={<Loader />}
       error={keysError}
@@ -121,14 +121,14 @@ function VaultPage() {
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="w-4 h-4 mr-2" />
-              Add API Key
+              Add credential
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add API Key</DialogTitle>
+              <DialogTitle>Add credential</DialogTitle>
               <DialogDescription>
-                Add a new API key with a custom name. Your keys are encrypted and stored securely.
+                Add a provider secret with a custom name. Credentials are encrypted and stored securely.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -165,7 +165,7 @@ function VaultPage() {
                 disabled={createKeyMutation.isPending || !keyName.trim() || !apiKey.trim()}
               >
                 {createKeyMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Add Key
+                Save credential
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -177,14 +177,14 @@ function VaultPage() {
           <div className="flex flex-col items-center justify-center py-24 gap-5">
             <KeyRound className="w-12 h-12 text-muted-foreground/40" strokeWidth={1.5} />
             <div className="text-center space-y-2">
-              <h3 className="text-xl font-bold text-foreground">No keys yet</h3>
+              <h3 className="text-xl font-bold text-foreground">No credentials stored</h3>
               <p className="text-muted-foreground max-w-xs leading-relaxed">
-                Add your first API key to use third-party services in your investigations.
+                Add your first encrypted provider credential to enable external investigation services.
               </p>
             </div>
             <Button onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Add your first key
+              Add first credential
             </Button>
           </div>
         ) : (

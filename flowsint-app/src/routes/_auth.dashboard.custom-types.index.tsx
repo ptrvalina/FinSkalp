@@ -75,8 +75,8 @@ function CustomTypesPage() {
 
   return (
     <PageLayout
-      title="Custom types"
-      description="Create and manage your custom data types."
+      title="Schema Architect"
+      description="Design governed custom schemas that map cleanly into investigations, flows, and evidence pipelines."
       isLoading={isLoading}
       loadingComponent={
         <div className="p-2">
@@ -99,7 +99,7 @@ function CustomTypesPage() {
           onClick={() => navigate({ to: '/dashboard/custom-types/new' })}
         >
           <PlusIcon className="w-4 h-4 mr-2" />
-          New custom type
+          New schema
         </Button>
       }
     >
@@ -108,17 +108,16 @@ function CustomTypesPage() {
             <div className="rounded-full bg-muted/50 p-4 mb-4">
               <FileX className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No custom types yet</h3>
+            <h3 className="text-xl font-semibold mb-2">No governed schemas yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Get started by creating your first custom type. Custom types allow you to define
-              your own data structures for use in flows and investigations.
+              Create the first custom schema to standardize new data structures across flows and investigations.
             </p>
             <Button onClick={() => navigate({
               // @ts-ignore
               to: '/dashboard/custom-types/new'
             })}>
               <PlusIcon className="w-4 h-4 mr-2" />
-              Create your first custom type
+              Create first schema
             </Button>
           </div>
         ) : (

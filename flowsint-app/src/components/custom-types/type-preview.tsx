@@ -1,5 +1,4 @@
 import * as LucideIcons from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import type { SchemaField } from './field-row'
 
 interface TypePreviewProps {
@@ -17,9 +16,7 @@ export function TypePreview({
   description,
   icon,
   color,
-  fields,
-  status,
-  category
+  fields
 }: TypePreviewProps) {
   const Icon = (LucideIcons as any)[icon] || LucideIcons.FileQuestion
   const validFields = fields.filter((f) => f.key.trim())

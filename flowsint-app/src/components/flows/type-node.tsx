@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react'
 import { Position } from '@xyflow/react'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
+import { lookupItemTypeRecord } from '@/lib/item-type'
 import { useIcon } from '@/hooks/use-icon'
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
@@ -28,7 +29,7 @@ function areEqual(prevProps: EnricherNodeProps, nextProps: EnricherNodeProps) {
 // Type node component for data types (domains, websites, IPs, etc.)
 const TypeNode = memo(({ data }: EnricherNodeProps) => {
   const colors = useNodesDisplaySettings((s) => s.colors)
-  const outputColor = colors[data.outputs.type.toLowerCase()]
+  const outputColor = lookupItemTypeRecord(colors, data.outputs.type.toLowerCase())
   const Icon = useIcon(data.outputs.type.toLowerCase() as string)
   const setOpenFlowSheet = useFlowStore((state) => state.setOpenFlowSheet)
   const key = data.outputs.properties[0].name

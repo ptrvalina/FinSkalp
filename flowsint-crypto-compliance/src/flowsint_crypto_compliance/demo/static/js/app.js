@@ -766,29 +766,68 @@ async function runFinSkalpInvestigation() {
     "Детектор рисков + XGBoost…",
     "Формирование PDF-отчётов…",
   ];
+  const serverTimeoutSec = Math.round((Number(window.FINSKALP_INVESTIGATE_TIMEOUT_MS) || 315000) / 1000);
+  const useAsync = combatMode || (payload.depth >= 3) || (payload.osint_depth >= 3) || (payload.collectors?.length >= 6);
+  const startedAt = Date.now();
   let phaseIdx = 0;
   const renderProgress = (hint) => {
-    out.innerHTML = `<div class="ic-running">${FinSkalpUI?.skeletonHtml(5, 2) || ""}<div class="ic-progress">${esc(hint)}</div><div class="ic-progress-sub">Live TRON: 1–5 мин · демо TRU_HUB_MSK — мгновенно</div></div>`;
+    const elapsed = Math.round((Date.now() - startedAt) / 1000);
+    const mode = useAsync ? "фоновый режим" : "синхронный";
+    out.innerHTML = `<div class="ic-running">${FinSkalpUI?.skeletonHtml(5, 2) || ""}<div class="ic-progress">${esc(hint)}</div><div class="ic-progress-sub">${mode} · ${elapsed} с · лимит ~${serverTimeoutSec} с · live TRON + все коллекторы: 5–12 мин</div></div>`;
   };
   renderProgress(phaseHints[0]);
   const progressTimer = setInterval(() => {
     phaseIdx = Math.min(phaseIdx + 1, phaseHints.length - 1);
-    const el = out.querySelector(".ic-progress");
-    if (el) el.textContent = phaseHints[phaseIdx];
-  }, 2200);
-  const timeoutMs = Number(window.FINSKALP_INVESTIGATE_TIMEOUT_MS) || 300000;
+    renderProgress(phaseHints[phaseIdx]);
+  }, 2800);
+  const timeoutMs = Number(window.FINSKALP_INVESTIGATE_TIMEOUT_MS) || 315000;
+  const pollBudgetMs = useAsync ? Math.max(timeoutMs + 600000, 900000) : timeoutMs;
   const abort = new AbortController();
-  const abortTimer = setTimeout(() => abort.abort(), timeoutMs);
+  const abortTimer = setTimeout(() => abort.abort(), pollBudgetMs);
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   try {
-    const data = await fetch(`${API}/api/finskalp/investigate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: abort.signal,
-    }).then(async r => {
-      if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
-      return r.json();
-    });
+    let data;
+    if (useAsync) {
+      const queued = await fetch(`${API}/api/finskalp/investigate/async`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: abort.signal,
+      }).then(async (r) => {
+        if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+        return r.json();
+      });
+      const taskId = queued.task_id;
+      const taskTimeoutSec = Number(queued.timeout_sec) || serverTimeoutSec;
+      const deadline = Date.now() + taskTimeoutSec * 1000 + 120000;
+      while (Date.now() < deadline) {
+        await sleep(2500);
+        const poll = await fetch(`${API}/api/finskalp/investigate/tasks/${taskId}`, {
+          signal: abort.signal,
+        }).then((r) => r.json());
+        if (poll.status === "success" && poll.result) {
+          data = poll.result;
+          break;
+        }
+        if (poll.status === "failure") {
+          throw new Error(poll.error || "Расследование завершилось с ошибкой");
+        }
+        renderProgress(phaseHints[phaseIdx]);
+      }
+      if (!data) {
+        throw new Error(`Превышено время ожидания (${taskTimeoutSec} с). Уменьшите глубину или снимите тяжёлые коллекторы (Maigret, Tor).`);
+      }
+    } else {
+      data = await fetch(`${API}/api/finskalp/investigate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: abort.signal,
+      }).then(async (r) => {
+        if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+        return r.json();
+      });
+    }
     (data.phases || []).forEach(s => {
       const el = document.getElementById(`pipe-status-${s.id}`);
       if (el) { el.textContent = "✓"; el.className = "pipe-status done"; }
@@ -798,7 +837,7 @@ async function runFinSkalpInvestigation() {
     toast(`ФинСкальп · ${data.case_ref}`);
   } catch (e) {
     const msg = e.name === "AbortError"
-      ? `Превышено время ожидания (${Math.round(timeoutMs / 1000)} с). Live-адрес с TronGrid и всеми Scalpel-инструментами может занимать несколько минут — подождите или снимите лишние коллекторы.`
+      ? `Превышено время ожидания (${Math.round(pollBudgetMs / 1000)} с). Live-адрес с TronGrid и всеми Scalpel-инструментами может занимать 5–12 минут — уменьшите глубину до 2 или снимите Maigret/Tor.`
       : String(e.message || e);
     out.innerHTML = `<div class="empty-state" style="color:var(--critical)">${esc(msg)}</div>`;
   } finally {

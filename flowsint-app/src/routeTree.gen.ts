@@ -19,6 +19,7 @@ import { Route as AuthDashboardIndexRouteImport } from './routes/_auth.dashboard
 import { Route as AuthDashboardVaultRouteImport } from './routes/_auth.dashboard.vault'
 import { Route as AuthDashboardToolsRouteImport } from './routes/_auth.dashboard.tools'
 import { Route as AuthDashboardProfileRouteImport } from './routes/_auth.dashboard.profile'
+import { Route as AuthDashboardComplianceRouteImport } from './routes/_auth.dashboard.compliance'
 import { Route as AuthDashboardFlowsIndexRouteImport } from './routes/_auth.dashboard.flows.index'
 import { Route as AuthDashboardEnrichersIndexRouteImport } from './routes/_auth.dashboard.enrichers.index'
 import { Route as AuthDashboardCustomTypesIndexRouteImport } from './routes/_auth.dashboard.custom-types.index'
@@ -77,6 +78,11 @@ const AuthDashboardToolsRoute = AuthDashboardToolsRouteImport.update({
 const AuthDashboardProfileRoute = AuthDashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AuthDashboardRoute,
+} as any)
+const AuthDashboardComplianceRoute = AuthDashboardComplianceRouteImport.update({
+  id: '/compliance',
+  path: '/compliance',
   getParentRoute: () => AuthDashboardRoute,
 } as any)
 const AuthDashboardFlowsIndexRoute = AuthDashboardFlowsIndexRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/middleware': typeof MiddlewareRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthDashboardRouteWithChildren
+  '/dashboard/compliance': typeof AuthDashboardComplianceRoute
   '/dashboard/profile': typeof AuthDashboardProfileRoute
   '/dashboard/tools': typeof AuthDashboardToolsRoute
   '/dashboard/vault': typeof AuthDashboardVaultRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/middleware': typeof MiddlewareRoute
   '/register': typeof RegisterRoute
+  '/dashboard/compliance': typeof AuthDashboardComplianceRoute
   '/dashboard/profile': typeof AuthDashboardProfileRoute
   '/dashboard/tools': typeof AuthDashboardToolsRoute
   '/dashboard/vault': typeof AuthDashboardVaultRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/middleware': typeof MiddlewareRoute
   '/register': typeof RegisterRoute
   '/_auth/dashboard': typeof AuthDashboardRouteWithChildren
+  '/_auth/dashboard/compliance': typeof AuthDashboardComplianceRoute
   '/_auth/dashboard/profile': typeof AuthDashboardProfileRoute
   '/_auth/dashboard/tools': typeof AuthDashboardToolsRoute
   '/_auth/dashboard/vault': typeof AuthDashboardVaultRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/middleware'
     | '/register'
     | '/dashboard'
+    | '/dashboard/compliance'
     | '/dashboard/profile'
     | '/dashboard/tools'
     | '/dashboard/vault'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/middleware'
     | '/register'
+    | '/dashboard/compliance'
     | '/dashboard/profile'
     | '/dashboard/tools'
     | '/dashboard/vault'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/middleware'
     | '/register'
     | '/_auth/dashboard'
+    | '/_auth/dashboard/compliance'
     | '/_auth/dashboard/profile'
     | '/_auth/dashboard/tools'
     | '/_auth/dashboard/vault'
@@ -347,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardProfileRouteImport
       parentRoute: typeof AuthDashboardRoute
     }
+    '/_auth/dashboard/compliance': {
+      id: '/_auth/dashboard/compliance'
+      path: '/compliance'
+      fullPath: '/dashboard/compliance'
+      preLoaderRoute: typeof AuthDashboardComplianceRouteImport
+      parentRoute: typeof AuthDashboardRoute
+    }
     '/_auth/dashboard/flows/': {
       id: '/_auth/dashboard/flows/'
       path: '/flows'
@@ -439,6 +458,7 @@ const AuthDashboardInvestigationsInvestigationIdRouteWithChildren =
   )
 
 interface AuthDashboardRouteChildren {
+  AuthDashboardComplianceRoute: typeof AuthDashboardComplianceRoute
   AuthDashboardProfileRoute: typeof AuthDashboardProfileRoute
   AuthDashboardToolsRoute: typeof AuthDashboardToolsRoute
   AuthDashboardVaultRoute: typeof AuthDashboardVaultRoute
@@ -454,6 +474,7 @@ interface AuthDashboardRouteChildren {
 }
 
 const AuthDashboardRouteChildren: AuthDashboardRouteChildren = {
+  AuthDashboardComplianceRoute: AuthDashboardComplianceRoute,
   AuthDashboardProfileRoute: AuthDashboardProfileRoute,
   AuthDashboardToolsRoute: AuthDashboardToolsRoute,
   AuthDashboardVaultRoute: AuthDashboardVaultRoute,

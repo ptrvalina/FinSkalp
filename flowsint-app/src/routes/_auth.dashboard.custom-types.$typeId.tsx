@@ -325,7 +325,7 @@ function CustomTypeEditor() {
                     </SelectTrigger>
                     <SelectContent>
                       {!actionLoading &&
-                        actionItems.map((item) => (
+                        (actionItems ?? []).map((item) => (
                           <SelectItem value={item.type}>
                             <div className="flex items-center gap-2">{item.label}</div>
                           </SelectItem>

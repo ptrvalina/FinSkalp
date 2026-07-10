@@ -6,25 +6,13 @@ import { Link } from '@tanstack/react-router'
 
 import {
 
-  Activity,
-
   Bell,
-
-  Briefcase,
 
   ExternalLink,
 
-  FileText,
-
-  GitBranch,
-
   LayoutDashboard,
 
-  MessageSquare,
-
   Send,
-
-  Wallet,
 
 } from 'lucide-react'
 
@@ -48,8 +36,6 @@ import {
 
 import { ActivityTimeline } from '@/components/dashboard/investigation/activity-timeline'
 
-import { EvidenceSection } from '@/components/dashboard/investigation/evidence-section'
-
 import { Badge } from '@/components/ui/badge'
 
 import { Button } from '@/components/ui/button'
@@ -67,6 +53,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTheme } from '@/components/theme-provider'
 
 import { WorkspaceCommandPalette } from './workspace-command-palette'
+import { CaseDashboardPanel } from './case-dashboard-panel'
+import { RiskDrawerPanel } from './risk-drawer-panel'
+import { WorkspaceEvidenceSection } from './workspace-evidence-section'
+import { GraphInsightsPanel } from './graph-insights-panel'
+import { AiContextPanel } from './ai-context-panel'
+import { TaskBoardPanel } from './task-board-panel'
+import { BookmarksPanel } from './bookmarks-panel'
+import { ActivityFeedPanel } from './activity-feed-panel'
+import { QuickActionsBar } from './quick-actions-bar'
+import { ReportsPanel } from './reports-panel'
+import { WalletsPanel } from './wallets-panel'
+import { AlertCenterPanel } from './alert-center-panel'
+import {
+  EnterpriseContextBar,
+  EnterprisePanel,
+  EntityCard,
+} from '@/components/enterprise/enterprise-ui'
 
 
 
@@ -87,6 +90,12 @@ const TAB_LABELS: Record<string, string> = {
   reports: 'Отчёты',
 
   activity: 'Активность',
+
+  tasks: 'Задачи',
+
+  bookmarks: 'Закладки',
+
+  ai: 'AI Context',
 
 }
 
@@ -153,6 +162,8 @@ export function AnalystWorkspaceShell({
   const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(new Set())
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
 
 
@@ -331,6 +342,14 @@ export function AnalystWorkspaceShell({
 
       open_activity: 'activity',
 
+      open_tasks: 'tasks',
+
+      open_bookmarks: 'bookmarks',
+
+      open_ai: 'ai',
+
+      ask_ai: 'ai',
+
     }
 
     if (tabMap[commandId]) {
@@ -380,6 +399,44 @@ export function AnalystWorkspaceShell({
 
         setPaletteOpen(true)
 
+        return
+
+      }
+
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey) return
+
+      const tabByDigit: Record<string, string> = {
+
+        '1': 'summary',
+
+        '2': 'entities',
+
+        '3': 'wallets',
+
+        '4': 'timeline',
+
+        '5': 'evidence',
+
+        '6': 'graph',
+
+        '7': 'reports',
+
+        '8': 'activity',
+
+        '9': 'tasks',
+
+        '0': 'bookmarks',
+
+      }
+
+      const tab = tabByDigit[e.key]
+
+      if (tab) {
+
+        e.preventDefault()
+
+        handleTabChange(tab)
+
       }
 
     }
@@ -388,7 +445,7 @@ export function AnalystWorkspaceShell({
 
     return () => window.removeEventListener('keydown', onKeyDown)
 
-  }, [])
+  }, [handleTabChange])
 
 
 
@@ -466,29 +523,10 @@ export function AnalystWorkspaceShell({
 
     <div className="space-y-4">
 
-      <Card>
-
-        <CardHeader className="pb-3">
-
-          <div className="flex items-start justify-between gap-4">
-
-            <div>
-
-              <CardTitle className="text-base flex items-center gap-2">
-
-                <LayoutDashboard className="w-4 h-4" />
-
-                Рабочее пространство аналитика
-
-              </CardTitle>
-
-              <CardDescription className="font-mono mt-1">{caseRef}</CardDescription>
-
-              <p className="text-xs text-muted-foreground mt-1">{investigationName}</p>
-
-            </div>
-
-            <div className="flex flex-wrap gap-2 items-center">
+      <EnterprisePanel
+        title="Analyst Workspace Shell"
+        description="Investigation-first context bar, explainable risk, and persistent workspace state."
+        actions={<div className="flex flex-wrap gap-2 items-center">
 
               <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
 
@@ -566,7 +604,7 @@ export function AnalystWorkspaceShell({
 
               <Button size="sm" variant="outline" onClick={() => setPaletteOpen(true)}>
 
-                Команды (Ctrl+K)
+                Command Palette (Ctrl+K)
 
               </Button>
 
@@ -574,7 +612,7 @@ export function AnalystWorkspaceShell({
 
                 <Link to="/dashboard/compliance">
 
-                  Комплаенс
+                  Compliance
 
                   <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
 
@@ -582,63 +620,62 @@ export function AnalystWorkspaceShell({
 
               </Button>
 
-            </div>
-
+            </div>}
+      >
+        <div className="space-y-4">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              Investigation Workspace
+            </CardTitle>
+            <CardDescription className="font-mono mt-1">{caseRef}</CardDescription>
+            <p className="text-xs text-muted-foreground mt-1">{investigationName}</p>
           </div>
 
-        </CardHeader>
+          <EnterpriseContextBar
+            caseId={caseRef}
+            status={String(workflow?.workflow_status ?? 'active')}
+            priority="medium"
+            owner="Assigned analyst"
+            risk="high"
+            objectCount={String(counts?.timeline ?? 0)}
+            evidenceCount={String(counts?.evidence ?? 0)}
+          />
 
-        <CardContent className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">RFC-0010</Badge>
 
-          <Badge variant="outline">RFC-0010</Badge>
+            {workflow?.workflow_status ? (
+              <Badge variant="secondary">{String(workflow.workflow_status)}</Badge>
+            ) : null}
 
-          {workflow?.workflow_status ? (
+            {counts ? (
+              <>
+                <Badge variant="outline">{counts.evidence} evidence</Badge>
+                <Badge variant="outline">{counts.timeline} events</Badge>
+              </>
+            ) : null}
 
-            <Badge variant="secondary">{String(workflow.workflow_status)}</Badge>
+            {stateQuery.data?.intelligence ? (
+              <Badge variant="outline">{stateQuery.data.intelligence.engines_count} engines</Badge>
+            ) : null}
 
-          ) : null}
+            {stateQuery.data?.latency_ms != null ? (
+              <Badge variant="outline" className="font-mono text-xs">
+                {stateQuery.data.latency_ms} ms
+              </Badge>
+            ) : null}
+          </div>
+        </div>
+      </EnterprisePanel>
 
-          {counts ? (
-
-            <>
-
-              <Badge variant="outline">{counts.evidence} доказательств</Badge>
-
-              <Badge variant="outline">{counts.timeline} событий</Badge>
-
-            </>
-
-          ) : null}
-
-          {stateQuery.data?.intelligence ? (
-
-            <Badge variant="outline">
-
-              {stateQuery.data.intelligence.engines_count} движков
-
-            </Badge>
-
-          ) : null}
-
-          {stateQuery.data?.latency_ms != null ? (
-
-            <Badge variant="outline" className="font-mono text-xs">
-
-              {stateQuery.data.latency_ms} мс
-
-            </Badge>
-
-          ) : null}
-
-        </CardContent>
-
-      </Card>
+      <QuickActionsBar onAction={handlePaletteCommand} />
 
 
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
 
-        <TabsList className="flex flex-wrap h-auto gap-1">
+        <TabsList className="flex flex-wrap h-auto gap-1 rounded-sm border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] p-1">
 
           {tabs.map((tab) => (
 
@@ -656,43 +693,15 @@ export function AnalystWorkspaceShell({
 
         <TabsContent value="summary" className="mt-4">
 
-          <Card>
-
-            <CardHeader>
-
-              <CardTitle className="text-sm flex items-center gap-2">
-
-                <Briefcase className="w-4 h-4" />
-
-                Сводка расследования
-
-              </CardTitle>
-
-            </CardHeader>
-
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-
-              <p>Расследование: {investigationName}</p>
-
-              <p>Кейс: {caseRef}</p>
-
-              {stateQuery.data?.intelligence?.rule_ru ? (
-                <p className="text-xs">{stateQuery.data.intelligence.rule_ru}</p>
-              ) : null}
-              {workflowRecsQuery.data?.recommendations?.length ? (
-                <div className="pt-2 space-y-1">
-                  <p className="text-xs font-medium text-foreground">Рекомендации (RFC-0011)</p>
-                  {workflowRecsQuery.data.recommendations.slice(0, 3).map((rec) => (
-                    <p key={rec.id} className="text-xs">
-                      {rec.action_ru} — {rec.explanation_ru}
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-
-            </CardContent>
-
-          </Card>
+          <CaseDashboardPanel
+            caseRef={caseRef}
+            investigationName={investigationName}
+            workflow={workflow}
+            counts={counts}
+            intelligence={stateQuery.data?.intelligence}
+            recommendations={workflowRecsQuery.data?.recommendations}
+            onOpenRisk={() => setDrawerOpen(true)}
+          />
 
         </TabsContent>
 
@@ -700,46 +709,40 @@ export function AnalystWorkspaceShell({
 
         <TabsContent value="entities" className="mt-4">
 
-          <Card>
-
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-
-              Сущности графа знаний — выберите сущность в графе или через поиск (Ctrl+K).
-
-              {context.selectedEntityId ? (
-
-                <p className="mt-2 font-mono text-foreground">
-
-                  Выбрано: {context.selectedEntityId}
-
-                </p>
-
-              ) : null}
-
-            </CardContent>
-
-          </Card>
+          <EnterprisePanel title="Entities" description="Compact entity views keep focus on attribution, sources, and risk.">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {[0, 1, 2].map((index) => (
+                <EntityCard
+                  key={index}
+                  compact
+                  entity={{
+                    title: index === 0 && context.selectedEntityId ? context.selectedEntityId : `Workspace Entity ${index + 1}`,
+                    subtitle: index === 1 ? 'Counterparty' : 'Graph entity',
+                    attributes: [
+                      'Entity-first evidence context',
+                      'Selection preserved across route changes',
+                      'Ready for graph and reporting pivots',
+                    ],
+                    sources: ['Evidence', 'Registry', 'OSINT'],
+                    confidence: 72 + index * 8,
+                    risk: index === 0 ? 'high' : index === 1 ? 'medium' : 'low',
+                  }}
+                />
+              ))}
+            </div>
+          </EnterprisePanel>
 
         </TabsContent>
 
 
 
         <TabsContent value="wallets" className="mt-4">
-
-          <Card>
-
-            <CardContent className="pt-6 text-sm text-muted-foreground flex items-center gap-2">
-
-              <Wallet className="w-4 h-4" />
-
-              Обозреватель кошельков — цепочки:{' '}
-
-              {(stateQuery.data?.intelligence?.supported_chains ?? []).join(', ') || '—'}
-
-            </CardContent>
-
-          </Card>
-
+          <WalletsPanel
+            evidenceItems={stateQuery.data?.evidence?.items as Array<Record<string, unknown>> | undefined}
+            supportedChains={stateQuery.data?.intelligence?.supported_chains}
+            selectedEntityId={context.selectedEntityId}
+            loading={stateQuery.isLoading}
+          />
         </TabsContent>
 
 
@@ -760,12 +763,9 @@ export function AnalystWorkspaceShell({
 
         <TabsContent value="evidence" className="mt-4">
 
-          <EvidenceSection
-
-            items={stateQuery.data?.evidence?.items}
-
+          <WorkspaceEvidenceSection
+            items={stateQuery.data?.evidence?.items as Array<Record<string, unknown>> | undefined}
             loading={stateQuery.isLoading}
-
           />
 
         </TabsContent>
@@ -774,43 +774,37 @@ export function AnalystWorkspaceShell({
 
         <TabsContent value="graph" className="mt-4">
 
-          <Card>
-
-            <CardContent className="pt-6 text-sm text-muted-foreground flex items-center gap-2">
-
-              <GitBranch className="w-4 h-4" />
-
-              Граф связей — откройте{' '}
-
-              <Link to="/dashboard/compliance" className="text-primary underline">
-
-                комплаенс
-
-              </Link>{' '}
-
-              для полного графа доказательств.
-
-            </CardContent>
-
-          </Card>
+          <GraphInsightsPanel caseId={caseRef} />
 
         </TabsContent>
 
 
 
         <TabsContent value="reports" className="mt-4">
+          <ReportsPanel caseRef={caseRef} />
+        </TabsContent>
 
-          <Card>
 
-            <CardContent className="pt-6 text-sm text-muted-foreground flex items-center gap-2">
 
-              <FileText className="w-4 h-4" />
+        <TabsContent value="tasks" className="mt-4">
 
-              Отчёты RFC-0005 — доступны через API комплаенса для связанного кейса.
+          <TaskBoardPanel />
 
-            </CardContent>
+        </TabsContent>
 
-          </Card>
+
+
+        <TabsContent value="bookmarks" className="mt-4">
+
+          <BookmarksPanel caseRef={caseRef} onNavigate={handleTabChange} />
+
+        </TabsContent>
+
+
+
+        <TabsContent value="ai" className="mt-4">
+
+          <AiContextPanel caseRef={caseRef} investigationId={investigationId} />
 
         </TabsContent>
 
@@ -818,145 +812,54 @@ export function AnalystWorkspaceShell({
 
         <TabsContent value="activity" className="mt-4 space-y-4">
 
-          <Card>
+          <AlertCenterPanel
+            notifications={Array.isArray(stateQuery.data?.notifications) ? stateQuery.data.notifications : []}
+            caseRef={caseRef}
+          />
 
-            <CardHeader>
-
-              <CardTitle className="text-sm flex items-center gap-2">
-
-                <MessageSquare className="w-4 h-4" />
-
-                Комментарии ({collaborationComments.length})
-
-              </CardTitle>
-
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-
-              <div className="flex gap-2">
-
-                <Input
-
-                  placeholder="Добавить комментарий…"
-
-                  value={commentText}
-
-                  onChange={(e) => setCommentText(e.target.value)}
-
-                  onKeyDown={(e) => {
-
-                    if (e.key === 'Enter' && commentText.trim()) {
-
-                      commentMutation.mutate(commentText.trim())
-
-                    }
-
-                  }}
-
-                />
-
-                <Button
-
-                  size="icon"
-
-                  disabled={!commentText.trim() || commentMutation.isPending}
-
-                  onClick={() => commentMutation.mutate(commentText.trim())}
-
-                >
-
-                  <Send className="w-4 h-4" />
-
-                </Button>
-
-              </div>
-
-              {collaborationComments.length === 0 ? (
-
-                <p className="text-sm text-muted-foreground">Комментариев пока нет</p>
-
-              ) : (
-
-                <div className="space-y-3">
-
-                  {collaborationComments.map((c) => (
-
-                    <div key={c.id} className="text-sm border-l-2 border-muted pl-3">
-
-                      <div className="text-foreground">{c.text}</div>
-
-                      <div className="text-xs text-muted-foreground mt-1">
-
-                        {c.author} · {formatNotifTime(c.created_at)}
-
-                      </div>
-
-                    </div>
-
-                  ))}
-
+          <ActivityFeedPanel
+            collaborationComments={collaborationComments}
+            collaborationActivity={collaborationActivity}
+            fallbackTimeline={stateQuery.data?.timeline?.events}
+            loading={stateQuery.isLoading}
+            commentSlot={
+              <>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Добавить комментарий…"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && commentText.trim()) {
+                        commentMutation.mutate(commentText.trim())
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    disabled={!commentText.trim() || commentMutation.isPending}
+                    onClick={() => commentMutation.mutate(commentText.trim())}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
                 </div>
-
-              )}
-
-            </CardContent>
-
-          </Card>
-
-          <Card>
-
-            <CardHeader>
-
-              <CardTitle className="text-sm flex items-center gap-2">
-
-                <Activity className="w-4 h-4" />
-
-                Лента активности
-
-              </CardTitle>
-
-            </CardHeader>
-
-            <CardContent>
-
-              <ActivityTimeline
-
-                events={
-
-                  collaborationActivity.length > 0
-
-                    ? collaborationActivity.map((e) => ({
-
-                        id: e.id,
-
-                        event_type:
-
-                          e.event_type === 'comment' || e.event_type === 'collaboration_comment'
-
-                            ? `Комментарий: ${(e.payload?.text as string)?.slice(0, 80) ?? ''}`
-
-                            : e.event_type,
-
-                        occurred_at: e.occurred_at,
-
-                        actor: e.actor,
-
-                        payload: e.payload,
-
-                      }))
-
-                    : stateQuery.data?.timeline?.events
-
-                }
-
-                loading={stateQuery.isLoading}
-
-              />
-
-            </CardContent>
-
-          </Card>
+                {collaborationComments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Комментариев пока нет</p>
+                ) : (
+                  <div className="space-y-3">
+                    {collaborationComments.map((c) => (
+                      <div key={c.id} className="text-sm border-l-2 border-muted pl-3">
+                        <div className="text-foreground">{c.text}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {c.author} · {formatNotifTime(c.created_at)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            }
+          />
 
         </TabsContent>
 
@@ -978,6 +881,13 @@ export function AnalystWorkspaceShell({
 
         onSearchSelect={handleSearchSelect}
 
+      />
+
+      <RiskDrawerPanel
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        caseRef={caseRef}
+        entityKey={context.selectedEntityId}
       />
 
     </div>

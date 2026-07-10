@@ -1,60 +1,66 @@
 /**
- * FinSkalp Design Tokens v2 — premium motion tier
- * Palantir/Linear-grade density · WCAG AA contrast (dark default)
+ * FinSkalp Design Tokens v3 — Stitch tactical terminal aesthetic
+ * True-black instrument panel · sharp instrument-border edges · cyan/salmon/amber signal palette
  */
 
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Navy / blue base */
-  --fs-color-bg: #040810;
-  --fs-color-bg-elevated: #0a1019;
-  --fs-color-bg-surface: #0f1724;
-  --fs-color-bg-muted: #152032;
-  --fs-color-border: #1e2d45;
-  --fs-color-border-subtle: #162033;
+  /* True-black tactical base — unified with icon-rail, topbar & footer shell */
+  --fs-color-bg: #050505;
+  --fs-color-bg-elevated: #1c1b1b;
+  --fs-color-bg-surface: #131313;
+  --fs-color-bg-muted: #201f1f;
+  --fs-color-bg-muted-high: #2a2a2a;
+  --fs-color-border: #1f1f1f;
+  --fs-color-border-subtle: #1a1a1a;
 
-  --fs-color-text: #eef2f7;
-  --fs-color-text-secondary: #94a3b8;
-  --fs-color-text-muted: #64748b;
-  --fs-color-text-inverse: #0f172a;
+  --fs-color-text: #e5e2e1;
+  --fs-color-text-secondary: #b9cacb;
+  --fs-color-text-muted: #849495;
+  --fs-color-text-inverse: #00363a;
 
-  --fs-color-accent: #3b82f6;
-  --fs-color-accent-hover: #60a5fa;
-  --fs-color-accent-muted: #1e3a5f;
+  --fs-color-accent: #00dbe9;
+  --fs-color-accent-hover: #7df4ff;
+  --fs-color-accent-muted: rgba(0, 219, 233, 0.12);
 
-  /* Risk semantics */
-  --fs-risk-critical: #ef4444;
-  --fs-risk-critical-bg: rgba(239, 68, 68, 0.12);
-  --fs-risk-high: #f97316;
-  --fs-risk-high-bg: rgba(249, 115, 22, 0.12);
-  --fs-risk-medium: #eab308;
-  --fs-risk-medium-bg: rgba(234, 179, 8, 0.12);
-  --fs-risk-low: #22c55e;
-  --fs-risk-low-bg: rgba(34, 197, 94, 0.12);
-  --fs-risk-clear: #14b8a6;
-  --fs-risk-clear-bg: rgba(20, 184, 166, 0.12);
+  /* Amber signal — secondary brand accent for official/legal surfaces */
+  --fs-color-gold: #ffba20;
+  --fs-color-gold-hover: #ffdea8;
+  --fs-color-gold-muted: rgba(255, 186, 32, 0.12);
 
-  /* Premium glow tokens */
-  --fs-glow-accent: 0 0 24px rgba(59, 130, 246, 0.35), 0 0 48px rgba(59, 130, 246, 0.12);
-  --fs-glow-risk-critical: 0 0 20px rgba(239, 68, 68, 0.45), 0 0 40px rgba(239, 68, 68, 0.15);
-  --fs-glow-risk-high: 0 0 18px rgba(249, 115, 22, 0.4), 0 0 36px rgba(249, 115, 22, 0.12);
-  --fs-glow-risk-medium: 0 0 16px rgba(234, 179, 8, 0.35), 0 0 32px rgba(234, 179, 8, 0.1);
-  --fs-glow-risk-low: 0 0 14px rgba(34, 197, 94, 0.3), 0 0 28px rgba(34, 197, 94, 0.1);
-  --fs-glow-risk-clear: 0 0 14px rgba(20, 184, 166, 0.35), 0 0 28px rgba(20, 184, 166, 0.1);
+  /* Risk semantics — salmon/amber/cyan signal triad */
+  --fs-risk-critical: #ffb3ac;
+  --fs-risk-critical-bg: rgba(196, 0, 25, 0.22);
+  --fs-risk-high: #ffba20;
+  --fs-risk-high-bg: rgba(255, 186, 32, 0.16);
+  --fs-risk-medium: #ffd386;
+  --fs-risk-medium-bg: rgba(255, 211, 134, 0.13);
+  --fs-risk-low: #00dbe9;
+  --fs-risk-low-bg: rgba(0, 219, 233, 0.13);
+  --fs-risk-clear: #7df4ff;
+  --fs-risk-clear-bg: rgba(125, 244, 255, 0.13);
 
-  /* Ambient mesh gradient stops */
-  --fs-mesh-1: #0a1628;
-  --fs-mesh-2: #0c1a32;
-  --fs-mesh-3: #081420;
-  --fs-mesh-accent: rgba(37, 99, 235, 0.18);
-  --fs-mesh-teal: rgba(20, 184, 166, 0.08);
-  --fs-mesh-violet: rgba(99, 102, 241, 0.1);
+  /* Instrument glow tokens */
+  --fs-glow-accent: 0 0 24px rgba(0, 219, 233, 0.35), 0 0 48px rgba(0, 219, 233, 0.12);
+  --fs-glow-risk-critical: 0 0 20px rgba(255, 179, 172, 0.45), 0 0 40px rgba(255, 179, 172, 0.15);
+  --fs-glow-risk-high: 0 0 18px rgba(255, 186, 32, 0.4), 0 0 36px rgba(255, 186, 32, 0.12);
+  --fs-glow-risk-medium: 0 0 16px rgba(255, 211, 134, 0.35), 0 0 32px rgba(255, 211, 134, 0.1);
+  --fs-glow-risk-low: 0 0 14px rgba(0, 219, 233, 0.3), 0 0 28px rgba(0, 219, 233, 0.1);
+  --fs-glow-risk-clear: 0 0 14px rgba(125, 244, 255, 0.35), 0 0 28px rgba(125, 244, 255, 0.1);
 
-  /* Typography */
+  /* Ambient mesh gradient stops (subtle — kept dark/near-black, cyan+salmon tint only) */
+  --fs-mesh-1: #0a0a0a;
+  --fs-mesh-2: #0d0d0d;
+  --fs-mesh-3: #070707;
+  --fs-mesh-accent: rgba(0, 219, 233, 0.14);
+  --fs-mesh-teal: rgba(0, 219, 233, 0.06);
+  --fs-mesh-violet: rgba(255, 179, 172, 0.08);
+
+  /* Typography — Inter (UI) + IBM Plex Mono (data/labels) */
   --fs-font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
-  --fs-font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --fs-font-mono: "IBM Plex Mono", "Cascadia Code", Consolas, monospace;
   --fs-text-xs: 0.6875rem;
   --fs-text-sm: 0.8125rem;
   --fs-text-base: 0.875rem;
@@ -72,11 +78,11 @@
   --fs-space-6: 1.5rem;
   --fs-space-8: 2rem;
 
-  /* Radius */
-  --fs-radius-sm: 4px;
-  --fs-radius-md: 6px;
-  --fs-radius-lg: 8px;
-  --fs-radius-xl: 12px;
+  /* Radius — sharp instrument-panel edges (Stitch borderRadius DEFAULT 0.25rem) */
+  --fs-radius-sm: 2px;
+  --fs-radius-md: 2px;
+  --fs-radius-lg: 3px;
+  --fs-radius-xl: 4px;
 
   /* Motion — standard */
   --fs-duration-fast: 120ms;
@@ -91,14 +97,17 @@
   --fs-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Glass */
-  --fs-glass-bg: rgba(10, 16, 25, 0.72);
-  --fs-glass-border: rgba(148, 163, 184, 0.12);
-  --fs-glass-blur: 16px;
+  --fs-glass-bg: rgba(19, 19, 19, 0.82);
+  --fs-glass-border: rgba(59, 73, 75, 0.4);
+  --fs-glass-blur: 18px;
 
-  /* Shadows */
-  --fs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --fs-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --fs-shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  /* Shadows / elevation ladder */
+  --fs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --fs-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --fs-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --fs-shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --fs-brand-gradient: #00dbe9;
+  --fs-brand-gradient-dim: rgba(0, 219, 233, 0.1);
 
   /* Legacy aliases (app.css compat) */
   --bg: var(--fs-color-bg);
@@ -109,7 +118,7 @@
   --text: var(--fs-color-text);
   --muted: var(--fs-color-text-secondary);
   --accent: var(--fs-color-accent);
-  --accent2: #0ea5e9;
+  --accent2: #00dbe9;
   --critical: var(--fs-risk-critical);
   --high: var(--fs-risk-high);
   --medium: var(--fs-risk-medium);
@@ -135,9 +144,13 @@
   --fs-color-text-muted: #64748b;
   --fs-color-text-inverse: #f8fafc;
 
-  --fs-color-accent: #2563eb;
-  --fs-color-accent-hover: #1d4ed8;
-  --fs-color-accent-muted: #dbeafe;
+  --fs-color-accent: #00a8b8;
+  --fs-color-accent-hover: #007c88;
+  --fs-color-accent-muted: #d6f7f9;
+
+  --fs-color-gold: #b6791a;
+  --fs-color-gold-hover: #92600f;
+  --fs-color-gold-muted: rgba(182, 121, 26, 0.12);
 
   --fs-risk-critical: #dc2626;
   --fs-risk-critical-bg: rgba(220, 38, 38, 0.1);
@@ -166,7 +179,12 @@
 
   --fs-glass-bg: rgba(255, 255, 255, 0.78);
   --fs-glass-border: rgba(15, 23, 42, 0.08);
+  --fs-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --fs-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.1);
+  --fs-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
   --fs-shadow-premium: 0 8px 32px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --fs-brand-gradient: linear-gradient(135deg, #2563eb 0%, #0891b2 55%, #0d9488 100%);
+  --fs-brand-gradient-dim: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(13, 148, 136, 0.06));
 
   --bg: var(--fs-color-bg);
   --panel: var(--fs-color-bg-elevated);
@@ -176,11 +194,12 @@
   --text: var(--fs-color-text);
   --muted: var(--fs-color-text-secondary);
   --accent: var(--fs-color-accent);
-  --accent2: #0284c7;
+  --accent2: #00a8b8;
   --critical: var(--fs-risk-critical);
   --high: var(--fs-risk-high);
   --medium: var(--fs-risk-medium);
   --low: var(--fs-risk-low);
+  --gold: var(--fs-color-gold);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,8 +4,7 @@ import {
   forceLink,
   forceManyBody,
   forceCenter,
-  forceCollide,
-  forceRadial
+  forceCollide
 } from 'd3-force'
 
 export interface GraphNode {
@@ -59,7 +58,7 @@ interface LayoutMessage {
 function computeDagreLayout(
   nodes: GraphNode[],
   edges: GraphEdge[],
-  options: DagreLayoutOptions = {}
+  _options: DagreLayoutOptions = {}
 ) {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 

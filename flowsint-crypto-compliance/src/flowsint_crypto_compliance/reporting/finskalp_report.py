@@ -215,6 +215,7 @@ class FinSkalpReportBuilder:
     def render_html(self, report: dict[str, Any]) -> str:
         from flowsint_crypto_compliance.reporting.pdf_report import _env
 
+        report = self._maybe_enrich_enterprise_sections(report)
         kind = report.get("report_type", "address")
         if kind == "forensic":
             report = _normalize_forensic_report(report)
@@ -236,6 +237,42 @@ class FinSkalpReportBuilder:
         content, media = render_pdf_bytes(html)
         ext = "pdf" if media.startswith("application/pdf") else "html"
         return content, media, ext
+
+    @staticmethod
+    def _maybe_enrich_enterprise_sections(report: dict[str, Any]) -> dict[str, Any]:
+        """Attach optional enterprise sections when the feature flag is on.
+
+        Fully defensive and additive: on any failure the original report is
+        returned unchanged, so legacy generation can never break. Rollback is a
+        matter of unsetting ``FINSKALP_ENTERPRISE_REPORT_SECTIONS``.
+        """
+        try:
+            from flowsint_crypto_compliance.feature_flags import (
+                enterprise_report_sections_enabled,
+            )
+
+            if not enterprise_report_sections_enabled():
+                return report
+            from flowsint_crypto_compliance.reporting.enterprise_sections import (
+                enrich_enterprise_sections,
+            )
+
+            context = {
+                "case_ref": report.get("case_ref"),
+                "evidence_ids": [
+                    str(x.get("evidence_id") or x.get("eccf_id"))
+                    for x in (report.get("evidence_log") or report.get("evidence_chain") or [])
+                    if isinstance(x, dict) and (x.get("evidence_id") or x.get("eccf_id"))
+                ],
+            }
+            return enrich_enterprise_sections(report, context=context)
+        except Exception:  # pragma: no cover - safety net
+            import logging
+
+            logging.getLogger(__name__).exception(
+                "enterprise_sections enrichment skipped due to error"
+            )
+            return report
 
 
 def _now_iso() -> str:

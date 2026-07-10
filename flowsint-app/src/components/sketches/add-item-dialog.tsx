@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, Download, Upload } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, flattenObj } from '@/lib/utils'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'

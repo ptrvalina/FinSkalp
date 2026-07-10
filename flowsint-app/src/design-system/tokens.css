@@ -1,40 +1,71 @@
 /**
- * RFC-0008 Enterprise Design System — design tokens (Ch.3, 4, 5, 12)
- * Components MUST use these tokens, not hardcoded values.
+ * RFC-0008 Enterprise Design System tokens.
+ * Shared by flowsint-app and the demo stand.
  */
 
 :root {
-  /* Surfaces — Ch.3 */
-  --fs-bg-primary: var(--background);
-  --fs-bg-secondary: var(--muted);
-  --fs-surface: var(--card);
+  --bg-primary: #0b0f14;
+  --bg-secondary: #10151c;
+  --surface: #161c25;
+  --surface-raised: #1d2530;
+  --border: #26303d;
+  --border-strong: #364152;
+
+  --text-primary: #e6eaf0;
+  --text-secondary: #8d98a8;
+  --text-tertiary: #5c6779;
+
+  --accent: #4fd1c5;
+  --accent-dim: #2a6e68;
+
+  --success: #45c77a;
+  --warning: #e0a93a;
+  --error: #e14f5a;
+  --info: #4b8fe0;
+
+  --risk-low: #3fa66b;
+  --risk-medium: #d9a93b;
+  --risk-high: #e0793c;
+  --risk-critical: #de4457;
+
+  --entity-wallet: #4fd1c5;
+  --entity-person: #8c7cf0;
+  --entity-company: #4b8fe0;
+  --entity-exchange: #e0a93a;
+  --entity-contract: #6fcf97;
+  --entity-document: #9aa7b8;
+  --entity-evidence: #de9f4f;
+  --entity-investigation: #de4457;
+
+  --fs-bg-primary: var(--bg-primary);
+  --fs-bg-secondary: var(--bg-secondary);
+  --fs-surface: var(--surface);
+  --fs-surface-raised: var(--surface-raised);
   --fs-border: var(--border);
-  --fs-text-primary: var(--foreground);
-  --fs-text-secondary: var(--muted-foreground);
+  --fs-border-strong: var(--border-strong);
+  --fs-text-primary: var(--text-primary);
+  --fs-text-secondary: var(--text-secondary);
+  --fs-text-tertiary: var(--text-tertiary);
+  --fs-accent: var(--accent);
+  --fs-accent-dim: var(--accent-dim);
+  --fs-success: var(--success);
+  --fs-warning: var(--warning);
+  --fs-error: var(--error);
+  --fs-info: var(--info);
+  --fs-risk-low: var(--risk-low);
+  --fs-risk-medium: var(--risk-medium);
+  --fs-risk-high: var(--risk-high);
+  --fs-risk-critical: var(--risk-critical);
 
-  /* Semantic — Ch.3 */
-  --fs-success: var(--success, oklch(0.6 0.12 145));
-  --fs-warning: var(--warning, oklch(0.7 0.12 80));
-  --fs-error: var(--destructive);
-  --fs-info: var(--info, oklch(0.6 0.1 240));
+  --fs-graph-wallet: var(--entity-wallet);
+  --fs-graph-person: var(--entity-person);
+  --fs-graph-company: var(--entity-company);
+  --fs-graph-exchange: var(--entity-exchange);
+  --fs-graph-contract: var(--entity-contract);
+  --fs-graph-document: var(--entity-document);
+  --fs-graph-evidence: var(--entity-evidence);
+  --fs-graph-investigation: var(--entity-investigation);
 
-  /* Risk analytics — Ch.3 (aliases; base values in styles.css :root) */
-  --fs-risk-low-token: var(--fs-risk-low);
-  --fs-risk-medium-token: var(--fs-risk-medium);
-  --fs-risk-high-token: var(--fs-risk-high);
-  --fs-risk-critical-token: var(--fs-risk-critical);
-
-  /* Graph entity colors — Ch.3 */
-  --fs-graph-wallet: oklch(0.72 0.14 70);
-  --fs-graph-person: oklch(0.65 0.12 250);
-  --fs-graph-company: oklch(0.62 0.1 300);
-  --fs-graph-exchange: oklch(0.68 0.15 40);
-  --fs-graph-contract: oklch(0.58 0.08 200);
-  --fs-graph-document: oklch(0.55 0.06 180);
-  --fs-graph-evidence: oklch(0.7 0.12 145);
-  --fs-graph-investigation: oklch(0.64 0.17 36);
-
-  /* Typography scale — Ch.4 */
   --fs-text-h1: 1.875rem;
   --fs-text-h2: 1.5rem;
   --fs-text-h3: 1.25rem;
@@ -43,10 +74,9 @@
   --fs-text-body: 0.875rem;
   --fs-text-caption: 0.75rem;
   --fs-text-label: 0.6875rem;
-  --fs-font-sans: var(--font-sans, Inter, system-ui, sans-serif);
-  --fs-font-mono: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  --fs-font-sans: var(--font-sans, Inter, "Segoe UI", system-ui, sans-serif);
+  --fs-font-mono: var(--font-mono, "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace);
 
-  /* 8px grid — Ch.5 */
   --fs-space-1: 4px;
   --fs-space-2: 8px;
   --fs-space-3: 16px;
@@ -54,28 +84,26 @@
   --fs-space-5: 32px;
   --fs-space-6: 48px;
 
-  /* Motion — Ch.8 */
   --fs-duration-fast: 120ms;
   --fs-duration-normal: 200ms;
   --fs-duration-slow: 320ms;
   --fs-ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
-  /* Breakpoints reference — Ch.11 */
   --fs-bp-laptop: 1280px;
   --fs-bp-desktop: 1920px;
   --fs-bp-wide: 2560px;
 }
 
 .high-contrast {
-  --background: oklch(0 0 0);
-  --foreground: oklch(1 0 0);
-  --border: oklch(0.85 0 0);
-  --muted-foreground: oklch(0.9 0 0);
-  --primary: oklch(0.85 0.2 95);
-  --fs-risk-critical: #ff6b6b;
-  --fs-risk-high: #ffa94d;
-  --fs-risk-medium: #ffe066;
-  --fs-risk-low: #69db7c;
+  --bg-primary: #000000;
+  --bg-secondary: #06080d;
+  --surface: #0d1117;
+  --surface-raised: #121821;
+  --border: #c4cedb;
+  --border-strong: #e6eaf0;
+  --text-primary: #ffffff;
+  --text-secondary: #e6eaf0;
+  --text-tertiary: #c4cedb;
 }
 
 .fs-density-compact {

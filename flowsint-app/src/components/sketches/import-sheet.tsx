@@ -59,7 +59,7 @@ export function ImportSheet({ sketchId }: ImportSheetProps) {
         const result = await sketchService.analyzeImportFile(sketchId, selectedFile)
         setAnalysisResult(result)
       } catch (error) {
-        toast.error(error?.message)
+        toast.error(error instanceof Error ? error.message : 'Import failed')
         setFile(null)
       } finally {
         setIsAnalyzing(false)

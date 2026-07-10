@@ -28,7 +28,7 @@ export const PasteMarkdown = Extension.create({
 
   onCreate() {
     this.storage.markdownManager = new MarkdownManager({
-      extensions: this.editor.extensionManager.baseExtensions
+      extensions: this.editor.extensionManager.extensions
     })
   },
 

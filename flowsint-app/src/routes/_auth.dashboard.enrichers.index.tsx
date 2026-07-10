@@ -59,9 +59,9 @@ function TemplatesPage() {
     reader.onload = (e) => {
       const content = e.target?.result as string
       navigate({
-        to: '/dashboard/enrichers/new' as string,
+        to: '/dashboard/enrichers/new',
         state: { importedContent: content }
-      })
+      } as Parameters<typeof navigate>[0])
     }
     reader.onerror = () => {
       toast.error('Failed to read file')

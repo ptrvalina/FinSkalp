@@ -22,5 +22,6 @@
   <h2>Ключевые выводы</h2>
   <ol>{% for f in report.executive_summary.key_findings_ru %}<li>{{ f }}</li>{% endfor %}</ol>
   <p style="margin-top:2rem;font-size:0.8rem;color:#666">{{ report.product_ru }} · {{ report.generated_at }}</p>
+  {% include "_enterprise_sections.html.j2" %}
 </body>
 </html>

@@ -303,7 +303,7 @@ const GraphViewer: React.FC<GraphViewerProps> = ({
     [handleNodeHover, showTooltip, hideTooltip]
   )
 
-  useKeyboardEvents(sketchId)
+  useKeyboardEvents(sketchId ?? '')
 
   const {
     handleNodeClick,

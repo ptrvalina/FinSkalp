@@ -56,17 +56,23 @@ async def test_multihop_engine_with_mock_transfers():
     assert len(graph.nodes) >= 2
 
 
-def test_live_collector_registry_lists_nine():
+def test_live_collector_registry_lists_expected():
     from flowsint_crypto_compliance.osint_core.live_collector_registry import (
         LIVE_COLLECTOR_REGISTRY,
         list_live_collectors,
     )
 
-    assert len(LIVE_COLLECTOR_REGISTRY) == 9
+    assert len(LIVE_COLLECTOR_REGISTRY) == 11
     ids = {c["id"] for c in list_live_collectors()}
-    assert "collect_tron_chain" in ids
-    assert "collect_eth_chain" in ids
-    assert "collect_maigret" in ids
+    assert ids == set(LIVE_COLLECTOR_REGISTRY)
+    for expected in (
+        "collect_tron_chain",
+        "collect_eth_chain",
+        "collect_bitcoinabuse",
+        "collect_ahmia",
+        "collect_maigret",
+    ):
+        assert expected in ids
 
 
 def test_fusion_graph_to_dict():

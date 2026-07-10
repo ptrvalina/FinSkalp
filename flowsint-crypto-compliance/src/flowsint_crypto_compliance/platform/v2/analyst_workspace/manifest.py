@@ -17,6 +17,9 @@ class WorkspaceTab(str, Enum):
     GRAPH = "graph"
     REPORTS = "reports"
     ACTIVITY = "activity"
+    TASKS = "tasks"
+    BOOKMARKS = "bookmarks"
+    AI = "ai"
 
 
 class NavigationModule(str, Enum):
@@ -49,6 +52,9 @@ COMMAND_PALETTE_COMMANDS: list[dict[str, str]] = [
     {"id": "open_graph", "label_ru": "Открыть граф", "shortcut": "Ctrl+6", "level": "contextual"},
     {"id": "open_reports", "label_ru": "Открыть отчёты", "shortcut": "Ctrl+7", "level": "contextual"},
     {"id": "open_activity", "label_ru": "Открыть активность", "shortcut": "Ctrl+8", "level": "contextual"},
+    {"id": "open_tasks", "label_ru": "Открыть задачи", "shortcut": "Ctrl+9", "level": "contextual"},
+    {"id": "open_bookmarks", "label_ru": "Закладки", "shortcut": "Ctrl+0", "level": "contextual"},
+    {"id": "open_ai", "label_ru": "AI Context", "level": "contextual"},
     {"id": "search_entity", "label_ru": "Найти сущность", "shortcut": "Ctrl+K", "level": "global"},
     {"id": "search_wallet", "label_ru": "Найти кошелёк", "shortcut": "Ctrl+Shift+K", "level": "global"},
     {"id": "run_osint", "label_ru": "Запустить OSINT-сбор", "level": "contextual"},
@@ -113,6 +119,9 @@ def analyst_workspace_manifest() -> dict[str, Any]:
             WorkspaceTab.GRAPH.value: "Граф",
             WorkspaceTab.REPORTS.value: "Отчёты",
             WorkspaceTab.ACTIVITY.value: "Активность",
+            WorkspaceTab.TASKS.value: "Задачи",
+            WorkspaceTab.BOOKMARKS.value: "Закладки",
+            WorkspaceTab.AI.value: "AI Context",
         },
         "navigation_modules": [m.value for m in NavigationModule],
         "navigation_levels": [n.value for n in NavigationLevel],

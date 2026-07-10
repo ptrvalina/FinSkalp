@@ -63,21 +63,18 @@ export function usePasteListener(handlers: PasteHandlers, options: UsePasteListe
       const payloads = parseClipboard(clipboardData)
 
       payloads.forEach((payload) => {
-        const handler = handlersRef.current[payload.type]
-        if (!handler) return
-
         switch (payload.type) {
           case 'text':
-            handler(payload.text, event)
+            handlersRef.current.text?.(payload.text, event)
             break
           case 'html':
-            handler(payload.html, event)
+            handlersRef.current.html?.(payload.html, event)
             break
           case 'image':
-            handler(payload.file, event)
+            handlersRef.current.image?.(payload.file, event)
             break
           case 'files':
-            handler(payload.files, event)
+            handlersRef.current.files?.(payload.files, event)
             break
         }
       })

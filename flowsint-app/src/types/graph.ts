@@ -37,6 +37,8 @@ export type GraphNode = {
   val?: number
   neighbors?: any[]
   links?: any[]
+  /** Legacy force-graph payload used by some sketch components */
+  data?: Record<string, unknown>
 }
 
 export type GraphEdge = {

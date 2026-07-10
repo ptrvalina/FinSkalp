@@ -22,20 +22,25 @@ export function PageLayout({
   errorComponent
 }: PageLayoutProps) {
   return (
-    <div className="h-full w-full overflow-y-auto bg-background">
-      <div className="border-b border-border z-10">
-        <div className="max-w-7xl mx-auto p-8">
-          <div className="flex items-center justify-between">
+    <div className="h-full w-full overflow-y-auto bg-[var(--fs-bg-primary)]">
+      <div className="sticky top-0 z-10 border-b border-[var(--fs-border)] bg-[color-mix(in_srgb,var(--fs-bg-primary)_92%,transparent)] backdrop-blur">
+        <div className="mx-auto max-w-7xl px-6 py-5 xl:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-              {description && <p className="text-muted-foreground">{description}</p>}
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--fs-text-tertiary)]">
+                Enterprise workspace
+              </p>
+              <h1 className="text-2xl font-semibold text-[var(--fs-text-primary)]">{title}</h1>
+              {description && (
+                <p className="max-w-3xl text-sm text-[var(--fs-text-secondary)]">{description}</p>
+              )}
             </div>
             {actions && <div className="flex items-center gap-2">{actions}</div>}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-8 space-y-8">
+      <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 xl:px-8">
         {isLoading ? loadingComponent : error ? errorComponent : children}
       </div>
     </div>

@@ -39,8 +39,8 @@ def _build_rule_context(
         "sanctioned": bool(registry.get("sanctioned")),
         "mixer_exposure": bool(blockchain.get("mixer_exposure")),
         "org_status": registry.get("org_status"),
-        "operations_active": bool(blockchain.get("transaction_count", 0) > 0),
-        "composite_score": aggregated.get("composite_score", 0),
+        "operations_active": bool((blockchain.get("transaction_count") or 0) > 0),
+        "composite_score": aggregated.get("composite_score") or 0,
     }
     return ctx
 

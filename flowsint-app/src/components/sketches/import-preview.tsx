@@ -559,7 +559,7 @@ export function ImportPreview({
       }
     } catch (error) {
       setIsImporting(false)
-      toast.error(error?.message)
+      toast.error(error instanceof Error ? error.message : 'Import failed')
     }
   }, [mappingsById, sketchId, onSuccess, refetchGraph])
 

@@ -12,6 +12,13 @@ _TRACER_NAME = "finskalp"
 
 
 def otel_enabled() -> bool:
+    try:
+        from flowsint_crypto_compliance.feature_flags import otel_tracing_enabled
+
+        if otel_tracing_enabled():
+            return True
+    except Exception:
+        pass
     return bool(os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 

@@ -87,6 +87,10 @@ from flowsint_crypto_compliance.observability.middleware import CorrelationIdMid
 from flowsint_crypto_compliance.observability.tracing import instrument_fastapi
 
 app.add_middleware(CorrelationIdMiddleware)
+
+from flowsint_crypto_compliance.observability.api_rate_limit import ApiRateLimitMiddleware
+
+app.add_middleware(ApiRateLimitMiddleware)
 instrument_fastapi(app)
 
 from flowsint_crypto_compliance.demo.combat_mode import apply_combat_env_defaults

@@ -68,10 +68,9 @@ export function useCan(role: InvestigationRole | null | undefined): Permissions 
  * RootLayout like DetailsPanel, since the route is active when they render.
  */
 export function usePermissions(): Permissions {
-  const role = useLoaderData({
-    from: '/_auth/dashboard/investigations/$investigationId',
-    select: (d: any) => d?.investigation?.current_user_role ?? null,
-    strict: false,
-  }) as InvestigationRole | null | undefined
+  const data = useLoaderData({ strict: false }) as
+    | { investigation?: { current_user_role?: InvestigationRole | null } }
+    | undefined
+  const role = data?.investigation?.current_user_role ?? null
   return useCan(role)
 }

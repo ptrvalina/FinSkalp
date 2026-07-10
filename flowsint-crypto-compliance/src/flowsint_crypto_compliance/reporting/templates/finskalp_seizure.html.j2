@@ -42,5 +42,6 @@
 
   <h2>Рекомендуемые действия</h2>
   <ol>{% for a in report.recommended_actions_ru %}<li>{{ a }}</li>{% endfor %}</ol>
+  {% include "_enterprise_sections.html.j2" %}
 </body>
 </html>

@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { getDisplayName } from '@/lib/user-display'
 import { SESSION_QUERY_KEY } from '@/hooks/use-auth'
+import { PageLayout } from '@/components/layout/page-layout'
 
 export const Route = createFileRoute('/_auth/dashboard/profile')({
   component: ProfilePage,
@@ -82,11 +83,18 @@ function ProfilePage() {
   const displayName = getDisplayName(profile)
 
   return (
-    <main className="flex-1 h-full overflow-auto">
-      <div className="max-w-xl mx-auto px-8 py-12 space-y-8">
+    <PageLayout
+      title="User Profile"
+      description="Manage analyst identity, avatar, and personal workspace metadata."
+    >
+      <div className="max-w-xl space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your account information.</p>
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--fs-text-primary)]">
+            Analyst account
+          </h2>
+          <p className="mt-1 text-sm text-[var(--fs-text-secondary)]">
+            Update the profile used across notifications, collaboration, and case ownership.
+          </p>
         </div>
 
         {/* Avatar preview */}
@@ -146,6 +154,6 @@ function ProfilePage() {
           </div>
         </form>
       </div>
-    </main>
+    </PageLayout>
   )
 }

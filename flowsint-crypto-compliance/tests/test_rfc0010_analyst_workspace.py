@@ -15,18 +15,13 @@ from fastapi.testclient import TestClient
 
 
 from flowsint_crypto_compliance.platform.v2.analyst_workspace import (
-
     analyst_workspace_manifest,
-
     get_analyst_workspace_service,
-
     reset_collaboration_store,
-
     reset_personalization_store,
-
     universal_search,
-
 )
+from flowsint_crypto_compliance.platform.v2.analyst_workspace.manifest import WorkspaceTab
 
 from flowsint_crypto_compliance.platform.v2.investigation_workspace import InvestigationWorkspace
 
@@ -156,7 +151,7 @@ def test_analyst_workspace_manifest_structure():
 
     assert m["rfc"] == "RFC-0010"
 
-    assert len(m["workspace_tabs"]) == 8
+    assert len(m["workspace_tabs"]) == len(WorkspaceTab)
 
     assert len(m["navigation_modules"]) == 10
 
@@ -186,7 +181,7 @@ def test_analyst_workspace_state_service():
 
     assert state["case_ref"] == "RFC10-TEST"
 
-    assert len(state["tabs"]) == 8
+    assert len(state["tabs"]) == len(WorkspaceTab)
 
     assert "workspace" in state
 

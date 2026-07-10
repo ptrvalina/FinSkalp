@@ -11,7 +11,10 @@ import type { TemplateData } from './template-schema'
 
 export interface TestResult {
   success: boolean
-  data?: unknown
+  data?: {
+    raw_results?: Record<string, unknown>
+    results?: unknown
+  }
   error?: string
   duration?: number
   url?: string

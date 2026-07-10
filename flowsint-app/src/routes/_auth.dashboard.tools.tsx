@@ -10,6 +10,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { PageLayout } from '@/components/layout/page-layout'
 
 export const Route = createFileRoute('/_auth/dashboard/tools')({
   component: ToolsPage
@@ -170,12 +171,11 @@ function ToolsPage() {
   })
 
   return (
-    <div className="h-full w-full px-12 py-12 bg-background overflow-auto">
-      <div className="max-w-7xl mx-auto flex flex-col gap-12 items-center justify-start">
-        <div className="w-full">
-          <h1 className="font-semibold text-2xl">Tools</h1>
-          <p className="opacity-60 mt-3">Here are the tools used to gather informations.</p>
-        </div>
+    <PageLayout
+      title="Forensic Toolset"
+      description="Operational catalog of OSINT, blockchain, registry, and metadata tools available to investigators."
+    >
+      <div className="flex flex-col gap-8">
 
         <div className="w-full flex flex-col md:flex-row gap-4">
           <div className="flex-1">
@@ -209,7 +209,7 @@ function ToolsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </PageLayout>
   )
 }
 

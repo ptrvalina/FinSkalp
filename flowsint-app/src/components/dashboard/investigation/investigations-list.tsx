@@ -1,4 +1,4 @@
-import { FolderOpen, MoreHorizontal, FileText, Network } from 'lucide-react'
+import { FolderOpen, FileText, Network } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Link } from '@tanstack/react-router'
 import { Investigation } from '@/types'

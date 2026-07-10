@@ -1,0 +1,18 @@
+groups:
+  - name: finskalp-api
+    rules:
+      - alert: ApiHealthProbeFailures
+        expr: increase(idoo_health_probe_total{status!="healthy"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: IDOO health probe failures detected
+
+      - alert: HighApiRateLimit
+        expr: increase(http_requests_total{status="429"}[5m]) > 50
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: Elevated HTTP 429 responses

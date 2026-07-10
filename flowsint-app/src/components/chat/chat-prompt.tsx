@@ -5,6 +5,7 @@ import { XIcon, ArrowUp } from 'lucide-react'
 import { useGraphStore } from '@/stores/graph-store'
 import { useRef, useEffect, memo, useState } from 'react'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
+import { lookupItemTypeRecord } from '@/lib/item-type'
 import { ChatContextFormat } from '@/types'
 
 interface ChatPanelProps {
@@ -127,7 +128,7 @@ export const ContextList = memo(({ context }: { context: ChatContextFormat[] }) 
     <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-1.5 items-center px-1">
       {context.map((item: ChatContextFormat, index: number) => {
         if (item.type === 'node') {
-          const color = item.nodeColor ?? colors[item.nodeType]
+          const color = item.nodeColor ?? lookupItemTypeRecord(colors, item.nodeType)
           return (
             <Badge
               key={index}
@@ -140,8 +141,8 @@ export const ContextList = memo(({ context }: { context: ChatContextFormat[] }) 
           )
         }
 
-        const fromColor = item.fromColor ?? colors[item.fromType]
-        const toColor = item.toColor ?? colors[item.toType]
+        const fromColor = item.fromColor ?? lookupItemTypeRecord(colors, item.fromType)
+        const toColor = item.toColor ?? lookupItemTypeRecord(colors, item.toType)
 
         return (
           <Badge

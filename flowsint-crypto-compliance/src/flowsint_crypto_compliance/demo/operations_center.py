@@ -417,6 +417,11 @@ class OperationsCenter:
     def _seed_working_queue(self) -> None:
         if is_combat_mode():
             return
+        self._seed_default_alerts()
+
+    def _seed_default_alerts(self) -> None:
+        if self._alerts:
+            return
         incoming = [
             _alert_from_bank_scenario(get_scenario("p2p_rub_offshore")),
             _alert_from_pattern(PATTERN_RULES[0]),
@@ -556,6 +561,8 @@ class OperationsCenter:
         status: AlertStatus | None = None,
     ) -> list[dict[str, Any]]:
         async with self._lock:
+            if not self._alerts:
+                self._seed_default_alerts()
             items = list(self._alerts.values())
         items.sort(key=lambda a: a.received_at, reverse=True)
         if status:

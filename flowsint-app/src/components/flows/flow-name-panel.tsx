@@ -27,7 +27,7 @@ export const FlowNamePanel = ({ flow, onUpdate, disabled = false }: FlowNamePane
   const updateFlowMutation = useMutation({
     mutationFn: ({ flowId, body }: { flowId: string; body: BodyInit }) =>
       flowService.update(flowId, body),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       if (onUpdate) {
         onUpdate(variables.body as Partial<Flow>)
       }

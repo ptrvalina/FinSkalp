@@ -9,7 +9,9 @@ import html
 import json
 import os
 import socket
+import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -108,9 +110,19 @@ _finskalp_reporter = FinSkalpReportBuilder()
 _scalpel_engine = ScalpelEngine()
 _ocr_pipeline = OCRPipeline()
 _bg_task: asyncio.Task | None = None
+_investigate_tasks: dict[str, dict[str, Any]] = {}
 
 _DEFAULT_FUSION_SCENARIO = "p2p_rub_offshore"
-_INVESTIGATE_TIMEOUT_SEC = float(os.getenv("COMPLIANCE_INVESTIGATE_TIMEOUT_SEC", "300"))
+
+
+def _investigate_timeout_sec() -> float:
+    raw = os.getenv("COMPLIANCE_INVESTIGATE_TIMEOUT_SEC", "").strip()
+    if raw:
+        return float(raw)
+    return 900.0 if is_combat_mode() else 300.0
+
+
+_INVESTIGATE_TIMEOUT_SEC = _investigate_timeout_sec()
 
 
 def _resolve_scenario_id(scenario_id: str | None) -> str:
@@ -493,10 +505,20 @@ class KytWatchlistRequest(BaseModel):
     address: str = Field(..., min_length=1, max_length=128)
 
 
+_NO_STORE_HEADERS = {
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+    "Expires": "0",
+}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """FinSkalp enterprise UI + full live SPA."""
-    return HTMLResponse((STATIC_DIR / "index.html").read_text(encoding="utf-8"))
+    return HTMLResponse(
+        (STATIC_DIR / "index.html").read_text(encoding="utf-8"),
+        headers=_NO_STORE_HEADERS,
+    )
 
 
 @app.get("/classic", response_class=HTMLResponse)
@@ -504,8 +526,11 @@ async def classic_demo():
     """Classic layout (pre-enterprise shell)."""
     classic = STATIC_DIR / "index.classic.html"
     if classic.is_file():
-        return HTMLResponse(classic.read_text(encoding="utf-8"))
-    return HTMLResponse((STATIC_DIR / "index.html").read_text(encoding="utf-8"))
+        return HTMLResponse(classic.read_text(encoding="utf-8"), headers=_NO_STORE_HEADERS)
+    return HTMLResponse(
+        (STATIC_DIR / "index.html").read_text(encoding="utf-8"),
+        headers=_NO_STORE_HEADERS,
+    )
 
 
 @app.get("/status", response_class=HTMLResponse)
@@ -594,7 +619,7 @@ async def health():
         "entity_store": entity_store_mode(),
         "version": "0.8.0-osint-quality",
         "platform": "flowsint_compliance",
-        "investigate_timeout_sec": _INVESTIGATE_TIMEOUT_SEC,
+        "investigate_timeout_sec": _investigate_timeout_sec(),
         "osint_collectors": collectors,
     }
 
@@ -736,17 +761,7 @@ class FinSkalpInvestigateRequest(BaseModel):
     )
 
 
-@app.get("/api/scenarios")
-async def scenarios_list():
-    return list_scenarios()
-
-
-@app.post("/api/finskalp/investigate")
-@app.post("/api/osint/investigate")
-async def finskalp_investigate(body: FinSkalpInvestigateRequest, request: Request):
-    assert_demo_api_token(request)
-    from flowsint_crypto_compliance.observability.logging import correlation_id_var
-
+def _build_investigation_request(body: FinSkalpInvestigateRequest) -> tuple[FinSkalpInvestigationRequest, Chain | None]:
     try:
         chain = Chain(body.chain.lower()) if body.chain else None
     except ValueError as exc:
@@ -756,43 +771,27 @@ async def finskalp_investigate(body: FinSkalpInvestigateRequest, request: Reques
             get_scenario(body.scenario_id)
         except KeyError as exc:
             raise HTTPException(status_code=422, detail=f"Unknown scenario: {body.scenario_id}") from exc
-    try:
-        result = await asyncio.wait_for(
-            _finskalp.investigate(
-                FinSkalpInvestigationRequest(
-                    address=body.address.strip(),
-                    chain=chain,
-                    tx_hash=body.tx_hash,
-                    bank_reference=body.bank_reference,
-                    bank_name=body.bank_name,
-                    subject_id=body.subject_id,
-                    amount=body.amount,
-                    currency=body.currency,
-                    region=body.region,
-                    notes=body.notes,
-                    scenario_id=body.scenario_id,
-                    depth=body.depth,
-                    osint_depth=body.osint_depth,
-                    limit=body.limit,
-                    collectors=body.collectors,
-                ),
-                correlation_id=correlation_id_var.get() or request.headers.get("X-Correlation-ID"),
-            ),
-            timeout=_INVESTIGATE_TIMEOUT_SEC,
-        )
-    except asyncio.TimeoutError as exc:
-        hint = (
-            "Укажите live-адрес (TRON/ETH/BTC) и повторите."
-            if is_combat_mode()
-            else "Попробуйте демо-адрес TRU_HUB_MSK или повторите позже."
-        )
-        raise HTTPException(
-            status_code=504,
-            detail=f"Расследование превысило лимит времени. {hint}",
-        ) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    payload = result.to_dict()
+    req = FinSkalpInvestigationRequest(
+        address=body.address.strip(),
+        chain=chain,
+        tx_hash=body.tx_hash,
+        bank_reference=body.bank_reference,
+        bank_name=body.bank_name,
+        subject_id=body.subject_id,
+        amount=body.amount,
+        currency=body.currency,
+        region=body.region,
+        notes=body.notes,
+        scenario_id=body.scenario_id,
+        depth=body.depth,
+        osint_depth=body.osint_depth,
+        limit=body.limit,
+        collectors=body.collectors,
+    )
+    return req, chain
+
+
+def _finalize_finskalp_payload(payload: dict[str, Any]) -> dict[str, Any]:
     _cache_finskalp_payload(payload)
     try:
         from flowsint_crypto_compliance.search.meilisearch_client import index_case, index_wallet
@@ -827,6 +826,135 @@ async def finskalp_investigate(body: FinSkalpInvestigateRequest, request: Reques
     except Exception:
         pass
     return payload
+
+
+async def _run_finskalp_investigate_core(
+    body: FinSkalpInvestigateRequest,
+    *,
+    correlation_id: str | None,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.observability.logging import correlation_id_var
+
+    req, _chain = _build_investigation_request(body)
+    cid = correlation_id or correlation_id_var.get()
+    result = await asyncio.wait_for(
+        _finskalp.investigate(req, correlation_id=cid),
+        timeout=_investigate_timeout_sec(),
+    )
+    return _finalize_finskalp_payload(result.to_dict())
+
+
+async def _run_investigate_task(task_id: str, body: FinSkalpInvestigateRequest, correlation_id: str | None) -> None:
+    _investigate_tasks[task_id]["status"] = "running"
+    try:
+        payload = await _run_finskalp_investigate_core(body, correlation_id=correlation_id)
+        _investigate_tasks[task_id].update(
+            {
+                "status": "success",
+                "result": payload,
+                "error": None,
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+    except asyncio.TimeoutError:
+        hint = (
+            "Укажите live-адрес (TRON/ETH/BTC) и повторите."
+            if is_combat_mode()
+            else "Попробуйте демо-адрес TRU_HUB_MSK или повторите позже."
+        )
+        _investigate_tasks[task_id].update(
+            {
+                "status": "failure",
+                "error": f"Расследование превысило лимит времени ({int(_investigate_timeout_sec())} с). {hint}",
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+    except ValueError as exc:
+        _investigate_tasks[task_id].update(
+            {
+                "status": "failure",
+                "error": str(exc),
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+    except Exception as exc:
+        _investigate_tasks[task_id].update(
+            {
+                "status": "failure",
+                "error": str(exc)[:2000],
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+
+
+@app.get("/api/scenarios")
+async def scenarios_list():
+    return list_scenarios()
+
+
+@app.post("/api/finskalp/investigate")
+@app.post("/api/osint/investigate")
+async def finskalp_investigate(body: FinSkalpInvestigateRequest, request: Request):
+    assert_demo_api_token(request)
+    from flowsint_crypto_compliance.observability.logging import correlation_id_var
+
+    try:
+        return await _run_finskalp_investigate_core(
+            body,
+            correlation_id=correlation_id_var.get() or request.headers.get("X-Correlation-ID"),
+        )
+    except asyncio.TimeoutError as exc:
+        hint = (
+            "Укажите live-адрес (TRON/ETH/BTC) и повторите."
+            if is_combat_mode()
+            else "Попробуйте демо-адрес TRU_HUB_MSK или повторите позже."
+        )
+        raise HTTPException(
+            status_code=504,
+            detail=f"Расследование превысило лимит времени. {hint}",
+        ) from exc
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/finskalp/investigate/async")
+@app.post("/api/osint/investigate/async")
+async def finskalp_investigate_async(body: FinSkalpInvestigateRequest, request: Request):
+    """Фоновое расследование — для live TRON + все Scalpel-коллекторы (5–15 мин)."""
+    assert_demo_api_token(request)
+    from flowsint_crypto_compliance.observability.logging import correlation_id_var
+
+    try:
+        _build_investigation_request(body)
+    except HTTPException:
+        raise
+    task_id = str(uuid.uuid4())
+    _investigate_tasks[task_id] = {
+        "task_id": task_id,
+        "status": "queued",
+        "result": None,
+        "error": None,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "timeout_sec": _investigate_timeout_sec(),
+    }
+    correlation_id = correlation_id_var.get() or request.headers.get("X-Correlation-ID")
+    asyncio.create_task(_run_investigate_task(task_id, body, correlation_id))
+    return {
+        "task_id": task_id,
+        "status": "queued",
+        "poll_url": f"/api/finskalp/investigate/tasks/{task_id}",
+        "timeout_sec": _investigate_timeout_sec(),
+    }
+
+
+@app.get("/api/finskalp/investigate/tasks/{task_id}")
+async def finskalp_investigate_task_poll(task_id: str):
+    task = _investigate_tasks.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача расследования не найдена")
+    return task
 
 
 @app.get("/api/finskalp/report/{investigation_id}/pdf")

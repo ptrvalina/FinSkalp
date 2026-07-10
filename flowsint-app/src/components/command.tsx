@@ -54,7 +54,7 @@ export function Command() {
   })
 
   useKeyboardShortcut({
-    key: 'j',
+    key: 'k',
     ctrlOrCmd: true,
     callback: () => {
       setOpen((prev) => !prev)
@@ -80,7 +80,7 @@ export function Command() {
         (analysis: Analysis) => analysis.investigation_id === investigation.id
       )
       const matchesAnalyses = investigationAnalyses.some(
-        (analysis) =>
+        (analysis: Analysis) =>
           analysis.title.toLowerCase().includes(query) ||
           analysis.description?.toLowerCase().includes(query)
       )
@@ -92,7 +92,7 @@ export function Command() {
       const matchesTitle = analysis.title.toLowerCase().includes(query)
       const matchesDescription = analysis.description?.toLowerCase().includes(query)
       const belongsToFilteredInvestigation = filteredInvestigations.some(
-        (inv) => inv.id === analysis.investigation_id
+        (inv: Investigation) => inv.id === analysis.investigation_id
       )
       return (matchesTitle || matchesDescription) && belongsToFilteredInvestigation
     })
@@ -121,18 +121,18 @@ export function Command() {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="text-xs h-8 w-full max-w-3xs border flex rounded-full items-center justify-between hover:border-muted-foreground text-muted-foreground"
+        className="h-9 w-full min-w-[14rem] max-w-xs rounded-sm border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] px-3 text-xs text-[var(--fs-text-secondary)] hover:border-[var(--fs-border-strong)] hover:bg-[var(--fs-surface-raised)]"
       >
         <span className="flex items-center gap-2">
-          <Search /> Поиск FinSkalp{' '}
+          <Search className="h-4 w-4" /> Command Palette
         </span>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-          <span className="text-xs">⌘</span>J
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-sm border border-[var(--fs-border)] bg-[var(--fs-surface)] px-1.5 font-mono text-[10px] font-medium text-[var(--fs-text-tertiary)] opacity-100">
+          <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput
-          placeholder="Type a command or search..."
+          placeholder="Open case, search wallet, build graph, import evidence..."
           value={searchQuery}
           onValueChange={setSearchQuery}
         />
@@ -218,7 +218,7 @@ export function Command() {
                   <CommandGroup heading="Quick Actions">
                     <CommandItem
                       onSelect={() => {
-                        navigate({ to: '/dashboard/investigations' })
+                        navigate({ to: '/dashboard' })
                         setOpen(false)
                       }}
                     >
@@ -235,7 +235,18 @@ export function Command() {
                     >
                       <div className="flex items-center gap-2">
                         <Workflow className="h-4 w-4" />
-                        <span>Enrichers</span>
+                          <span>Open Flow Architect</span>
+                      </div>
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => {
+                        navigate({ to: '/dashboard/compliance' })
+                        setOpen(false)
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Fingerprint className="h-4 w-4" />
+                        <span>Open compliance lifecycle</span>
                       </div>
                     </CommandItem>
                   </CommandGroup>

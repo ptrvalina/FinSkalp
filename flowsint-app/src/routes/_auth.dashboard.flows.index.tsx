@@ -55,8 +55,8 @@ function FlowPage() {
 
   return (
     <PageLayout
-      title="Flows"
-      description="Create and manage your flow flows."
+      title="Flow Architect"
+      description="Design, monitor, and version operational flow pipelines without losing investigation context."
       isLoading={isLoading}
       loadingComponent={
         <div className="p-2">
@@ -87,10 +87,9 @@ function FlowPage() {
             <div className="rounded-full bg-muted/50 p-4 mb-4">
               <FileX className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No flow yet</h3>
+            <h3 className="text-xl font-semibold mb-2">No flow pipelines yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Get started by creating your first flow. You can use flows to process and manipulate
-              your data in powerful ways.
+              Create your first operational pipeline for enrichment, case triage, or evidence handling.
             </p>
             <NewFlow>
               <Button>

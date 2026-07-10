@@ -10,6 +10,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import { TriangleAlert, Loader2, ArrowRight } from 'lucide-react'
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
+import { lookupItemTypeRecord } from '@/lib/item-type'
 import { Enricher } from '@/types/enricher'
 import { useQuery } from '@tanstack/react-query'
 import { Input } from '../ui/input'
@@ -68,7 +69,7 @@ const FlowSheet = ({ onLayout }: { onLayout: () => void }) => {
           class_name: enricher.class_name,
           module: enricher.module || '',
           key: enricher.name,
-          color: colors[enricher.category.toLowerCase()] || '#94a3b8',
+          color: lookupItemTypeRecord(colors, enricher.category.toLowerCase()) || '#94a3b8',
           name: enricher.name,
           category: enricher.category,
           type: enricher.type,
@@ -171,8 +172,8 @@ function areEqual(prevProps: { enricher: Enricher }, nextProps: { enricher: Enri
 // Memoized enricher item component for the sidebar
 const EnricherItem = memo(({ enricher, onClick }: { enricher: Enricher; onClick: () => void }) => {
   const colors = useNodesDisplaySettings((s) => s.colors)
-  const borderInputColor = colors[enricher.inputs.type.toLowerCase()]
-  const borderOutputColor = colors[enricher.outputs.type.toLowerCase()]
+  const borderInputColor = lookupItemTypeRecord(colors, enricher.inputs.type.toLowerCase())
+  const borderOutputColor = lookupItemTypeRecord(colors, enricher.outputs.type.toLowerCase())
   const Icon =
     enricher.type === 'type'
       ? useIcon(enricher.outputs.type.toLowerCase() as string)

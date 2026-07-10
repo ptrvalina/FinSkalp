@@ -5,7 +5,7 @@ from flowsint_crypto_compliance.demo.microservices import (
     list_microservices,
     run_microservice,
 )
-from flowsint_crypto_compliance.demo.osint_console import OSINTConsole
+from flowsint_crypto_compliance.demo.osint_console import OSINTConsole, OSINT_SOURCES
 
 
 def test_microservices_count_and_osint_cluster():
@@ -36,7 +36,7 @@ async def test_run_microservice_with_scenario():
 @pytest.mark.asyncio
 async def test_osint_console_fusion():
     console = OSINTConsole()
-    assert len(console.sources()) == 9
+    assert len(console.sources()) == len(OSINT_SOURCES)
     assert len(console.pipeline()) == 8
     status = console.status()
     assert status["sovereign_mode"] is True

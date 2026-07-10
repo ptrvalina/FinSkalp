@@ -8,7 +8,6 @@ from enum import Enum
 from threading import Lock
 from typing import Any
 
-
 class AuditAction(str, Enum):
     """RFC-0017 Ch.10 — audit entry types."""
 
@@ -83,13 +82,30 @@ class AuditTrail:
             return list(self._entries)
 
 
-_trail: AuditTrail | None = None
+_trail: AuditTrail | Any | None = None
 
 
 def get_audit_trail() -> AuditTrail:
     global _trail
     if _trail is None:
-        _trail = AuditTrail()
+        from flowsint_crypto_compliance.feature_flags import eccf_postgres_persistence_enabled
+
+        if eccf_postgres_persistence_enabled():
+            try:
+                from flowsint_crypto_compliance.platform.v2.eccf.postgres_store import (
+                    PostgresAuditTrail,
+                )
+
+                _trail = PostgresAuditTrail()
+            except Exception:
+                import logging
+
+                logging.getLogger(__name__).exception(
+                    "ECCF Postgres audit unavailable — falling back to in-memory"
+                )
+                _trail = AuditTrail()
+        else:
+            _trail = AuditTrail()
     return _trail
 
 

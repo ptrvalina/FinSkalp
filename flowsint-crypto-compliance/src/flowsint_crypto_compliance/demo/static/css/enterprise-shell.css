@@ -3,20 +3,29 @@ body.fs-enterprise {
   height: 100vh;
   overflow: hidden;
   display: block;
-  background: #031427;
-  color: #d3e4fe;
+  background: var(--fs-color-bg, #050505);
+  color: var(--fs-color-text, #e5e2e1);
 }
 
 body.fs-enterprise::before {
-  display: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background:
+    radial-gradient(ellipse 900px 520px at 8% -6%, var(--fs-mesh-accent, rgba(0, 219, 233, 0.16)) 0%, transparent 55%),
+    radial-gradient(ellipse 720px 480px at 100% 14%, var(--fs-mesh-teal, rgba(0, 219, 233, 0.08)) 0%, transparent 50%);
 }
 
 .fs-app-main {
   position: relative;
   z-index: 1;
-  background: #031427;
+  background: transparent;
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 4.5rem);
 }
 
 .fs-app-main > .workspace-full,
@@ -107,12 +116,12 @@ body.fs-enterprise::before {
 
 @keyframes fs-kpi-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; color: #38bdf8; }
+  50% { opacity: 0.5; color: #00dbe9; }
 }
 
 .fs-app-main .nav-badge {
   font-size: 0.65rem;
-  background: #38bdf8;
+  background: #00dbe9;
   color: #001e2c;
   padding: 0.1rem 0.35rem;
   border-radius: 999px;
@@ -125,6 +134,56 @@ body.fs-enterprise::before {
   right: 1rem;
   z-index: 9999;
 }
+
+/* --- Icon rail (Stitch tactical nav) --- */
+aside.bg-surface-dim {
+  background: var(--fs-color-bg, #050505) !important;
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.fs-nav {
+  border-radius: 0 !important;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: relative;
+}
+.fs-nav:hover {
+  background: var(--fs-color-bg-muted-high, #2a2a2a) !important;
+}
+.fs-nav.fs-nav-active {
+  color: var(--fs-color-accent, #00dbe9) !important;
+  background: var(--fs-color-bg-muted-high, #2a2a2a) !important;
+  border-left: 2px solid var(--fs-color-accent, #00dbe9);
+}
+.fs-nav.fs-nav-active .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+.fs-nav .material-symbols-outlined {
+  transition: transform var(--fs-duration-fast, 120ms) var(--fs-ease);
+}
+.fs-nav:hover .material-symbols-outlined { transform: scale(1.08); }
+
+/* --- Topbar --- */
+.fs-topbar {
+  background: var(--fs-color-bg-elevated, #1c1b1b) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.fs-topbar #globalSearchWrap .flex {
+  transition: border-color var(--fs-duration-fast, 120ms) var(--fs-ease), box-shadow var(--fs-duration-fast, 120ms) var(--fs-ease);
+}
+.fs-topbar #globalSearchWrap .flex:focus-within {
+  border-color: var(--fs-color-accent, #00dbe9);
+  box-shadow: 0 0 0 3px var(--fs-color-accent-muted, rgba(0, 219, 233, 0.15));
+}
+.fs-kpi {
+  background: var(--fs-color-bg-surface, #131313) !important;
+  border-color: var(--fs-color-border, #1f1f1f) !important;
+  border-radius: 0 !important;
+}
+#themeToggle {
+  transition: color var(--fs-duration-fast, 120ms), transform var(--fs-duration-fast, 120ms);
+}
+#themeToggle:hover { color: var(--fs-color-accent, #00dbe9); transform: rotate(20deg); }
 
 @media (max-width: 1024px) {
   .fs-app-main .dash-grid,

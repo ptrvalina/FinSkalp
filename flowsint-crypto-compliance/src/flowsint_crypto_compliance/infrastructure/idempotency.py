@@ -96,12 +96,24 @@ class IdempotencyStore:
             self._local.pop(rk, None)
 
 
+_default_store: IdempotencyStore | None = None
+_store_lock = threading.Lock()
+
+
+def get_idempotency_store() -> IdempotencyStore:
+    global _default_store
+    with _store_lock:
+        if _default_store is None:
+            _default_store = IdempotencyStore()
+        return _default_store
+
+
 def make_idempotency_key(*parts: str) -> str:
     return ":".join(str(p) for p in parts if p)
 
 
 def run_idempotent(scope: str, idempotency_key: str, fn):
-    store = IdempotencyStore()
+    store = get_idempotency_store()
     state = store.acquire(scope, idempotency_key)
     if state == "done":
         cached = store.get_result(scope, idempotency_key)

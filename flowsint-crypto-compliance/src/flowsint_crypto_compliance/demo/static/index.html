@@ -6,15 +6,46 @@
 <meta name="application-name" content="FinSkalp" />
 <title>ФинСкальп · FinSkalp — суверенная криптофорензика</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;900&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style>
-.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-.glass-stroke { box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.06); }
-.fs-nav.fs-nav-active {
-  color: #8ed5ff; background: rgba(62, 73, 93, 0.15);
-  border-right: 2px solid #8ed5ff; border-radius: 0.125rem 0 0 0.125rem;
+body {
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
-.fs-nav.fs-nav-active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-size: 18px;
+}
+.instrument-border {
+  border: 1px solid #1f1f1f;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b494b;
+}
+.scanline {
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 219, 233, 0.1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  animation: fs-scan 4s linear infinite;
+}
+@keyframes fs-scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+.glass-stroke { box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.06); }
 </style>
 <script id="tailwind-config">
 tailwind.config = {
@@ -22,88 +53,159 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        primary: "#8ed5ff", surface: "#031427", background: "#031427",
-        "surface-dim": "#031427", "surface-container": "#102034",
-        "surface-container-low": "#0b1c30", "surface-container-high": "#1b2b3f",
-        "surface-container-highest": "#26364a", "surface-container-lowest": "#000f21",
-        "on-surface": "#d3e4fe", "on-surface-variant": "#bdc8d1",
-        "outline-variant": "#3e484f", outline: "#87929a",
-        "primary-container": "#38bdf8", error: "#ffb4ab", tertiary: "#ffc176",
-        "secondary-container": "#3e495d", "on-primary": "#00354a",
+        "tertiary-fixed-dim": "#ffba20",
+        "error": "#ffb4ab",
+        "on-primary-fixed-variant": "#004f54",
+        "inverse-primary": "#006970",
+        "surface": "#131313",
+        "tertiary-fixed": "#ffdea8",
+        "secondary-fixed": "#ffdad6",
+        "surface-container-high": "#2a2a2a",
+        "on-error-container": "#ffdad6",
+        "on-secondary-container": "#ffd2cd",
+        "secondary": "#ffb3ac",
+        "surface-tint": "#00dbe9",
+        "surface-variant": "#353534",
+        "surface-bright": "#3a3939",
+        "surface-container-low": "#1c1b1b",
+        "outline-variant": "#3b494b",
+        "secondary-fixed-dim": "#ffb3ac",
+        "on-surface": "#e5e2e1",
+        "on-tertiary": "#412d00",
+        "primary-fixed": "#7df4ff",
+        "on-tertiary-fixed": "#271900",
+        "on-background": "#e5e2e1",
+        "error-container": "#93000a",
+        "primary-container": "#00f0ff",
+        "on-surface-variant": "#b9cacb",
+        "surface-container-highest": "#353534",
+        "on-error": "#690005",
+        "on-primary": "#00363a",
+        "outline": "#849495",
+        "inverse-on-surface": "#313030",
+        "on-primary-fixed": "#002022",
+        "surface-dim": "#131313",
+        "on-secondary-fixed": "#410003",
+        "inverse-surface": "#e5e2e1",
+        "surface-container": "#201f1f",
+        "on-secondary-fixed-variant": "#930010",
+        "on-tertiary-fixed-variant": "#5e4200",
+        "tertiary-container": "#ffd386",
+        "on-primary-container": "#006970",
+        "surface-container-lowest": "#0e0e0e",
+        "primary": "#dbfcff",
+        "background": "#131313",
+        "tertiary": "#fff4e8",
+        "primary-fixed-dim": "#00dbe9",
+        "secondary-container": "#c40019",
+        "on-secondary": "#680008",
+        "on-tertiary-container": "#7d5800"
       },
-      spacing: { "container-margin": "32px", "block-gap": "24px", "compact-gap": "8px" },
+      borderRadius: {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "0.75rem",
+        "full": "9999px"
+      },
+      spacing: {
+        "tight-inset": "4px",
+        "module-gap": "1px",
+        "standard-inset": "8px",
+        "unit": "4px",
+        "container-padding": "12px"
+      },
       fontFamily: {
-        h1: ["Public Sans"], h2: ["Public Sans"], h3: ["Public Sans"],
-        "body-md": ["Public Sans"], "body-sm": ["Public Sans"],
-        "label-caps": ["Public Sans"], "data-mono": ["IBM Plex Mono"],
+        "headline-lg": ["Inter"],
+        "mono-sm": ["IBM Plex Mono"],
+        "mono-data": ["IBM Plex Mono"],
+        "mono-label": ["IBM Plex Mono"],
+        "body-md": ["Inter"],
+        "headline-md": ["Inter"],
+        h1: ["Inter"], h2: ["Inter"], h3: ["Inter"],
+        "body-sm": ["Inter"],
+        "label-caps": ["IBM Plex Mono"],
+        "data-mono": ["IBM Plex Mono"]
       },
-    },
-  },
-};
+      fontSize: {
+        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "mono-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "450"}],
+        "mono-label": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "body-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+      }
+    }
+  }
+}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260704b" />
-<link rel="stylesheet" href="/static/css/motion.css?v=20260704b" />
-<link rel="stylesheet" href="/static/css/app.css?v=20260704b" />
-<link rel="stylesheet" href="/static/css/enterprise-shell.css?v=20260704b" />
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260709e" />
+<link rel="stylesheet" href="/static/css/motion.css?v=20260709e" />
+<link rel="stylesheet" href="/static/css/app.css?v=20260709e" />
+<link rel="stylesheet" href="/static/css/enterprise-shell.css?v=20260709e" />
 </head>
-<body class="fs-enterprise bg-surface text-on-surface font-body-md selection:bg-primary/30">
-<div class="flex h-screen overflow-hidden">
-<aside class="flex flex-col h-full w-64 shrink-0 bg-surface-container border-r border-outline-variant z-50 overflow-y-auto">
-<div class="p-6 flex flex-col gap-1">
-<span class="font-h2 text-h2 font-semibold text-primary tracking-tight">Фин<span class="text-primary-container">Скальп</span></span>
-<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest" id="orgName">FinSkalp · 115-ФЗ</span>
+<body class="fs-enterprise bg-background text-on-surface font-body-md selection:bg-primary-fixed-dim/30 flex flex-col">
+<!-- Icon Rail (Stitch tactical nav) -->
+<aside class="bg-surface-dim border-r border-outline-variant fixed h-full w-16 left-0 top-0 flex flex-col items-center py-4 z-50">
+<div class="mb-8 flex flex-col items-center">
+<div class="w-10 h-10 bg-primary-container flex items-center justify-center rounded-sm">
+<span class="material-symbols-outlined text-on-primary-container font-bold">terminal</span>
 </div>
-<nav class="flex-1 px-2 py-2 space-y-0.5 flex flex-col">
-<div class="px-3 pt-4 pb-1 font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest">Обзор</div>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="dashboard" onclick="switchView('dashboard')"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-caps text-label-caps">Командный центр</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="osint" onclick="switchView('osint')"><span class="material-symbols-outlined text-[20px]">public</span><span class="font-label-caps text-label-caps">Центр OSINT</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="wallet" onclick="switchView('wallet')"><span class="material-symbols-outlined text-[20px]">account_balance_wallet</span><span class="font-label-caps text-label-caps">Проверка кошелька</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="microservices" onclick="switchView('microservices')"><span class="material-symbols-outlined text-[20px]">hub</span><span class="font-label-caps text-label-caps">Микросервисы</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="platform" onclick="switchView('platform')"><span class="material-symbols-outlined text-[20px]">extension</span><span class="font-label-caps text-label-caps">Модули платформы</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<div class="px-3 pt-4 pb-1 font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest">Операции</div>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="ops" onclick="switchView('ops')"><span class="material-symbols-outlined text-[20px]">find_in_page</span><span class="font-label-caps text-label-caps">Расследования</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="instruments" onclick="switchView('instruments')"><span class="material-symbols-outlined text-[20px]">terminal</span><span class="font-label-caps text-label-caps">Консоль ИЦ</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="registries" onclick="switchView('registries')"><span class="material-symbols-outlined text-[20px]">storage</span><span class="font-label-caps text-label-caps">Реестры</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<button type="button" class="fs-nav w-full flex items-center gap-3 px-3 py-2 text-left text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors rounded font-body-sm text-body-sm" data-fs-view="reports" onclick="switchView('reports')"><span class="material-symbols-outlined text-[20px]">description</span><span class="font-label-caps text-label-caps">Отчёты 115-ФЗ</span><span class="nav-badge ml-auto" data-watchlist-badge hidden></span></button>
-<div class="mt-auto px-4 py-4 border-t border-outline-variant">
-<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-primary text-body-sm" href="/status"><span class="material-symbols-outlined text-[18px]">monitoring</span><span>Статус системы</span></a>
-<div class="urls mt-3 text-[10px] font-data-mono text-on-surface-variant break-all" id="urls">—</div>
+<span class="font-mono-sm text-mono-sm text-outline mt-1">v4.0</span>
 </div>
+<nav class="flex flex-col gap-1 w-full items-center">
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="dashboard" data-view="dashboard" onclick="switchView('dashboard')" title="Командный центр"><span class="material-symbols-outlined">terminal</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="osint" data-view="osint" onclick="switchView('osint')" title="Центр OSINT"><span class="material-symbols-outlined">public</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="wallet" data-view="wallet" onclick="switchView('wallet')" title="Проверка кошелька"><span class="material-symbols-outlined">account_balance_wallet</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="microservices" data-view="microservices" onclick="switchView('microservices')" title="Микросервисы"><span class="material-symbols-outlined">settings_input_component</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="platform" data-view="platform" onclick="switchView('platform')" title="Модули платформы"><span class="material-symbols-outlined">settings_applications</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<div class="w-8 h-px bg-outline-variant my-1"></div>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="ops" data-view="ops" onclick="switchView('ops')" title="Расследования"><span class="material-symbols-outlined">search_insights</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="instruments" data-view="instruments" onclick="switchView('instruments')" title="Консоль ИЦ"><span class="material-symbols-outlined">biotech</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="registries" data-view="registries" onclick="switchView('registries')" title="Реестры"><span class="material-symbols-outlined">storage</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
+<button type="button" class="fs-nav w-12 h-12 flex items-center justify-center text-outline hover:text-on-surface-variant transition-colors duration-75 group cursor-pointer" data-fs-view="reports" data-view="reports" onclick="switchView('reports')" title="Отчёты 115-ФЗ"><span class="material-symbols-outlined">description</span><span class="nav-badge absolute top-1.5 right-1.5" data-watchlist-badge hidden></span></button>
 </nav>
+<div class="mt-auto flex flex-col items-center gap-2">
+<a href="/status" class="w-12 h-12 flex items-center justify-center text-secondary hover:bg-surface-container-highest transition-colors cursor-pointer" title="Статус системы"><span class="material-symbols-outlined">security</span></a>
+</div>
 </aside>
-<div class="flex flex-col flex-1 min-w-0 min-h-0">
-<header class="fs-topbar flex items-center justify-between h-14 px-4 shrink-0 bg-surface-container-low border-b border-outline-variant gap-4">
-<div class="flex items-center gap-4 min-w-0">
-<span class="font-h3 text-h3 font-bold text-on-surface truncate hidden sm:inline">Криптофорензика</span>
-<span class="text-on-surface-variant text-body-sm truncate" id="fsBreadcrumb">Командный центр</span>
+<!-- Topbar -->
+<header class="fs-topbar flex items-center justify-between h-12 px-3 ml-16 w-[calc(100%-4rem)] fixed top-0 z-40 gap-3 border-b border-outline-variant">
+<div class="flex items-center gap-3 min-w-0">
+<span class="font-headline-md text-headline-md font-bold text-on-surface truncate">FinSkalp Forensic</span>
+<div class="h-4 w-px bg-outline-variant hidden sm:block"></div>
+<div class="hidden sm:flex gap-3">
+<a class="text-primary-fixed-dim font-mono-label text-mono-label border-b border-primary-fixed-dim" href="#">CIS/FIU</a>
+<a class="text-on-surface-variant font-mono-label text-mono-label hover:bg-surface-container-highest transition-all" href="#">PROD-ACTIVE</a>
 </div>
-<div class="hidden lg:flex flex-1 max-w-md mx-4">
+<span class="text-outline-variant hidden lg:inline">/</span>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm truncate hidden lg:inline" id="fsBreadcrumb">Командный центр</span>
+<span class="hidden xl:inline font-mono-sm text-mono-sm text-outline truncate" id="orgName">FinSkalp · 115-ФЗ</span>
+</div>
+<div class="hidden lg:flex flex-1 max-w-md">
 <div class="relative w-full" id="globalSearchWrap">
-<div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5">
-<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
-<input type="search" id="globalSearchInput" class="flex-1 bg-transparent border-0 outline-none text-body-sm text-on-surface placeholder:text-outline" placeholder="Поиск: дела, кошельки, VASP, СОО…" autocomplete="off" aria-label="Глобальный поиск" />
+<div class="flex gap-2 bg-surface-container-lowest instrument-border px-2 py-1 items-center">
+<span class="material-symbols-outlined text-primary-fixed-dim scale-75">search</span>
+<input type="search" id="globalSearchInput" class="flex-1 bg-transparent border-none focus:ring-0 font-mono-data text-mono-data text-on-surface-variant placeholder:text-outline" placeholder="PORT 8877 QUERY..." autocomplete="off" aria-label="Глобальный поиск" />
 </div>
-<div id="globalSearchDropdown" class="hidden absolute left-0 right-0 top-full mt-1 z-50 bg-surface-container-low border border-outline-variant rounded-lg shadow-lg max-h-72 overflow-y-auto"></div>
+<div id="globalSearchDropdown" class="hidden absolute left-0 right-0 top-full mt-1 z-50 bg-surface-container-low instrument-border max-h-72 overflow-y-auto custom-scrollbar"></div>
 </div>
 </div>
-<div class="flex items-center gap-3 shrink-0">
-<div class="fs-kpi hidden md:flex items-center gap-1 px-2 py-1 bg-surface-container rounded border border-outline-variant">
-<span class="text-[10px] uppercase text-on-surface-variant">Банки</span>
-<span class="font-data-mono text-primary text-sm" id="kpiInst">—</span>
+<div class="flex items-center gap-2 shrink-0">
+<div class="fs-kpi hidden md:flex items-center gap-1 px-2 py-1 bg-surface-container instrument-border">
+<span class="font-mono-label text-mono-label text-on-surface-variant uppercase">Банки</span>
+<span class="font-mono-data text-mono-data text-primary-fixed-dim" id="kpiInst">—</span>
 </div>
-<div class="fs-kpi hidden md:flex items-center gap-1 px-2 py-1 bg-surface-container rounded border border-outline-variant">
-<span class="text-[10px] uppercase text-on-surface-variant">Скрининг</span>
-<span class="font-data-mono text-primary text-sm" id="kpiTps">—</span>
+<div class="fs-kpi hidden md:flex items-center gap-1 px-2 py-1 bg-surface-container instrument-border">
+<span class="font-mono-label text-mono-label text-on-surface-variant uppercase">Скрининг</span>
+<span class="font-mono-data text-mono-data text-primary-fixed-dim" id="kpiTps">—</span>
 </div>
-<div class="fs-kpi hidden lg:flex items-center gap-1 px-2 py-1 bg-surface-container rounded border border-outline-variant">
-<span class="text-[10px] uppercase text-on-surface-variant">SLA</span>
-<span class="font-data-mono text-primary text-sm">99.97%</span>
-</div>
-<span class="inline-flex items-center gap-1 text-[10px] text-primary uppercase"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Онлайн</span>
-<button type="button" id="themeToggle" class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant" onclick="FinSkalpUI.toggleTheme()" title="Тема">◐</button>
+<button type="button" class="bg-primary-container text-on-primary-container px-3 h-8 font-mono-label text-mono-label font-bold uppercase tracking-tighter hover:opacity-90 transition-opacity hidden md:inline-flex items-center" onclick="switchView('osint')">NEW_INVESTIGATION</button>
+<span class="hidden sm:inline-flex items-center gap-1 font-mono-sm text-mono-sm text-primary-fixed-dim uppercase"><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-pulse"></span>Онлайн</span>
+<button type="button" id="themeToggle" class="material-symbols-outlined text-outline hover:text-on-surface bg-transparent border-none p-1 cursor-pointer" onclick="FinSkalpUI.toggleTheme()" title="Тема">dark_mode</button>
 </div>
 </header>
-<main id="fsAppMain" class="fs-app-main flex-1 min-h-0 overflow-hidden">
+<main id="fsAppMain" class="fs-app-main ml-16 mt-12 mb-6 overflow-hidden">
 <!-- КОМАНДНЫЙ ЦЕНТР -->
     <div class="workspace-full" id="viewDashboard">
       <div class="dash-grid">
@@ -438,16 +540,26 @@ tailwind.config = {
       </div>
     </div>
 </main>
+<footer class="fixed bottom-0 right-0 w-[calc(100%-4rem)] h-6 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-4 z-30 gap-4">
+<div class="flex gap-4 items-center min-w-0">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant uppercase tracking-widest hidden sm:inline">SOVEREIGN NODE // SYSTEM SIGNATURE</span>
+<span class="font-mono-sm text-mono-sm text-primary-fixed-dim">OP: FORENSIC_X_99</span>
+<span class="font-mono-sm text-mono-sm text-outline truncate hidden md:inline" id="urls">—</span>
 </div>
+<div class="flex gap-4 items-center">
+<span class="font-mono-sm text-mono-sm text-outline hidden sm:inline">LATENCY: 12ms</span>
+<span class="font-mono-sm text-mono-sm text-outline hidden sm:inline">UPTIME: 99.99%</span>
+<span class="font-mono-label text-mono-label uppercase tracking-widest text-primary-fixed-dim">SYSTEM_8877_STABLE</span>
 </div>
+</footer>
 <div id="toastContainer" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/force-graph@1.43.5/dist/force-graph.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.4/dist/graphology.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sigma@2.4.0/dist/sigma.min.js"></script>
-<script src="/static/js/ui-system.js?v=20260704b"></script>
-<script src="/static/js/graph-viz.js?v=20260706a"></script>
-<script src="/static/js/evidence-chain.js?v=20260706a"></script>
-<script src="/static/js/enterprise-shell.js?v=20260706a"></script>
-<script src="/static/js/app.js?v=20260706a"></script>
+<script src="/static/js/ui-system.js?v=20260709e"></script>
+<script src="/static/js/graph-viz.js?v=20260709e"></script>
+<script src="/static/js/evidence-chain.js?v=20260709e"></script>
+<script src="/static/js/enterprise-shell.js?v=20260709e"></script>
+<script src="/static/js/app.js?v=20260709e"></script>
 </body>
 </html>

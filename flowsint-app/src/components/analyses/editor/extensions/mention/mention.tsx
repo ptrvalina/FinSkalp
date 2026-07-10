@@ -11,11 +11,9 @@ import type { MentionListRef, MentionItem } from './mention-list'
 import { memo, useCallback } from 'react'
 import { useIcon } from '@/hooks/use-icon'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
-import { Button } from '@/components/ui/button'
 import { GRAPH_COLORS } from '@/components/sketches/graph'
 import { useGraphStore } from '@/stores/graph-store'
 import { useGraphControls } from '@/stores/graph-controls-store'
-import { GraphNode } from '@/types'
 
 function hexWithOpacity(hex: string, opacity: number) {
   hex = hex.replace('#', '')

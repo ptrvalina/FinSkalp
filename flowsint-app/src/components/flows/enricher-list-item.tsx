@@ -11,6 +11,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
+import { lookupItemTypeRecord } from '@/lib/item-type'
 import { Badge } from '../ui/badge'
 import { type EnricherItemProps } from '@/types/enricher'
 import { useIcon } from '@/hooks/use-icon'
@@ -30,8 +31,8 @@ function areEqual(prevProps: EnricherItemProps, nextProps: EnricherItemProps) {
 // Memoized enricher item component for the sidebar
 const EnricherItem = memo(({ enricher, category }: EnricherItemProps) => {
   const colors = useNodesDisplaySettings((s) => s.colors)
-  const borderInputColor = colors[enricher.inputs.type.toLowerCase()]
-  const borderOutputColor = colors[enricher.outputs.type.toLowerCase()]
+  const borderInputColor = lookupItemTypeRecord(colors, enricher.inputs.type.toLowerCase())
+  const borderOutputColor = lookupItemTypeRecord(colors, enricher.outputs.type.toLowerCase())
   const Icon =
     enricher.type === 'type'
       ? useIcon(enricher.outputs.type.toLowerCase() as string)

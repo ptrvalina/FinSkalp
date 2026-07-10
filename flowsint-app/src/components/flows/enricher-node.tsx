@@ -4,6 +4,7 @@ import { Badge } from '../ui/badge'
 import { BaseNode } from '../xyflow/base-node'
 import { NodeStatusIndicator } from '../xyflow/node-status-indicator'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
+import { lookupItemTypeRecord } from '@/lib/item-type'
 import { cn } from '@/lib/utils'
 import { Plus, TriangleAlert } from 'lucide-react'
 import { type EnricherNodeProps } from '@/types/enricher'
@@ -47,8 +48,8 @@ const getStateColor = (state?: string) => {
 // Enricher node component for enricher/enricher nodes only
 const EnricherNode = memo(({ data, isConnectable }: EnricherNodeProps) => {
   const colors = useNodesDisplaySettings((s) => s.colors)
-  const inputColor = colors[data.inputs.type.toLowerCase()]
-  const outputColor = colors[data.outputs.type.toLowerCase()]
+  const inputColor = lookupItemTypeRecord(colors, data.inputs.type.toLowerCase())
+  const outputColor = lookupItemTypeRecord(colors, data.outputs.type.toLowerCase())
   const opacity = data.computationState === 'pending' ? 0.5 : 1
   const setOpenFlowSheet = useFlowStore((state) => state.setOpenFlowSheet)
   const Icon =

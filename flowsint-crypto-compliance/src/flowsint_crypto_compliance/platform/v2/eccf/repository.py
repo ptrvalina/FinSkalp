@@ -113,13 +113,30 @@ class ECCFRepository:
             return rec
 
 
-_repo: ECCFRepository | None = None
+_repo: ECCFRepository | Any | None = None
 
 
 def get_eccf_repository() -> ECCFRepository:
     global _repo
     if _repo is None:
-        _repo = ECCFRepository()
+        from flowsint_crypto_compliance.feature_flags import eccf_postgres_persistence_enabled
+
+        if eccf_postgres_persistence_enabled():
+            try:
+                from flowsint_crypto_compliance.platform.v2.eccf.postgres_store import (
+                    PostgresECCFRepository,
+                )
+
+                _repo = PostgresECCFRepository()
+            except Exception:
+                import logging
+
+                logging.getLogger(__name__).exception(
+                    "ECCF Postgres persistence unavailable — falling back to in-memory"
+                )
+                _repo = ECCFRepository()
+        else:
+            _repo = ECCFRepository()
     return _repo
 
 

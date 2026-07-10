@@ -231,14 +231,13 @@ const AVAILABLE_ICONS = [
   'BookmarkPlus'
 ] as const
 
+type AvailableIcon = (typeof AVAILABLE_ICONS)[number]
+
 type IconPopoverProps = {
   iconType: string | null
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  onIconChange: (
-    iconType: IconPopoverProps['iconType'],
-    iconName: keyof typeof AVAILABLE_ICONS
-  ) => void
+  onIconChange: (iconType: IconPopoverProps['iconType'], iconName: AvailableIcon) => void
 }
 
 export default function IconPicker({ iconType, open, setOpen, onIconChange }: IconPopoverProps) {
@@ -263,10 +262,7 @@ export default function IconPicker({ iconType, open, setOpen, onIconChange }: Ic
     overscan: 5
   })
 
-  const handleClick = (
-    iconType: IconPopoverProps['iconType'],
-    iconName: keyof typeof AVAILABLE_ICONS
-  ) => {
+  const handleClick = (iconType: IconPopoverProps['iconType'], iconName: AvailableIcon) => {
     onIconChange(iconType, iconName)
     setOpen(false)
   }

@@ -16,12 +16,14 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     case_timeline,
     compare_entity_versions,
     create_graph_snapshot,
+    diff_graph_at,
     emit_scalpel_collect_event,
     export_evidence_base,
     get_entity,
     get_entity_history,
     get_entity_neighbors,
     get_graph_at,
+    get_maturity_snapshot,
     get_intelligence_manifest,
     get_intelligence_engine_manifest,
     get_connectors_manifest,
@@ -103,6 +105,8 @@ from flowsint_crypto_compliance.platform.v2.gateway import (
     get_idoo_runbooks,
     get_idoo_queues,
     get_idoo_backup,
+    list_graph_temporal_snapshots,
+    propagate_graph_confidence_at,
     get_egpr_manifest,
     get_egpr_roadmap,
     get_egpr_rfc_catalog,
@@ -439,6 +443,47 @@ def create_platform_v2_router(
         tid = tenant_id or uuid.UUID(os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
         actor = str(getattr(current_user, "id", "demo")) if current_user else "demo"
         return create_graph_snapshot(tid, actor=actor)
+
+    @router.get("/graph/diff")
+    async def get_graph_diff(
+        as_of_a: datetime = Query(..., description="ISO8601 timestamp A"),
+        as_of_b: datetime = Query(..., description="ISO8601 timestamp B"),
+        tenant_id: uuid.UUID | None = None,
+        _user=dep_case_read,
+    ):
+        tid = tenant_id or uuid.UUID(os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
+        return diff_graph_at(tid, as_of_a, as_of_b)
+
+    @router.get("/graph/confidence/propagate")
+    async def get_graph_confidence_propagate(
+        as_of: datetime = Query(..., description="ISO8601 graph timestamp"),
+        seed_entity_id: str | None = None,
+        min_confidence: float = Query(0.0, ge=0.0, le=1.0),
+        tenant_id: uuid.UUID | None = None,
+        _user=dep_case_read,
+    ):
+        tid = tenant_id or uuid.UUID(os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
+        return propagate_graph_confidence_at(
+            tid,
+            as_of,
+            seed_entity_id=seed_entity_id,
+            min_confidence=min_confidence,
+        )
+
+    @router.get("/graph/temporal")
+    async def get_graph_temporal(
+        from_ts: datetime | None = Query(None, alias="from"),
+        to_ts: datetime | None = Query(None, alias="to"),
+        limit: int = Query(50, ge=1, le=200),
+        tenant_id: uuid.UUID | None = None,
+        _user=dep_case_read,
+    ):
+        tid = tenant_id or uuid.UUID(os.getenv("FINSKALP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
+        return list_graph_temporal_snapshots(tid, from_ts=from_ts, to_ts=to_ts, limit=limit)
+
+    @router.get("/maturity/snapshot")
+    async def maturity_snapshot_route(_user=dep_user):
+        return get_maturity_snapshot()
 
     @router.get("/evidence/export")
     async def export_evidence_endpoint(

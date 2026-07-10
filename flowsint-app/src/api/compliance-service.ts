@@ -48,6 +48,7 @@ export type ComplianceCase = {
   status: string
   investigation_id?: string | null
   fusion_result?: Record<string, unknown> | null
+  priority?: string
 }
 
 export type EvidenceGraph = {
@@ -1076,5 +1077,37 @@ export const complianceService = {
     return complianceFetch('/api/platform/v2/graph/snapshot', { method: 'POST' }) as Promise<
       Record<string, unknown>
     >
+  },
+
+  listDemoInbox() {
+    return complianceFetch('/api/inbox') as Promise<
+      Array<{
+        id: string
+        alert_code?: string
+        case_ref?: string
+        priority?: string
+        workflow_status?: string
+        title_ru?: string
+      }>
+    >
+  },
+
+  listDemoReports() {
+    return complianceFetch('/api/reports') as Promise<
+      Array<{
+        alert_id?: string
+        alert_code?: string
+        case_ref?: string
+        report_id?: string
+        typology_code?: string
+        risk_level?: string
+        decision_ru?: string
+        generated_at?: string
+      }>
+    >
+  },
+
+  getMaturitySnapshot() {
+    return complianceFetch('/api/platform/v2/maturity/snapshot') as Promise<Record<string, unknown>>
   }
 }

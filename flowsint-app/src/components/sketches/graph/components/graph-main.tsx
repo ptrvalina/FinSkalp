@@ -279,8 +279,8 @@ const GraphMain = () => {
       <PathPanel />
       {nodeMenu && selectedNodes.length === 0 && <NodeContextMenu {...nodeMenu} />}
       {edgeMenu && <EdgeContextMenu {...edgeMenu} />}
-      {(background || (nodeMenu && selectedNodes.length > 0)) && (
-        <BackgroundContextMenu {...background} />
+      {background && (
+        <BackgroundContextMenu {...background} nodes={background.nodes ?? filteredNodes} />
       )}
     </div>
   )

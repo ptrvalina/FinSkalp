@@ -1,0 +1,181 @@
+{# Optional enterprise sections — rendered only when report.enterprise_sections exists.
+   Every block is {% if %}-guarded; when the feature flag is off the whole partial
+   is skipped by the including template. Self-contained inline styles keep this
+   backward-compatible with every report template. #}
+{% if report.enterprise_sections %}
+{% set es = report.enterprise_sections %}
+<section class="enterprise-sections" style="margin-top:24px;border-top:2px solid #334155;padding-top:12px;font-size:12px;color:#0f172a;">
+  <h2 style="font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1e293b;">Enterprise Appendix</h2>
+
+  {% if es.executive_summary %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.executive_summary.heading_ru }}</h3>
+    <p>{{ es.executive_summary.text_ru }}</p>
+    {% if es.executive_summary.highlights_ru %}
+    <ul>{% for h in es.executive_summary.highlights_ru %}<li>{{ h }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if es.risk_matrix %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.risk_matrix.heading_ru }}
+      {% if es.risk_matrix.overall_score is not none %}<span style="font-weight:400;">— {{ es.risk_matrix.overall_score }}/100 ({{ es.risk_matrix.overall_level }})</span>{% endif %}
+    </h3>
+    {% if es.risk_matrix.rows %}
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#f1f5f9;"><th style="text-align:left;padding:3px 6px;">Измерение</th><th style="text-align:right;padding:3px 6px;">Балл</th><th style="text-align:left;padding:3px 6px;">Уровень</th><th style="text-align:left;padding:3px 6px;">Основание</th></tr></thead>
+      <tbody>
+        {% for r in es.risk_matrix.rows %}
+        <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{{ r.dimension }}</td><td style="text-align:right;padding:3px 6px;">{{ r.score }}</td><td style="padding:3px 6px;">{{ r.level }}</td><td style="padding:3px 6px;">{{ r.basis_ru or '—' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if es.confidence_matrix %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.confidence_matrix.heading_ru }}</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#f1f5f9;"><th style="text-align:left;padding:3px 6px;">Аспект</th><th style="text-align:right;padding:3px 6px;">Достоверность</th><th style="text-align:left;padding:3px 6px;">Основание</th></tr></thead>
+      <tbody>
+        {% for r in es.confidence_matrix.rows %}
+        <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{{ r.aspect_ru }}</td><td style="text-align:right;padding:3px 6px;">{% if r.confidence_pct is not none %}{{ r.confidence_pct }}%{% else %}—{% endif %}</td><td style="padding:3px 6px;">{{ r.label_ru or r.basis_ru or '—' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if es.evidence_quality %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.evidence_quality.heading_ru }}</h3>
+    <p>Экспонатов: <b>{{ es.evidence_quality.total_exhibits }}</b> · с хешем: <b>{{ es.evidence_quality.hashed_pct }}%</b>
+       · Tier-1: {{ es.evidence_quality.tiers.tier_1 }} · Tier-2: {{ es.evidence_quality.tiers.tier_2 }} · Tier-3: {{ es.evidence_quality.tiers.tier_3 }}</p>
+  </div>
+  {% endif %}
+
+  {% if es.evidence_timeline %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.evidence_timeline.heading_ru }}</h3>
+    <ul>{% for s in es.evidence_timeline.steps %}<li><b>{{ s.ts or '—' }}</b> — {{ s.label_ru or s.label_en or '' }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  {% if es.graph_legend %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.graph_legend.heading_ru }}</h3>
+    <ul style="list-style:none;padding-left:0;">
+      {% for n in es.graph_legend.nodes %}<li><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ n.color }};margin-right:6px;"></span>{{ n.meaning_ru }}</li>{% endfor %}
+      {% for e in es.graph_legend.edges %}<li>— {{ e.style }}: {{ e.meaning_ru }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if es.graph_statistics %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.graph_statistics.heading_ru }}</h3>
+    <p>Узлов: <b>{{ es.graph_statistics.nodes }}</b> · Рёбер: <b>{{ es.graph_statistics.edges }}</b>
+       {% if es.graph_statistics.density is not none %}· Плотность: {{ es.graph_statistics.density }}{% endif %}
+       {% if es.graph_statistics.avg_degree is not none %}· Ср. степень: {{ es.graph_statistics.avg_degree }}{% endif %}</p>
+  </div>
+  {% endif %}
+
+  {% if es.investigation_metrics %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.investigation_metrics.heading_ru }}</h3>
+    <ul>{% for k, v in es.investigation_metrics.metrics.items() %}<li>{{ k }}: <b>{{ v }}</b></li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  {% if es.ai_summary %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.ai_summary.heading_ru }}</h3>
+    <p>{{ es.ai_summary.text_ru }}</p>
+    <p style="color:#64748b;font-style:italic;">{{ es.ai_summary.disclaimer_ru }} ({{ es.ai_summary.generated_by }})</p>
+  </div>
+  {% endif %}
+
+  {% if es.explainability %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.explainability.heading_ru }}</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#f1f5f9;"><th style="text-align:left;padding:3px 6px;">Фактор</th><th style="text-align:right;padding:3px 6px;">Вклад</th><th style="text-align:left;padding:3px 6px;">Объяснение</th></tr></thead>
+      <tbody>
+        {% for f in es.explainability.factors %}
+        <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{{ f.factor }}</td><td style="text-align:right;padding:3px 6px;">{% if f.contribution_pct is not none %}{{ f.contribution_pct }}%{% else %}—{% endif %}</td><td style="padding:3px 6px;">{{ f.explanation_ru or '—' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if es.chain_of_custody %}
+  <div style="margin:10px 0;">
+    <h3 style="font-size:13px;">{{ es.chain_of_custody.heading_ru }}</h3>
+    {% if es.chain_of_custody.evidence_bundle_sha256 %}<p style="font-family:monospace;font-size:10px;">bundle: {{ es.chain_of_custody.evidence_bundle_sha256 }}</p>{% endif %}
+    {% if es.chain_of_custody.steps %}
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#f1f5f9;"><th style="text-align:left;padding:3px 6px;">#</th><th style="text-align:left;padding:3px 6px;">Экспонат</th><th style="text-align:left;padding:3px 6px;">Описание</th><th style="text-align:left;padding:3px 6px;">SHA-256</th></tr></thead>
+      <tbody>
+        {% for s in es.chain_of_custody.steps %}
+        <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{{ s.seq }}</td><td style="padding:3px 6px;">{{ s.exhibit_id }}</td><td style="padding:3px 6px;">{{ s.description_ru }}</td><td style="padding:3px 6px;font-family:monospace;font-size:9px;">{{ (s.sha256 or '—')[:24] }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if es.case_metadata or es.digital_signature_placeholder or es.audit_metadata or es.report_versions %}
+  <div style="margin:10px 0;display:flex;flex-wrap:wrap;gap:16px;">
+    {% if es.case_metadata %}
+    <div style="flex:1;min-width:220px;">
+      <h3 style="font-size:12px;">{{ es.case_metadata.heading_ru }}</h3>
+      <div style="font-size:11px;">
+        {% if es.case_metadata.case_ref %}<div>Дело: {{ es.case_metadata.case_ref }}</div>{% endif %}
+        {% if es.case_metadata.report_id %}<div>Отчёт: {{ es.case_metadata.report_id }}</div>{% endif %}
+        {% if es.case_metadata.report_type %}<div>Тип: {{ es.case_metadata.report_type }}</div>{% endif %}
+        {% if es.case_metadata.classification %}<div>Гриф: {{ es.case_metadata.classification }}</div>{% endif %}
+        {% if es.case_metadata.generated_at %}<div>Сформирован: {{ es.case_metadata.generated_at }}</div>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if es.digital_signature_placeholder %}
+    <div style="flex:1;min-width:220px;">
+      <h3 style="font-size:12px;">{{ es.digital_signature_placeholder.heading_ru }}</h3>
+      <div style="font-size:11px;">
+        <div>Статус: {{ es.digital_signature_placeholder.status }}</div>
+        <div>Алгоритм: {{ es.digital_signature_placeholder.algorithm or '—' }}</div>
+        {% if es.digital_signature_placeholder.report_sha256 %}<div style="font-family:monospace;font-size:9px;word-break:break-all;">{{ es.digital_signature_placeholder.report_sha256 }}</div>{% endif %}
+        <div style="color:#64748b;">{{ es.digital_signature_placeholder.note_ru }}</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if es.audit_metadata %}
+    <div style="flex:1;min-width:220px;">
+      <h3 style="font-size:12px;">{{ es.audit_metadata.heading_ru }}</h3>
+      <div style="font-size:11px;">
+        {% if es.audit_metadata.engine_version %}<div>Движок: {{ es.audit_metadata.engine_version }}</div>{% endif %}
+        {% if es.audit_metadata.generation_id %}<div>ID генерации: {{ es.audit_metadata.generation_id }}</div>{% endif %}
+        {% if es.audit_metadata.sanctions_snapshot %}<div>Санкции: {{ es.audit_metadata.sanctions_snapshot }}</div>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if es.report_versions %}
+    <div style="flex:1;min-width:220px;">
+      <h3 style="font-size:12px;">{{ es.report_versions.heading_ru }}</h3>
+      <div style="font-size:11px;">
+        <div>Движок: {{ es.report_versions.engine_version or '—' }}</div>
+        <div>Схема: {{ es.report_versions.schema_version }}</div>
+        <div>Ревизия: {{ es.report_versions.revision }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</section>
+{% endif %}

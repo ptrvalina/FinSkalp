@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
+from flowsint_crypto_compliance.feature_flags import (
+    flag_snapshot,
+    idoo_real_health_probes_enabled,
+)
 from flowsint_crypto_compliance.platform.v2.idoo.monitoring import get_idoo_metrics, monitoring_manifest
 from flowsint_crypto_compliance.platform.v2.idoo.observability import observability_manifest
 from flowsint_crypto_compliance.platform.v2.idoo.types import HealthProbeResult, ServiceHealth
 
+logger = logging.getLogger(__name__)
 
-def _probe_service(service: str, endpoint: str) -> HealthProbeResult:
-    """Stub health probe — returns healthy in dev/test; records metrics."""
+
+def _probe_service_stub(service: str, endpoint: str) -> HealthProbeResult:
+    """Legacy stub health probe — returns healthy in dev/test; records metrics."""
     start = time.perf_counter()
     metrics = get_idoo_metrics()
 
@@ -35,6 +42,26 @@ def _probe_service(service: str, endpoint: str) -> HealthProbeResult:
         latency_ms=elapsed,
         details=details,
     )
+
+
+def _probe_service(service: str, endpoint: str) -> HealthProbeResult:
+    if not idoo_real_health_probes_enabled():
+        return _probe_service_stub(service, endpoint)
+
+    from flowsint_crypto_compliance.platform.v2.idoo.health_probes import run_real_probe
+    from flowsint_crypto_compliance.observability.metrics import record_idoo_health_probe
+
+    result = run_real_probe(service, endpoint)
+    get_idoo_metrics().record_probe(service=service, status=result.status)
+    try:
+        record_idoo_health_probe(
+            service=service,
+            status=result.status.value,
+            mode=str(result.details.get("mode", "real")),
+        )
+    except Exception:
+        logger.debug("idoo probe metrics export skipped", exc_info=True)
+    return result
 
 
 def get_platform_health() -> dict[str, Any]:
@@ -61,10 +88,12 @@ def get_platform_health() -> dict[str, Any]:
     return {
         "ok": overall in (ServiceHealth.HEALTHY, ServiceHealth.DEGRADED),
         "overall_status": overall.value,
+        "probe_mode": "real" if idoo_real_health_probes_enabled() else "stub",
         "service_count": len(probes),
         "healthy_count": sum(1 for p in probes if p.status == ServiceHealth.HEALTHY),
         "probes": [p.to_dict() for p in probes],
         "metrics": get_idoo_metrics().get_metrics(),
+        "feature_flags": flag_snapshot(),
     }
 
 

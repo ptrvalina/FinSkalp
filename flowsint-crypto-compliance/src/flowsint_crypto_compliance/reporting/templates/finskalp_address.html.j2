@@ -151,5 +151,6 @@
   {% if report.notes %}<h2>Примечания аналитика</h2><p>{{ report.notes }}</p>{% endif %}
 
   <div class="footer">{{ report.product_ru }} · {{ report.classification }} · {{ report.case_ref }}</div>
+  {% include "_enterprise_sections.html.j2" %}
 </body>
 </html>

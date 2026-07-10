@@ -33,7 +33,7 @@ export function useCreateOnPaste(sketchId: string) {
 
         await createNode(nodeWithTempId, sketchId, addNode, replaceNode)
       } catch (e) {
-        toast.error(e.message)
+        toast.error(e instanceof Error ? e.message : 'Failed to create node')
       }
     },
     [sketchId]
@@ -63,7 +63,7 @@ export function useCreateOnPaste(sketchId: string) {
         }
         await createNode(nodeWithTempId, sketchId, addNode, replaceNode)
       } catch (e) {
-        toast.error(e.message)
+        toast.error(e instanceof Error ? e.message : 'Failed to create node')
       }
     },
     [sketchId]

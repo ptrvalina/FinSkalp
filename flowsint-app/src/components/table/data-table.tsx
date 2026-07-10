@@ -1,13 +1,10 @@
 import {
-  type Table,
-  type Row,
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  SortingState,
   getSortedRowModel
 } from '@tanstack/react-table'
+import type { ColumnDef, Row, SortingState, Table, HeaderGroup, Header } from '@tanstack/table-core'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
 import { Row as RowItem } from '@/types/table'
@@ -133,7 +130,7 @@ const TableBody = ({
   noStickyCol
 }: {
   table: Table<any>
-  tableContainerRef: React.RefObject<HTMLDivElement>
+  tableContainerRef: React.RefObject<HTMLDivElement | null>
   columnSizeVars: Record<string, number>
   noStickyCol?: boolean
 }) => {
@@ -334,9 +331,9 @@ export function DataTable<TData, TValue>({
     <div className="h-full w-full overflow-auto border-t p-0 relative" ref={tableContainerRef}>
       <table style={tableStyle}>
         <thead className="sticky top-0 z-20 bg-background">
-          {headerGroups.map((headerGroup) => (
+          {headerGroups.map((headerGroup: HeaderGroup<TData>) => (
             <tr key={headerGroup.id} className="px-0">
-              {headerGroup.headers.map((header, index) => (
+              {headerGroup.headers.map((header: Header<TData, unknown>, index: number) => (
                 <HeaderCell
                   key={header.id}
                   header={header}

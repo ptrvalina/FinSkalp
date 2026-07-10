@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
+import type { Step } from 'react-joyride';
 import { useLocation } from '@tanstack/react-router';
 import { getStepsForRoute } from './tutorial-steps';
 
@@ -21,8 +21,8 @@ interface TutorialProviderProps {
 export function TutorialProvider({ children }: TutorialProviderProps) {
   const location = useLocation();
   const [run, setRun] = useState(false);
-  const [steps, setSteps] = useState<Step[]>([]);
-  const [stepIndex, setStepIndex] = useState(0);
+  const [, setSteps] = useState<Step[]>([]);
+  const [, setStepIndex] = useState(0);
 
   const getCompletedRoutes = useCallback((): Set<string> => {
     try {
@@ -32,12 +32,6 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
       return new Set();
     }
   }, []);
-
-  const markRouteAsCompleted = useCallback((route: string) => {
-    const completed = getCompletedRoutes();
-    completed.add(route);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
-  }, [getCompletedRoutes]);
 
   const startTutorial = useCallback(() => {
     const currentPath = location.pathname;
@@ -79,16 +73,6 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
       setRun(false);
     }
   }, [location.pathname, getCompletedRoutes]);
-
-  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
-    const { status } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
-
-    if (finishedStatuses.includes(status)) {
-      setRun(false);
-      markRouteAsCompleted(location.pathname);
-    }
-  }, [location.pathname, markRouteAsCompleted]);
 
   const contextValue: TutorialContextValue = {
     startTutorial,

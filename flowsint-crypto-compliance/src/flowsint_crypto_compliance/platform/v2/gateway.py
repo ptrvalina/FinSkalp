@@ -1160,6 +1160,60 @@ def create_graph_snapshot(
     return kg.create_graph_snapshot(tenant_id, changed_by=actor)
 
 
+def diff_graph_at(
+    tenant_id: uuid.UUID,
+    as_of_a: datetime,
+    as_of_b: datetime,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.kg.graph_diff import diff_graph_snapshots
+    from flowsint_crypto_compliance.platform.v2.knowledge_graph import get_knowledge_graph_service
+
+    kg = get_knowledge_graph_service()
+    graph_a = kg.graph_at(tenant_id, as_of_a)
+    graph_b = kg.graph_at(tenant_id, as_of_b)
+    result = diff_graph_snapshots(graph_a, graph_b)
+    result["tenant_id"] = str(tenant_id)
+    return result
+
+
+def propagate_graph_confidence_at(
+    tenant_id: uuid.UUID,
+    as_of: datetime,
+    *,
+    seed_entity_id: str | None = None,
+    min_confidence: float = 0.0,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.kg.confidence_propagation import propagate_tenant_confidence
+    from flowsint_crypto_compliance.platform.v2.knowledge_graph import get_knowledge_graph_service
+
+    kg = get_knowledge_graph_service()
+    graph = kg.graph_at(tenant_id, as_of)
+    return propagate_tenant_confidence(
+        tenant_id,
+        graph,
+        seed_entity_id=seed_entity_id,
+        min_confidence=min_confidence,
+    )
+
+
+def list_graph_temporal_snapshots(
+    tenant_id: uuid.UUID,
+    *,
+    from_ts: datetime | None = None,
+    to_ts: datetime | None = None,
+    limit: int = 50,
+) -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.kg.temporal_graph import list_temporal_snapshots
+
+    return list_temporal_snapshots(tenant_id, from_ts=from_ts, to_ts=to_ts, limit=limit)
+
+
+def get_maturity_snapshot() -> dict[str, Any]:
+    from flowsint_crypto_compliance.platform.v2.maturity.checklist import build_maturity_snapshot
+
+    return build_maturity_snapshot()
+
+
 def get_pipeline_chain_manifest() -> dict[str, Any]:
     from flowsint_crypto_compliance.platform.v2.pipeline_chain import pipeline_chain_manifest
 

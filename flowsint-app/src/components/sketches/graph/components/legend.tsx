@@ -1,8 +1,8 @@
 import { memo } from 'react'
 import { useNodesDisplaySettings } from '@/stores/node-display-settings'
 import { Info } from 'lucide-react'
-import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog'
-import { Button } from '../ui/button'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 const Legend = () => {
   const getIcon = useNodesDisplaySettings((s) => s.getIcon)

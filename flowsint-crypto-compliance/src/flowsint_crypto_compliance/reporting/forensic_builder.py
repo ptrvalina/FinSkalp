@@ -49,6 +49,9 @@ def build_forensic_report_v2(
     risk_table = _risk_assessment_table(screening, attribution, pattern, priority_lead)
     limitations = _limitations_block(attribution)
     next_steps = _next_steps(attribution, pattern, priority_lead)
+    wallet_score = float(screening.get("risk_score") or 0)
+    network_score = float(fusion_report.get("illegal_flow_score") or 0)
+    composite_score = round(0.45 * wallet_score + 0.55 * network_score, 1)
 
     report = {
         "report_type": "forensic",
@@ -148,6 +151,11 @@ def build_forensic_report_v2(
         },
         "fusion_report": fusion_report,
         "attribution": attribution.to_dict(),
+        "regulatory_ru": {
+            "framework": "115-ФЗ · ПОД/ФТ · Федеральный закон о ПОД/ФТ",
+            "str_recommended": composite_score >= 55,
+            "materials_ready": True,
+        },
         "notes": notes,
     }
 
