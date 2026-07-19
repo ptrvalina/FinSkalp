@@ -2,20 +2,45 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8"/>
-  <title>Отчёт {{ report.case_ref }}</title>
+  <title>Отчёт {{ report.case_ref or 'FinSkalp' }}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    h1 { font-size: 1.3rem; }
-    .score { font-size: 1.5rem; font-weight: bold; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    td, th { border: 1px solid #ccc; padding: 0.4rem 0.6rem; }
+    @page { size: A4; margin: 14mm; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 16px; color: #111; background: #fff; }
+    h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    h2 { font-size: 1rem; margin: 18px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    .score { font-size: 1.35rem; font-weight: bold; margin: 8px 0; }
+    .muted { color: #555; font-size: 0.9rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.75rem; }
+    td, th { border: 1px solid #ccc; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #f3f3f3; }
+    ul { margin: 0.4rem 0; padding-left: 1.2rem; }
   </style>
 </head>
 <body>
-  <h1>{{ report.scenario_title_ru }}</h1>
-  <p>Кейс: {{ report.case_ref }}</p>
-  <p class="score">Индекс: {{ report.illegal_flow_score }}/100 ({{ report.risk_level }})</p>
+  {% set score = report.illegal_flow_score if report.illegal_flow_score is not none else (report.risk_score if report.risk_score is not none else '—') %}
+  {% set level = report.risk_level or '—' %}
+  {% set eg = report.evidence_graph if report.evidence_graph is mapping else none %}
+  {% set graph_stats = report.graph_stats if report.graph_stats is mapping else none %}
+  {% set nodes = graph_stats.nodes if graph_stats and graph_stats.nodes is not none else (eg.nodes|length if eg and eg.nodes is iterable else none) %}
+  {% set edges = graph_stats.edges if graph_stats and graph_stats.edges is not none else (eg.edges|length if eg and eg.edges is iterable else none) %}
+
+  <h1>{{ report.scenario_title_ru or 'Отчёт расследования FinSkalp' }}</h1>
+  <p>Кейс: <strong>{{ report.case_ref or '—' }}</strong></p>
+  <p class="score">Индекс: {{ score }}/100 ({{ level }})</p>
+  {% if report.executive_summary_ru %}
   <p>{{ report.executive_summary_ru }}</p>
+  {% else %}
+  <p class="muted">Executive summary отсутствует — завершите Fusion для дела.</p>
+  {% endif %}
+
+  {% if nodes is not none or edges is not none %}
+  <h2>Граф доказательств</h2>
+  <table>
+    <tr><th>Узлы</th><td>{{ nodes if nodes is not none else '—' }}</td></tr>
+    <tr><th>Рёбра</th><td>{{ edges if edges is not none else '—' }}</td></tr>
+  </table>
+  {% endif %}
+
   {% if xgb %}
   <h2>XGBoost ({{ xgb.model_version }})</h2>
   <table>
@@ -24,11 +49,30 @@
     <tr><th>Итог</th><td>{{ xgb.blended_score }}</td></tr>
   </table>
   {% endif %}
+
   <h2>Индикаторы</h2>
+  {% if report.findings %}
   <ul>
   {% for f in report.findings %}
     <li>[{{ f.severity|upper }}] {{ f.title_ru }}</li>
   {% endfor %}
   </ul>
+  {% else %}
+  <p class="muted">Индикаторы fusion не заполнены. Используйте Report Center → модуль (PDF/Печать) для полного отчёта по графу.</p>
+  {% endif %}
+
+  {% if report.attributions %}
+  <h2>Атрибуция</h2>
+  <ul>
+  {% for a in report.attributions[:12] %}
+    <li>{{ a.label_ru or a.entity or a.address or a }}{% if a.confidence %} · conf {{ a.confidence }}{% endif %}</li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if report.decision_ru %}
+  <h2>Решение</h2>
+  <p>{{ report.decision_ru }}</p>
+  {% endif %}
 </body>
 </html>

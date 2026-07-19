@@ -319,6 +319,20 @@ class EntityResolutionEngine:
         if scored and scored[0].score >= merge_threshold:
             primary = scored[0].entity
             merged = self.merge_entities(primary, [proposed])
+            from flowsint_crypto_compliance.platform.v2.operator_events import (
+                OperatorEventType,
+                publish_operator_event,
+            )
+
+            publish_operator_event(
+                OperatorEventType.ENTITY_MERGED,
+                payload={
+                    "primary_entity_id": str(primary.id),
+                    "merged_entity_id": str(proposed.id),
+                    "canonical_key": merged.canonical_key,
+                    "match_score": scored[0].score,
+                },
+            )
             return ResolutionResult(
                 entity=merged,
                 decision=MergeDecision.MERGE,

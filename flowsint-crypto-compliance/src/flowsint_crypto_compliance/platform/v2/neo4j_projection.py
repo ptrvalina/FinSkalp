@@ -183,7 +183,13 @@ def project_evidence_graph(
     tenant_id = uuid.UUID(tenant_raw)
     projection = Neo4jUnifiedProjection()
     results: list[dict[str, Any]] = []
-    nodes = getattr(graph, "nodes", None) or graph.get("nodes", [])
+    # EvidenceGraph.nodes may be [] (falsy) — do not fall through to .get on the object
+    if hasattr(graph, "nodes") and not isinstance(graph, dict):
+        nodes = list(getattr(graph, "nodes") or [])
+    elif isinstance(graph, dict):
+        nodes = list(graph.get("nodes") or [])
+    else:
+        nodes = []
     for node in nodes:
         kind = getattr(node, "kind", None)
         kind_val = kind.value if hasattr(kind, "value") else str(getattr(node, "kind", "wallet"))

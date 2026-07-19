@@ -12,6 +12,11 @@ from flowsint_crypto_compliance.attribution.types import (
 
 _EVM_CHAINS = frozenset({"eth", "bsc", "polygon"})
 _DEFAULT_BLOCK_WINDOW = 3
+_TOKEN_CONTRACTS = frozenset(
+    {
+        "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",  # USDT TRC20
+    }
+)
 
 
 def build_cospend_clusters(
@@ -53,11 +58,14 @@ def build_cospend_clusters(
         )
 
     # Account-model: group addresses funded by same source in overlapping time windows
+    # Skip known token contracts as funders — otherwise every USDT recipient clusters together.
     by_source: dict[str, set[str]] = defaultdict(set)
     for tr in transfers:
         frm = tr.get("from") or tr.get("source")
         to = tr.get("to") or tr.get("target")
         if not frm or not to or frm == to:
+            continue
+        if str(frm) in _TOKEN_CONTRACTS or str(to) in _TOKEN_CONTRACTS:
             continue
         by_source[str(frm)].add(str(to))
     for source, targets in by_source.items():
@@ -129,19 +137,30 @@ def propagate_cluster_labels(
     """If one address in a cluster is labeled, propagate Tier-2 label to siblings."""
     out: list[EntityLabel] = []
     for cluster in clusters:
-        seeds = [known[a] for a in cluster if a in known and known[a].label]
+        seeds = [
+            known[a]
+            for a in cluster
+            if a in known
+            and known[a].label
+            and not _is_token_contract_label(known[a])
+        ]
         if not seeds:
             continue
         seed = max(seeds, key=lambda s: (s.tier * -1, s.confidence))
+        base_label = _strip_cluster_prefix(seed.label)
+        if not base_label or _is_token_contract_name(base_label):
+            continue
         cluster_ref = f"cospend:{seed.address[:12]}"
         for addr in cluster:
             if addr in known and known[addr].tier <= TIER_COSPEND:
+                continue
+            if addr in _TOKEN_CONTRACTS:
                 continue
             out.append(
                 EntityLabel(
                     address=addr,
                     chain=chain,
-                    label=f"cluster:{seed.label}",
+                    label=f"cluster:{base_label}",
                     category=seed.category,
                     confidence=min(0.75, seed.confidence * 0.85),
                     source="cospend_cluster",
@@ -153,3 +172,24 @@ def propagate_cluster_labels(
                 )
             )
     return out
+
+
+def _strip_cluster_prefix(label: str) -> str:
+    s = (label or "").strip()
+    while s.lower().startswith("cluster:"):
+        s = s[8:].strip()
+    return s
+
+
+def _is_token_contract_name(name: str) -> bool:
+    n = name.lower()
+    return "contract" in n or n in {"usdt", "usdc", "trx"}
+
+
+def _is_token_contract_label(lbl: EntityLabel) -> bool:
+    if lbl.address in _TOKEN_CONTRACTS:
+        return True
+    cat = (lbl.category or "").lower()
+    if cat == "payment" and _is_token_contract_name(lbl.label or ""):
+        return True
+    return _is_token_contract_name(lbl.label or "")

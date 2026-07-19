@@ -82,8 +82,13 @@ def _register_collector_task(collector_id: str, task_name: str) -> Any:
 scalpel_collect_onchain = _register_collector_task("onchain_explorer", "scalpel_collect_onchain")
 scalpel_collect_sanctions = _register_collector_task("sanctions_watchlist", "scalpel_collect_sanctions")
 scalpel_collect_username = _register_collector_task("username_social", "scalpel_collect_username")
+scalpel_collect_username_probe = _register_collector_task(
+    "username_probe", "scalpel_collect_username_probe"
+)
 scalpel_collect_abuse = _register_collector_task("abuse_scam_registry", "scalpel_collect_abuse")
 scalpel_collect_darknet = _register_collector_task("darknet_index", "scalpel_collect_darknet")
+scalpel_collect_darknet_tor = _register_collector_task("darknet_tor", "scalpel_collect_darknet_tor")
+scalpel_collect_clearnet = _register_collector_task("clearnet_intel", "scalpel_collect_clearnet")
 scalpel_collect_vasp = _register_collector_task("vasp_registry", "scalpel_collect_vasp")
 scalpel_collect_court = _register_collector_task("court_enforcement", "scalpel_collect_court")
 scalpel_collect_dns = _register_collector_task("reverse_whois_dns", "scalpel_collect_dns")
@@ -92,8 +97,11 @@ SCALPEL_COLLECTOR_TASK_NAMES = [
     "scalpel_collect_onchain",
     "scalpel_collect_sanctions",
     "scalpel_collect_username",
+    "scalpel_collect_username_probe",
     "scalpel_collect_abuse",
     "scalpel_collect_darknet",
+    "scalpel_collect_darknet_tor",
+    "scalpel_collect_clearnet",
     "scalpel_collect_vasp",
     "scalpel_collect_court",
     "scalpel_collect_dns",
@@ -110,15 +118,24 @@ def run_scalpel_collect(
     depth: int = 1,
     counterparties: list[str] | None = None,
     usernames: list[str] | None = None,
+    collectors: list[str] | None = None,
     idempotency_key: str | None = None,
     correlation_id: str | None = None,
 ) -> dict[str, Any]:
-    """Полный FinSkalp Scalpel OSINT (8 легальных коллекторов параллельно)."""
+    """Полный FinSkalp Scalpel OSINT (все зарегистрированные коллекторы параллельно)."""
     from flowsint_crypto_compliance.infrastructure.idempotency import IdempotencyStore, make_idempotency_key
     from flowsint_crypto_compliance.osint_core.scalpel import ScalpelEngine
     from flowsint_types.fiat_crypto import Chain
 
-    idem = idempotency_key or make_idempotency_key("scalpel", chain, address, str(depth))
+    idem = idempotency_key or make_idempotency_key(
+        "scalpel",
+        chain,
+        address,
+        str(depth),
+        ",".join(sorted(usernames or [])),
+        ",".join(sorted(counterparties or [])),
+        ",".join(sorted(collectors or [])),
+    )
     store = IdempotencyStore()
     if store.acquire("run_scalpel_collect", idem) == "done":
         cached = store.get_result("run_scalpel_collect", idem)
@@ -135,6 +152,7 @@ def run_scalpel_collect(
                 counterparties=counterparties,
                 depth=depth,
                 usernames=usernames,
+                collectors=collectors,
             )
         )
         payload = result.to_dict()

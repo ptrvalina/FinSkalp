@@ -38,6 +38,6 @@ def grpc_manifest() -> dict[str, Any]:
         ],
         "transport": "grpc_internal",
         "tls_required": True,
-        "principle_ru": "gRPC — внутренние сервисы между микросервисами (stub)",
+        "principle_ru": "gRPC — внутренние сервисы между микросервисами (not configured)",
         "technical_debt": "TD-ASPP-2",
     }

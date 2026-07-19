@@ -146,6 +146,8 @@ class PlatformV2InvestigateRequest(BaseModel):
     osint_depth: int = Field(2, ge=1, le=3)
     limit: int = Field(50, ge=1, le=100)
     collectors: list[str] | None = None
+    usernames: list[str] | None = None
+    counterparties: list[str] | None = None
 
 
 class PlatformV2ScalpelCollectRequest(BaseModel):
@@ -154,6 +156,8 @@ class PlatformV2ScalpelCollectRequest(BaseModel):
     depth: int = Field(2, ge=1, le=3)
     collectors: list[str] | None = None
     case_ref: str | None = None
+    usernames: list[str] | None = None
+    counterparties: list[str] | None = None
 
 
 class PlatformV2IngestRequest(BaseModel):
@@ -789,7 +793,7 @@ def create_platform_v2_router(
             "source_type": body.source_type,
             "payload": body.payload or {},
         }
-        return await register_eccf_evidence(
+        result = await register_eccf_evidence(
             tenant_id=uuid.UUID(tenant_raw),
             collector_payload=collector_payload,
             case_ref=body.case_ref,
@@ -797,6 +801,24 @@ def create_platform_v2_router(
             source_uri=body.source_uri,
             bridge_kg=body.bridge_kg,
         )
+        if result.get("ok"):
+            from flowsint_crypto_compliance.platform.v2.operator_events import (
+                OperatorEventType,
+                publish_operator_event,
+            )
+
+            publish_operator_event(
+                OperatorEventType.EVIDENCE_ADDED,
+                payload={
+                    "case_ref": body.case_ref,
+                    "evidence_id": result.get("evidence_id"),
+                    "entity_type": body.entity_type,
+                    "entity_value": body.entity_value,
+                    "source_type": body.source_type,
+                    "channel": "eccf",
+                },
+            )
+        return result
 
     @router.get("/eccf/monitoring")
     async def eccf_monitoring(_user=dep_user):
@@ -1124,6 +1146,22 @@ def create_platform_v2_router(
         )
         if not result.get("ok"):
             raise HTTPException(status_code=422, detail=result.get("error"))
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.EVIDENCE_ADDED,
+            payload={
+                "case_ref": case_ref,
+                "evidence_id": result.get("evidence_id"),
+                "entity_type": body.entity_type,
+                "entity_value": body.entity_value,
+                "source_type": body.source_type,
+            },
+            actor=actor,
+        )
         return result
 
     @router.patch("/evidence/{evidence_id}/status")
@@ -1186,6 +1224,8 @@ def create_platform_v2_router(
                     osint_depth=body.osint_depth,
                     limit=body.limit,
                     collectors=body.collectors,
+                    usernames=body.usernames,
+                    counterparties=body.counterparties,
                 ),
                 correlation_id=request.headers.get("X-Correlation-ID"),
             )
@@ -1211,6 +1251,8 @@ def create_platform_v2_router(
                 chain,
                 depth=body.depth,
                 collectors=body.collectors,
+                usernames=body.usernames,
+                counterparties=body.counterparties,
             )
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -1271,6 +1313,28 @@ def create_platform_v2_router(
             category=body.category,
             analyst_id=body.analyst_id,
         )
+        from flowsint_crypto_compliance.platform.v2.entity_base import entity_from_label
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.ATTRIBUTION_CONFIRMED,
+            payload={
+                "chain": body.chain,
+                "address": body.address,
+                "label": body.label,
+                "entity": entity_from_label(
+                    chain=body.chain,
+                    address=body.address,
+                    label=body.label,
+                    category=body.category,
+                    confidence=float(getattr(el, "confidence", 0.8) or 0.8),
+                ),
+            },
+            actor=body.analyst_id or "analyst",
+        )
         return {"status": "confirmed", "label": el.label, "chain": el.chain, "address": el.address}
 
     @router.post("/attribution/reject")
@@ -1285,6 +1349,21 @@ def create_platform_v2_router(
             label=body.label,
             category=body.category,
             analyst_id=body.analyst_id,
+        )
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.ATTRIBUTION_REJECTED,
+            payload={
+                "chain": body.chain,
+                "address": body.address,
+                "label": body.label,
+                "analyst_id": body.analyst_id,
+            },
+            actor=body.analyst_id or "analyst",
         )
         return {"status": "rejected", "label": el.label, "chain": el.chain, "address": el.address}
 
@@ -1303,5 +1382,21 @@ def create_platform_v2_router(
             address=body.address,
             chain=body.chain,
         )
+
+    @router.get("/operator-events/catalog")
+    async def operator_events_catalog(_user=dep_user):
+        from flowsint_crypto_compliance.platform.v2.operator_events import operator_event_catalog
+
+        return operator_event_catalog()
+
+    @router.post("/confidence/decompose")
+    async def confidence_decompose(body: dict[str, Any], _user=dep_user):
+        from flowsint_crypto_compliance.platform.v2.multi_dimensional_confidence import (
+            build_confidence_dimensions,
+        )
+
+        screening = body.get("screening") if isinstance(body.get("screening"), dict) else body
+        attribution = body.get("attribution") if isinstance(body.get("attribution"), dict) else None
+        return build_confidence_dimensions(screening, attribution=attribution).model_dump()
 
     return router

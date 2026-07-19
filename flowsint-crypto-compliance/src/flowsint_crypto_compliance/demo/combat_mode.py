@@ -10,6 +10,11 @@ from flowsint_crypto_compliance.services.wallet_screening import infer_chain
 from flowsint_types.fiat_crypto import Chain
 
 
+def is_regulator_stand() -> bool:
+    """True when running flowsint-regulator-stand (:8877 demo surface)."""
+    return os.getenv("FINSKALP_REGULATOR_STAND", "0").strip().lower() in ("1", "true", "yes")
+
+
 def is_combat_mode() -> bool:
     """Default ON for regulator stand — set COMPLIANCE_COMBAT_MODE=0 only for offline dev."""
     return os.getenv("COMPLIANCE_COMBAT_MODE", "1").strip().lower() in ("1", "true", "yes")
@@ -20,13 +25,39 @@ def resolve_entity_store_mode() -> str:
     raw = os.getenv("FINSKALP_ENTITY_STORE", "").strip().lower()
     if raw:
         return raw
+    # Demo stand (:8877) must not share production entity_labels unless explicitly opted in.
+    if is_regulator_stand() and os.getenv("FINSKALP_DEMO_STAND_SHARE_PROD_DB", "0") != "1":
+        return "memory"
     return "postgres" if is_combat_mode() else "memory"
 
 
 def apply_combat_env_defaults() -> None:
-    """Set combat-mode defaults (entity store) without overriding explicit env."""
-    if is_combat_mode() and not os.getenv("FINSKALP_ENTITY_STORE", "").strip():
-        os.environ["FINSKALP_ENTITY_STORE"] = "postgres"
+    """Set combat-mode defaults without overriding explicit env."""
+    if not os.getenv("FINSKALP_ENTITY_STORE", "").strip():
+        if is_regulator_stand() and os.getenv("FINSKALP_DEMO_STAND_SHARE_PROD_DB", "0") != "1":
+            os.environ["FINSKALP_ENTITY_STORE"] = "memory"
+        elif is_combat_mode():
+            os.environ["FINSKALP_ENTITY_STORE"] = "postgres"
+
+    if not is_combat_mode():
+        return
+
+    # Production feature flags — only set when unset so operators can override
+    combat_flags = {
+        "FINSKALP_ECCF_POSTGRES_PERSISTENCE": "1",
+        "FINSKALP_WORKSPACE_FULL_PANELS": "1",
+        "FINSKALP_ENTERPRISE_REPORT_SECTIONS": "1",
+        "FINSKALP_IDOO_REAL_HEALTH_PROBES": "1",
+        "COMPLIANCE_DEMO_MODE": "0",
+        "FINSKALP_MAIGRET_TOP_SITES": "40",
+        "FINSKALP_MAIGRET_TIMEOUT": "45",
+        "FINSKALP_MAIGRET_USERNAMES": "1",
+        "FINSKALP_COLLECTOR_TIMEOUT_SEC": "55",
+        "COMPLIANCE_INVESTIGATE_TIMEOUT_SEC": "900",
+    }
+    for key, value in combat_flags.items():
+        if not os.getenv(key, "").strip():
+            os.environ[key] = value
 
 
 def combat_seed_address() -> tuple[str, Chain] | None:

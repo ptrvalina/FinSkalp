@@ -53,33 +53,38 @@ class CourtEnforcementCollector(ScalpelCollector):
             )
 
         if not hits:
+            from flowsint_crypto_compliance.demo.combat_mode import is_combat_mode
             from flowsint_crypto_compliance.osint_core.open_osint_corpus import OPEN_OSINT_CORPUS
 
-            norm = address.lower() if chain.value == "eth" else address
-            for row in OPEN_OSINT_CORPUS:
-                if row.source_type not in ("forum", "web", "explorer_tag"):
-                    continue
-                key = row.address.lower() if chain.value == "eth" else row.address
-                if key != norm:
-                    continue
-                if "seizure" in row.excerpt_ru.lower() or "изъят" in row.excerpt_ru.lower():
-                    hits.append(
-                        OpenMentionHit(
-                            source_type="web",
-                            source_name=row.source_name,
-                            title_ru=row.title_ru,
-                            excerpt_ru=row.excerpt_ru,
-                            url=row.url,
-                            risk_tag="enforcement_context",
-                            confidence=row.confidence * 0.9,
-                            observed_at=row.observed_at,
-                            address=address,
-                            chain=chain.value,
+            if not is_combat_mode():
+                norm = address.lower() if chain.value == "eth" else address
+                for row in OPEN_OSINT_CORPUS:
+                    if row.source_type not in ("forum", "web", "explorer_tag"):
+                        continue
+                    key = row.address.lower() if chain.value == "eth" else row.address
+                    if key != norm:
+                        continue
+                    if "seizure" in row.excerpt_ru.lower() or "изъят" in row.excerpt_ru.lower():
+                        hits.append(
+                            OpenMentionHit(
+                                source_type="web",
+                                source_name=row.source_name,
+                                title_ru=row.title_ru,
+                                excerpt_ru=row.excerpt_ru,
+                                url=row.url,
+                                risk_tag="enforcement_context",
+                                confidence=row.confidence * 0.9,
+                                observed_at=row.observed_at,
+                                address=address,
+                                chain=chain.value,
+                            )
                         )
-                    )
 
         detail = f"store:{len(store_hits)};hits:{len(hits)}"
-        if not hits:
+        # Offline demo only: surface an empty-feed placeholder. Combat stays silent on miss.
+        from flowsint_crypto_compliance.demo.combat_mode import is_combat_mode
+
+        if not hits and not is_combat_mode():
             hits.append(
                 OpenMentionHit(
                     source_type="web",
@@ -100,6 +105,6 @@ class CourtEnforcementCollector(ScalpelCollector):
         return CollectorResult(
             collector_id=self.collector_id,
             hits=hits[:5],
-            status="ok" if store_hits or len(hits) > 1 else "miss",
+            status="ok" if hits else "miss",
             detail=detail,
         )

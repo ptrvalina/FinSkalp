@@ -19,17 +19,27 @@ import { Route as AuthDashboardIndexRouteImport } from './routes/_auth.dashboard
 import { Route as AuthDashboardVaultRouteImport } from './routes/_auth.dashboard.vault'
 import { Route as AuthDashboardToolsRouteImport } from './routes/_auth.dashboard.tools'
 import { Route as AuthDashboardProfileRouteImport } from './routes/_auth.dashboard.profile'
+import { Route as AuthDashboardFusionRouteImport } from './routes/_auth.dashboard.fusion'
 import { Route as AuthDashboardComplianceRouteImport } from './routes/_auth.dashboard.compliance'
+import { Route as AuthDashboardFusionIndexRouteImport } from './routes/_auth.dashboard.fusion.index'
 import { Route as AuthDashboardFlowsIndexRouteImport } from './routes/_auth.dashboard.flows.index'
 import { Route as AuthDashboardEnrichersIndexRouteImport } from './routes/_auth.dashboard.enrichers.index'
 import { Route as AuthDashboardCustomTypesIndexRouteImport } from './routes/_auth.dashboard.custom-types.index'
 import { Route as AuthDashboardInvestigationsInvestigationIdRouteImport } from './routes/_auth.dashboard.investigations.$investigationId'
+import { Route as AuthDashboardFusionReportsRouteImport } from './routes/_auth.dashboard.fusion.reports'
+import { Route as AuthDashboardFusionInvestigateRouteImport } from './routes/_auth.dashboard.fusion.investigate'
 import { Route as AuthDashboardFlowsFlowIdRouteImport } from './routes/_auth.dashboard.flows.$flowId'
 import { Route as AuthDashboardEnrichersNewRouteImport } from './routes/_auth.dashboard.enrichers.new'
 import { Route as AuthDashboardEnrichersEnricherIdRouteImport } from './routes/_auth.dashboard.enrichers.$enricherId'
 import { Route as AuthDashboardCustomTypesTypeIdRouteImport } from './routes/_auth.dashboard.custom-types.$typeId'
 import { Route as AuthDashboardInvestigationsInvestigationIdIndexRouteImport } from './routes/_auth.dashboard.investigations.$investigationId.index'
+import { Route as AuthDashboardFusionReportsIndexRouteImport } from './routes/_auth.dashboard.fusion.reports.index'
+import { Route as AuthDashboardFusionReportsCaseRefRouteImport } from './routes/_auth.dashboard.fusion.reports.$caseRef'
+import { Route as AuthDashboardFusionInvestigationCaseRefRouteImport } from './routes/_auth.dashboard.fusion.investigation.$caseRef'
+import { Route as AuthDashboardFusionReportsCaseRefIndexRouteImport } from './routes/_auth.dashboard.fusion.reports.$caseRef.index'
 import { Route as AuthDashboardInvestigationsInvestigationIdTypeIdRouteImport } from './routes/_auth.dashboard.investigations.$investigationId.$type.$id'
+import { Route as AuthDashboardFusionReportsCaseRefReportTypeRouteImport } from './routes/_auth.dashboard.fusion.reports.$caseRef.$reportType'
+import { Route as AuthDashboardFusionInvestigationCaseRefGraphRouteImport } from './routes/_auth.dashboard.fusion.investigation.$caseRef.graph'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -80,11 +90,22 @@ const AuthDashboardProfileRoute = AuthDashboardProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthDashboardRoute,
 } as any)
+const AuthDashboardFusionRoute = AuthDashboardFusionRouteImport.update({
+  id: '/fusion',
+  path: '/fusion',
+  getParentRoute: () => AuthDashboardRoute,
+} as any)
 const AuthDashboardComplianceRoute = AuthDashboardComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
   getParentRoute: () => AuthDashboardRoute,
 } as any)
+const AuthDashboardFusionIndexRoute =
+  AuthDashboardFusionIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthDashboardFusionRoute,
+  } as any)
 const AuthDashboardFlowsIndexRoute = AuthDashboardFlowsIndexRouteImport.update({
   id: '/flows/',
   path: '/flows/',
@@ -107,6 +128,18 @@ const AuthDashboardInvestigationsInvestigationIdRoute =
     id: '/investigations/$investigationId',
     path: '/investigations/$investigationId',
     getParentRoute: () => AuthDashboardRoute,
+  } as any)
+const AuthDashboardFusionReportsRoute =
+  AuthDashboardFusionReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthDashboardFusionRoute,
+  } as any)
+const AuthDashboardFusionInvestigateRoute =
+  AuthDashboardFusionInvestigateRouteImport.update({
+    id: '/investigate',
+    path: '/investigate',
+    getParentRoute: () => AuthDashboardFusionRoute,
   } as any)
 const AuthDashboardFlowsFlowIdRoute =
   AuthDashboardFlowsFlowIdRouteImport.update({
@@ -138,11 +171,47 @@ const AuthDashboardInvestigationsInvestigationIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthDashboardInvestigationsInvestigationIdRoute,
   } as any)
+const AuthDashboardFusionReportsIndexRoute =
+  AuthDashboardFusionReportsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthDashboardFusionReportsRoute,
+  } as any)
+const AuthDashboardFusionReportsCaseRefRoute =
+  AuthDashboardFusionReportsCaseRefRouteImport.update({
+    id: '/$caseRef',
+    path: '/$caseRef',
+    getParentRoute: () => AuthDashboardFusionReportsRoute,
+  } as any)
+const AuthDashboardFusionInvestigationCaseRefRoute =
+  AuthDashboardFusionInvestigationCaseRefRouteImport.update({
+    id: '/investigation/$caseRef',
+    path: '/investigation/$caseRef',
+    getParentRoute: () => AuthDashboardFusionRoute,
+  } as any)
+const AuthDashboardFusionReportsCaseRefIndexRoute =
+  AuthDashboardFusionReportsCaseRefIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthDashboardFusionReportsCaseRefRoute,
+  } as any)
 const AuthDashboardInvestigationsInvestigationIdTypeIdRoute =
   AuthDashboardInvestigationsInvestigationIdTypeIdRouteImport.update({
     id: '/$type/$id',
     path: '/$type/$id',
     getParentRoute: () => AuthDashboardInvestigationsInvestigationIdRoute,
+  } as any)
+const AuthDashboardFusionReportsCaseRefReportTypeRoute =
+  AuthDashboardFusionReportsCaseRefReportTypeRouteImport.update({
+    id: '/$reportType',
+    path: '/$reportType',
+    getParentRoute: () => AuthDashboardFusionReportsCaseRefRoute,
+  } as any)
+const AuthDashboardFusionInvestigationCaseRefGraphRoute =
+  AuthDashboardFusionInvestigationCaseRefGraphRouteImport.update({
+    id: '/graph',
+    path: '/graph',
+    getParentRoute: () => AuthDashboardFusionInvestigationCaseRefRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -152,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthDashboardRouteWithChildren
   '/dashboard/compliance': typeof AuthDashboardComplianceRoute
+  '/dashboard/fusion': typeof AuthDashboardFusionRouteWithChildren
   '/dashboard/profile': typeof AuthDashboardProfileRoute
   '/dashboard/tools': typeof AuthDashboardToolsRoute
   '/dashboard/vault': typeof AuthDashboardVaultRoute
@@ -160,12 +230,21 @@ export interface FileRoutesByFullPath {
   '/dashboard/enrichers/$enricherId': typeof AuthDashboardEnrichersEnricherIdRoute
   '/dashboard/enrichers/new': typeof AuthDashboardEnrichersNewRoute
   '/dashboard/flows/$flowId': typeof AuthDashboardFlowsFlowIdRoute
+  '/dashboard/fusion/investigate': typeof AuthDashboardFusionInvestigateRoute
+  '/dashboard/fusion/reports': typeof AuthDashboardFusionReportsRouteWithChildren
   '/dashboard/investigations/$investigationId': typeof AuthDashboardInvestigationsInvestigationIdRouteWithChildren
   '/dashboard/custom-types': typeof AuthDashboardCustomTypesIndexRoute
   '/dashboard/enrichers': typeof AuthDashboardEnrichersIndexRoute
   '/dashboard/flows': typeof AuthDashboardFlowsIndexRoute
+  '/dashboard/fusion/': typeof AuthDashboardFusionIndexRoute
+  '/dashboard/fusion/investigation/$caseRef': typeof AuthDashboardFusionInvestigationCaseRefRouteWithChildren
+  '/dashboard/fusion/reports/$caseRef': typeof AuthDashboardFusionReportsCaseRefRouteWithChildren
+  '/dashboard/fusion/reports/': typeof AuthDashboardFusionReportsIndexRoute
   '/dashboard/investigations/$investigationId/': typeof AuthDashboardInvestigationsInvestigationIdIndexRoute
+  '/dashboard/fusion/investigation/$caseRef/graph': typeof AuthDashboardFusionInvestigationCaseRefGraphRoute
+  '/dashboard/fusion/reports/$caseRef/$reportType': typeof AuthDashboardFusionReportsCaseRefReportTypeRoute
   '/dashboard/investigations/$investigationId/$type/$id': typeof AuthDashboardInvestigationsInvestigationIdTypeIdRoute
+  '/dashboard/fusion/reports/$caseRef/': typeof AuthDashboardFusionReportsCaseRefIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,11 +260,18 @@ export interface FileRoutesByTo {
   '/dashboard/enrichers/$enricherId': typeof AuthDashboardEnrichersEnricherIdRoute
   '/dashboard/enrichers/new': typeof AuthDashboardEnrichersNewRoute
   '/dashboard/flows/$flowId': typeof AuthDashboardFlowsFlowIdRoute
+  '/dashboard/fusion/investigate': typeof AuthDashboardFusionInvestigateRoute
   '/dashboard/custom-types': typeof AuthDashboardCustomTypesIndexRoute
   '/dashboard/enrichers': typeof AuthDashboardEnrichersIndexRoute
   '/dashboard/flows': typeof AuthDashboardFlowsIndexRoute
+  '/dashboard/fusion': typeof AuthDashboardFusionIndexRoute
+  '/dashboard/fusion/investigation/$caseRef': typeof AuthDashboardFusionInvestigationCaseRefRouteWithChildren
+  '/dashboard/fusion/reports': typeof AuthDashboardFusionReportsIndexRoute
   '/dashboard/investigations/$investigationId': typeof AuthDashboardInvestigationsInvestigationIdIndexRoute
+  '/dashboard/fusion/investigation/$caseRef/graph': typeof AuthDashboardFusionInvestigationCaseRefGraphRoute
+  '/dashboard/fusion/reports/$caseRef/$reportType': typeof AuthDashboardFusionReportsCaseRefReportTypeRoute
   '/dashboard/investigations/$investigationId/$type/$id': typeof AuthDashboardInvestigationsInvestigationIdTypeIdRoute
+  '/dashboard/fusion/reports/$caseRef': typeof AuthDashboardFusionReportsCaseRefIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -196,6 +282,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_auth/dashboard': typeof AuthDashboardRouteWithChildren
   '/_auth/dashboard/compliance': typeof AuthDashboardComplianceRoute
+  '/_auth/dashboard/fusion': typeof AuthDashboardFusionRouteWithChildren
   '/_auth/dashboard/profile': typeof AuthDashboardProfileRoute
   '/_auth/dashboard/tools': typeof AuthDashboardToolsRoute
   '/_auth/dashboard/vault': typeof AuthDashboardVaultRoute
@@ -204,12 +291,21 @@ export interface FileRoutesById {
   '/_auth/dashboard/enrichers/$enricherId': typeof AuthDashboardEnrichersEnricherIdRoute
   '/_auth/dashboard/enrichers/new': typeof AuthDashboardEnrichersNewRoute
   '/_auth/dashboard/flows/$flowId': typeof AuthDashboardFlowsFlowIdRoute
+  '/_auth/dashboard/fusion/investigate': typeof AuthDashboardFusionInvestigateRoute
+  '/_auth/dashboard/fusion/reports': typeof AuthDashboardFusionReportsRouteWithChildren
   '/_auth/dashboard/investigations/$investigationId': typeof AuthDashboardInvestigationsInvestigationIdRouteWithChildren
   '/_auth/dashboard/custom-types/': typeof AuthDashboardCustomTypesIndexRoute
   '/_auth/dashboard/enrichers/': typeof AuthDashboardEnrichersIndexRoute
   '/_auth/dashboard/flows/': typeof AuthDashboardFlowsIndexRoute
+  '/_auth/dashboard/fusion/': typeof AuthDashboardFusionIndexRoute
+  '/_auth/dashboard/fusion/investigation/$caseRef': typeof AuthDashboardFusionInvestigationCaseRefRouteWithChildren
+  '/_auth/dashboard/fusion/reports/$caseRef': typeof AuthDashboardFusionReportsCaseRefRouteWithChildren
+  '/_auth/dashboard/fusion/reports/': typeof AuthDashboardFusionReportsIndexRoute
   '/_auth/dashboard/investigations/$investigationId/': typeof AuthDashboardInvestigationsInvestigationIdIndexRoute
+  '/_auth/dashboard/fusion/investigation/$caseRef/graph': typeof AuthDashboardFusionInvestigationCaseRefGraphRoute
+  '/_auth/dashboard/fusion/reports/$caseRef/$reportType': typeof AuthDashboardFusionReportsCaseRefReportTypeRoute
   '/_auth/dashboard/investigations/$investigationId/$type/$id': typeof AuthDashboardInvestigationsInvestigationIdTypeIdRoute
+  '/_auth/dashboard/fusion/reports/$caseRef/': typeof AuthDashboardFusionReportsCaseRefIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,6 +316,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/dashboard/compliance'
+    | '/dashboard/fusion'
     | '/dashboard/profile'
     | '/dashboard/tools'
     | '/dashboard/vault'
@@ -228,12 +325,21 @@ export interface FileRouteTypes {
     | '/dashboard/enrichers/$enricherId'
     | '/dashboard/enrichers/new'
     | '/dashboard/flows/$flowId'
+    | '/dashboard/fusion/investigate'
+    | '/dashboard/fusion/reports'
     | '/dashboard/investigations/$investigationId'
     | '/dashboard/custom-types'
     | '/dashboard/enrichers'
     | '/dashboard/flows'
+    | '/dashboard/fusion/'
+    | '/dashboard/fusion/investigation/$caseRef'
+    | '/dashboard/fusion/reports/$caseRef'
+    | '/dashboard/fusion/reports/'
     | '/dashboard/investigations/$investigationId/'
+    | '/dashboard/fusion/investigation/$caseRef/graph'
+    | '/dashboard/fusion/reports/$caseRef/$reportType'
     | '/dashboard/investigations/$investigationId/$type/$id'
+    | '/dashboard/fusion/reports/$caseRef/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -249,11 +355,18 @@ export interface FileRouteTypes {
     | '/dashboard/enrichers/$enricherId'
     | '/dashboard/enrichers/new'
     | '/dashboard/flows/$flowId'
+    | '/dashboard/fusion/investigate'
     | '/dashboard/custom-types'
     | '/dashboard/enrichers'
     | '/dashboard/flows'
+    | '/dashboard/fusion'
+    | '/dashboard/fusion/investigation/$caseRef'
+    | '/dashboard/fusion/reports'
     | '/dashboard/investigations/$investigationId'
+    | '/dashboard/fusion/investigation/$caseRef/graph'
+    | '/dashboard/fusion/reports/$caseRef/$reportType'
     | '/dashboard/investigations/$investigationId/$type/$id'
+    | '/dashboard/fusion/reports/$caseRef'
   id:
     | '__root__'
     | '/'
@@ -263,6 +376,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_auth/dashboard'
     | '/_auth/dashboard/compliance'
+    | '/_auth/dashboard/fusion'
     | '/_auth/dashboard/profile'
     | '/_auth/dashboard/tools'
     | '/_auth/dashboard/vault'
@@ -271,12 +385,21 @@ export interface FileRouteTypes {
     | '/_auth/dashboard/enrichers/$enricherId'
     | '/_auth/dashboard/enrichers/new'
     | '/_auth/dashboard/flows/$flowId'
+    | '/_auth/dashboard/fusion/investigate'
+    | '/_auth/dashboard/fusion/reports'
     | '/_auth/dashboard/investigations/$investigationId'
     | '/_auth/dashboard/custom-types/'
     | '/_auth/dashboard/enrichers/'
     | '/_auth/dashboard/flows/'
+    | '/_auth/dashboard/fusion/'
+    | '/_auth/dashboard/fusion/investigation/$caseRef'
+    | '/_auth/dashboard/fusion/reports/$caseRef'
+    | '/_auth/dashboard/fusion/reports/'
     | '/_auth/dashboard/investigations/$investigationId/'
+    | '/_auth/dashboard/fusion/investigation/$caseRef/graph'
+    | '/_auth/dashboard/fusion/reports/$caseRef/$reportType'
     | '/_auth/dashboard/investigations/$investigationId/$type/$id'
+    | '/_auth/dashboard/fusion/reports/$caseRef/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -359,12 +482,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardProfileRouteImport
       parentRoute: typeof AuthDashboardRoute
     }
+    '/_auth/dashboard/fusion': {
+      id: '/_auth/dashboard/fusion'
+      path: '/fusion'
+      fullPath: '/dashboard/fusion'
+      preLoaderRoute: typeof AuthDashboardFusionRouteImport
+      parentRoute: typeof AuthDashboardRoute
+    }
     '/_auth/dashboard/compliance': {
       id: '/_auth/dashboard/compliance'
       path: '/compliance'
       fullPath: '/dashboard/compliance'
       preLoaderRoute: typeof AuthDashboardComplianceRouteImport
       parentRoute: typeof AuthDashboardRoute
+    }
+    '/_auth/dashboard/fusion/': {
+      id: '/_auth/dashboard/fusion/'
+      path: '/'
+      fullPath: '/dashboard/fusion/'
+      preLoaderRoute: typeof AuthDashboardFusionIndexRouteImport
+      parentRoute: typeof AuthDashboardFusionRoute
     }
     '/_auth/dashboard/flows/': {
       id: '/_auth/dashboard/flows/'
@@ -393,6 +530,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/investigations/$investigationId'
       preLoaderRoute: typeof AuthDashboardInvestigationsInvestigationIdRouteImport
       parentRoute: typeof AuthDashboardRoute
+    }
+    '/_auth/dashboard/fusion/reports': {
+      id: '/_auth/dashboard/fusion/reports'
+      path: '/reports'
+      fullPath: '/dashboard/fusion/reports'
+      preLoaderRoute: typeof AuthDashboardFusionReportsRouteImport
+      parentRoute: typeof AuthDashboardFusionRoute
+    }
+    '/_auth/dashboard/fusion/investigate': {
+      id: '/_auth/dashboard/fusion/investigate'
+      path: '/investigate'
+      fullPath: '/dashboard/fusion/investigate'
+      preLoaderRoute: typeof AuthDashboardFusionInvestigateRouteImport
+      parentRoute: typeof AuthDashboardFusionRoute
     }
     '/_auth/dashboard/flows/$flowId': {
       id: '/_auth/dashboard/flows/$flowId'
@@ -429,6 +580,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardInvestigationsInvestigationIdIndexRouteImport
       parentRoute: typeof AuthDashboardInvestigationsInvestigationIdRoute
     }
+    '/_auth/dashboard/fusion/reports/': {
+      id: '/_auth/dashboard/fusion/reports/'
+      path: '/'
+      fullPath: '/dashboard/fusion/reports/'
+      preLoaderRoute: typeof AuthDashboardFusionReportsIndexRouteImport
+      parentRoute: typeof AuthDashboardFusionReportsRoute
+    }
+    '/_auth/dashboard/fusion/reports/$caseRef': {
+      id: '/_auth/dashboard/fusion/reports/$caseRef'
+      path: '/$caseRef'
+      fullPath: '/dashboard/fusion/reports/$caseRef'
+      preLoaderRoute: typeof AuthDashboardFusionReportsCaseRefRouteImport
+      parentRoute: typeof AuthDashboardFusionReportsRoute
+    }
+    '/_auth/dashboard/fusion/investigation/$caseRef': {
+      id: '/_auth/dashboard/fusion/investigation/$caseRef'
+      path: '/investigation/$caseRef'
+      fullPath: '/dashboard/fusion/investigation/$caseRef'
+      preLoaderRoute: typeof AuthDashboardFusionInvestigationCaseRefRouteImport
+      parentRoute: typeof AuthDashboardFusionRoute
+    }
+    '/_auth/dashboard/fusion/reports/$caseRef/': {
+      id: '/_auth/dashboard/fusion/reports/$caseRef/'
+      path: '/'
+      fullPath: '/dashboard/fusion/reports/$caseRef/'
+      preLoaderRoute: typeof AuthDashboardFusionReportsCaseRefIndexRouteImport
+      parentRoute: typeof AuthDashboardFusionReportsCaseRefRoute
+    }
     '/_auth/dashboard/investigations/$investigationId/$type/$id': {
       id: '/_auth/dashboard/investigations/$investigationId/$type/$id'
       path: '/$type/$id'
@@ -436,8 +615,90 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardInvestigationsInvestigationIdTypeIdRouteImport
       parentRoute: typeof AuthDashboardInvestigationsInvestigationIdRoute
     }
+    '/_auth/dashboard/fusion/reports/$caseRef/$reportType': {
+      id: '/_auth/dashboard/fusion/reports/$caseRef/$reportType'
+      path: '/$reportType'
+      fullPath: '/dashboard/fusion/reports/$caseRef/$reportType'
+      preLoaderRoute: typeof AuthDashboardFusionReportsCaseRefReportTypeRouteImport
+      parentRoute: typeof AuthDashboardFusionReportsCaseRefRoute
+    }
+    '/_auth/dashboard/fusion/investigation/$caseRef/graph': {
+      id: '/_auth/dashboard/fusion/investigation/$caseRef/graph'
+      path: '/graph'
+      fullPath: '/dashboard/fusion/investigation/$caseRef/graph'
+      preLoaderRoute: typeof AuthDashboardFusionInvestigationCaseRefGraphRouteImport
+      parentRoute: typeof AuthDashboardFusionInvestigationCaseRefRoute
+    }
   }
 }
+
+interface AuthDashboardFusionReportsCaseRefRouteChildren {
+  AuthDashboardFusionReportsCaseRefReportTypeRoute: typeof AuthDashboardFusionReportsCaseRefReportTypeRoute
+  AuthDashboardFusionReportsCaseRefIndexRoute: typeof AuthDashboardFusionReportsCaseRefIndexRoute
+}
+
+const AuthDashboardFusionReportsCaseRefRouteChildren: AuthDashboardFusionReportsCaseRefRouteChildren =
+  {
+    AuthDashboardFusionReportsCaseRefReportTypeRoute:
+      AuthDashboardFusionReportsCaseRefReportTypeRoute,
+    AuthDashboardFusionReportsCaseRefIndexRoute:
+      AuthDashboardFusionReportsCaseRefIndexRoute,
+  }
+
+const AuthDashboardFusionReportsCaseRefRouteWithChildren =
+  AuthDashboardFusionReportsCaseRefRoute._addFileChildren(
+    AuthDashboardFusionReportsCaseRefRouteChildren,
+  )
+
+interface AuthDashboardFusionReportsRouteChildren {
+  AuthDashboardFusionReportsCaseRefRoute: typeof AuthDashboardFusionReportsCaseRefRouteWithChildren
+  AuthDashboardFusionReportsIndexRoute: typeof AuthDashboardFusionReportsIndexRoute
+}
+
+const AuthDashboardFusionReportsRouteChildren: AuthDashboardFusionReportsRouteChildren =
+  {
+    AuthDashboardFusionReportsCaseRefRoute:
+      AuthDashboardFusionReportsCaseRefRouteWithChildren,
+    AuthDashboardFusionReportsIndexRoute: AuthDashboardFusionReportsIndexRoute,
+  }
+
+const AuthDashboardFusionReportsRouteWithChildren =
+  AuthDashboardFusionReportsRoute._addFileChildren(
+    AuthDashboardFusionReportsRouteChildren,
+  )
+
+interface AuthDashboardFusionInvestigationCaseRefRouteChildren {
+  AuthDashboardFusionInvestigationCaseRefGraphRoute: typeof AuthDashboardFusionInvestigationCaseRefGraphRoute
+}
+
+const AuthDashboardFusionInvestigationCaseRefRouteChildren: AuthDashboardFusionInvestigationCaseRefRouteChildren =
+  {
+    AuthDashboardFusionInvestigationCaseRefGraphRoute:
+      AuthDashboardFusionInvestigationCaseRefGraphRoute,
+  }
+
+const AuthDashboardFusionInvestigationCaseRefRouteWithChildren =
+  AuthDashboardFusionInvestigationCaseRefRoute._addFileChildren(
+    AuthDashboardFusionInvestigationCaseRefRouteChildren,
+  )
+
+interface AuthDashboardFusionRouteChildren {
+  AuthDashboardFusionInvestigateRoute: typeof AuthDashboardFusionInvestigateRoute
+  AuthDashboardFusionReportsRoute: typeof AuthDashboardFusionReportsRouteWithChildren
+  AuthDashboardFusionIndexRoute: typeof AuthDashboardFusionIndexRoute
+  AuthDashboardFusionInvestigationCaseRefRoute: typeof AuthDashboardFusionInvestigationCaseRefRouteWithChildren
+}
+
+const AuthDashboardFusionRouteChildren: AuthDashboardFusionRouteChildren = {
+  AuthDashboardFusionInvestigateRoute: AuthDashboardFusionInvestigateRoute,
+  AuthDashboardFusionReportsRoute: AuthDashboardFusionReportsRouteWithChildren,
+  AuthDashboardFusionIndexRoute: AuthDashboardFusionIndexRoute,
+  AuthDashboardFusionInvestigationCaseRefRoute:
+    AuthDashboardFusionInvestigationCaseRefRouteWithChildren,
+}
+
+const AuthDashboardFusionRouteWithChildren =
+  AuthDashboardFusionRoute._addFileChildren(AuthDashboardFusionRouteChildren)
 
 interface AuthDashboardInvestigationsInvestigationIdRouteChildren {
   AuthDashboardInvestigationsInvestigationIdIndexRoute: typeof AuthDashboardInvestigationsInvestigationIdIndexRoute
@@ -459,6 +720,7 @@ const AuthDashboardInvestigationsInvestigationIdRouteWithChildren =
 
 interface AuthDashboardRouteChildren {
   AuthDashboardComplianceRoute: typeof AuthDashboardComplianceRoute
+  AuthDashboardFusionRoute: typeof AuthDashboardFusionRouteWithChildren
   AuthDashboardProfileRoute: typeof AuthDashboardProfileRoute
   AuthDashboardToolsRoute: typeof AuthDashboardToolsRoute
   AuthDashboardVaultRoute: typeof AuthDashboardVaultRoute
@@ -475,6 +737,7 @@ interface AuthDashboardRouteChildren {
 
 const AuthDashboardRouteChildren: AuthDashboardRouteChildren = {
   AuthDashboardComplianceRoute: AuthDashboardComplianceRoute,
+  AuthDashboardFusionRoute: AuthDashboardFusionRouteWithChildren,
   AuthDashboardProfileRoute: AuthDashboardProfileRoute,
   AuthDashboardToolsRoute: AuthDashboardToolsRoute,
   AuthDashboardVaultRoute: AuthDashboardVaultRoute,

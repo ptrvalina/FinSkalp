@@ -1,0 +1,112 @@
+/* FinSkalp Fusion — motion */
+
+@keyframes fusion-panel-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fusion-feed-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fusion-risk-cascade {
+  0% { stroke-opacity: 0.3; }
+  50% { stroke-opacity: 1; }
+  100% { stroke-opacity: 0.6; }
+}
+
+@keyframes fusion-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.fusion-animate-panel-in {
+  animation: fusion-panel-slide-in var(--fusion-motion-base) ease-out forwards;
+}
+
+.fusion-animate-feed-enter {
+  animation: fusion-feed-enter 300ms ease-out forwards;
+}
+
+.fusion-animate-cascade {
+  animation: fusion-risk-cascade var(--fusion-motion-base) ease-in-out;
+}
+
+@keyframes fusion-entity-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fusion-entity-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--fusion-ops-cyan) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--fusion-ops-cyan) 0%, transparent);
+  }
+}
+
+@keyframes fusion-edge-flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fusion-graph-breathe {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.97;
+  }
+}
+
+.fusion-animate-entity-enter {
+  animation: fusion-entity-enter var(--fusion-motion-base) ease-out forwards;
+}
+
+.fusion-animate-entity-pulse {
+  animation: fusion-entity-pulse 1.4s ease-in-out 2;
+}
+
+.fusion-animate-edge-flow {
+  animation: fusion-edge-flow 1.2s linear infinite;
+}
+
+.fusion-graph-stage--live-breathe .fusion-graph-stage__canvas {
+  animation: fusion-graph-breathe 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fusion-animate-panel-in,
+  .fusion-animate-feed-enter,
+  .fusion-animate-cascade,
+  .fusion-animate-entity-enter,
+  .fusion-animate-entity-pulse,
+  .fusion-animate-edge-flow,
+  .fusion-graph-stage--live-breathe .fusion-graph-stage__canvas {
+    animation: none;
+  }
+}

@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { getDisplayName } from '@/lib/user-display'
 import { SESSION_QUERY_KEY } from '@/hooks/use-auth'
-import { PageLayout } from '@/components/layout/page-layout'
+import { FusionPlatformShell } from '@/fusion'
 
 export const Route = createFileRoute('/_auth/dashboard/profile')({
   component: ProfilePage,
@@ -74,28 +74,23 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <FusionPlatformShell title="Профиль оператора" activeSection="profile">
+        <div className="flex items-center justify-center py-16">
+          <div className="w-6 h-6 border-2 border-[var(--fusion-ops-blue)] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </FusionPlatformShell>
     )
   }
 
   const displayName = getDisplayName(profile)
 
   return (
-    <PageLayout
-      title="User Profile"
-      description="Manage analyst identity, avatar, and personal workspace metadata."
+    <FusionPlatformShell
+      title="Профиль оператора"
+      subtitle="Идентификация аналитика в рабочем пространстве"
+      activeSection="profile"
     >
-      <div className="max-w-xl space-y-8">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-[var(--fs-text-primary)]">
-            Analyst account
-          </h2>
-          <p className="mt-1 text-sm text-[var(--fs-text-secondary)]">
-            Update the profile used across notifications, collaboration, and case ownership.
-          </p>
-        </div>
+      <div className="max-w-lg space-y-6">
 
         {/* Avatar preview */}
         <div className="flex items-center gap-4">
@@ -154,6 +149,6 @@ function ProfilePage() {
           </div>
         </form>
       </div>
-    </PageLayout>
+    </FusionPlatformShell>
   )
 }

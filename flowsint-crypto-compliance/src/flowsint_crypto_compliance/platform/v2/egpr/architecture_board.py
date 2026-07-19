@@ -64,7 +64,7 @@ def submit_board_review(
     return {
         "ok": True,
         "review": request.to_dict(),
-        "message": "Review submitted to Architecture Board (stub)",
+        "message": "Review submitted to Architecture Board (not configured)",
     }
 
 

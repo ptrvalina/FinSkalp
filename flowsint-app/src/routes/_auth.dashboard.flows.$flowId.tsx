@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import Editor from '@/components/flows/editor'
 import Loader from '@/components/loader'
 import { flowService } from '@/api/flow-service'
+import { FusionPlatformShell, FusionPlatformEditor } from '@/fusion'
 
 export const Route = createFileRoute('/_auth/dashboard/flows/$flowId')({
   loader: async ({ params: { flowId } }) => {
@@ -31,11 +32,19 @@ export const Route = createFileRoute('/_auth/dashboard/flows/$flowId')({
 function FlowPage() {
   const { flow } = Route.useLoaderData()
   return (
-    <Editor
-      key={flow.id}
-      flow={flow}
-      initialNodes={flow?.flow_schema?.nodes}
-      initialEdges={flow?.flow_schema?.edges}
-    />
+    <FusionPlatformShell
+      title={flow.name ?? 'Flow Architect'}
+      subtitle={flow.description ?? 'Pipeline editor'}
+      activeSection="flows"
+    >
+      <FusionPlatformEditor className="h-full min-h-[70vh]">
+        <Editor
+          key={flow.id}
+          flow={flow}
+          initialNodes={flow?.flow_schema?.nodes}
+          initialEdges={flow?.flow_schema?.edges}
+        />
+      </FusionPlatformEditor>
+    </FusionPlatformShell>
   )
 }

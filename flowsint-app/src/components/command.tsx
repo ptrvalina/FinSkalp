@@ -121,12 +121,12 @@ export function Command() {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="h-9 w-full min-w-[14rem] max-w-xs rounded-sm border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] px-3 text-xs text-[var(--fs-text-secondary)] hover:border-[var(--fs-border-strong)] hover:bg-[var(--fs-surface-raised)]"
+        className="h-9 w-full min-w-[14rem] max-w-xs rounded-sm border border-[var(--fusion-border)] bg-[var(--fusion-bg-deck)] px-3 text-xs text-[var(--fusion-text-secondary)] hover:border-[var(--fusion-border-strong)] hover:bg-[var(--fusion-bg-interactive)]"
       >
         <span className="flex items-center gap-2">
           <Search className="h-4 w-4" /> Command Palette
         </span>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-sm border border-[var(--fs-border)] bg-[var(--fs-surface)] px-1.5 font-mono text-[10px] font-medium text-[var(--fs-text-tertiary)] opacity-100">
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-sm border border-[var(--fusion-border)] bg-[var(--fusion-bg-panel)] px-1.5 font-mono text-[10px] font-medium text-[var(--fusion-text-tertiary)] opacity-100">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
@@ -240,7 +240,7 @@ export function Command() {
                     </CommandItem>
                     <CommandItem
                       onSelect={() => {
-                        navigate({ to: '/dashboard/compliance' })
+                        navigate({ to: '/dashboard/compliance', search: { caseRef: undefined } })
                         setOpen(false)
                       }}
                     >

@@ -1,0 +1,493 @@
+/* FinSkalp Fusion — graph stage HUD */
+
+.fusion-graph-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--fusion-bg-void);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  overflow: hidden;
+}
+
+.fusion-graph-stage__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.fusion-graph-hud {
+  position: absolute;
+  top: var(--fusion-space-2);
+  left: var(--fusion-space-2);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fusion-space-2);
+  pointer-events: none;
+}
+
+.fusion-graph-hud__chip {
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-2);
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  background: color-mix(in srgb, var(--fusion-bg-panel) 92%, transparent);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  backdrop-filter: blur(4px);
+}
+
+.fusion-graph-hud__chip-label {
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-graph-hud__chip-value {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+  font-weight: 600;
+  color: var(--fusion-text-primary);
+}
+
+.fusion-graph-hud__live {
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-1);
+}
+
+.fusion-graph-hud__live-text {
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.12em;
+  color: var(--fusion-ops-green);
+}
+
+.fusion-graph-stage--persistent {
+  contain: layout style;
+}
+
+.compliance-graph-node--fusion-propagate {
+  animation: fusion-node-propagate 600ms ease-in-out;
+}
+
+@keyframes fusion-node-propagate {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.4); }
+}
+
+.fusion-graph-hud__chip--interactive {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.fusion-graph-hud__chip--interactive:hover {
+  border-color: var(--fusion-ops-blue);
+  color: var(--fusion-ops-blue);
+}
+
+.fusion-graph-hud__chip--active {
+  border-color: var(--fusion-ops-blue);
+  background: color-mix(in srgb, var(--fusion-ops-blue) 10%, var(--fusion-bg-panel));
+}
+
+.fusion-graph-layers {
+  pointer-events: auto;
+}
+
+/* Entity glyph nodes (ReactFlow custom node) */
+.fusion-entity-node-host {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.fusion-entity-node {
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-2);
+  width: 190px;
+  min-height: 52px;
+  padding: var(--fusion-space-2);
+  background: color-mix(in srgb, var(--fusion-node-accent, var(--fusion-ops-blue)) 12%, var(--fusion-bg-panel));
+  border: 1px solid color-mix(in srgb, var(--fusion-node-accent, var(--fusion-border)) 35%, var(--fusion-border));
+  border-radius: var(--fusion-radius-sm);
+  font-size: var(--fusion-text-xs);
+  color: var(--fusion-text-primary);
+  transition: box-shadow var(--fusion-motion-fast), border-color var(--fusion-motion-fast);
+}
+
+.fusion-entity-node--circle {
+  border-radius: 999px;
+  width: auto;
+  min-width: 160px;
+  max-width: 220px;
+}
+
+.fusion-entity-node--circle .fusion-entity-node__glyph {
+  border-radius: 50%;
+}
+
+.fusion-entity-node--rect {
+  border-radius: var(--fusion-radius-sm);
+}
+
+.fusion-entity-node--rect .fusion-entity-node__glyph {
+  border-radius: 2px;
+}
+
+.fusion-entity-node--unknown {
+  border-radius: 999px;
+  border-style: dashed;
+  border-width: 2px;
+  opacity: 0.92;
+}
+
+.fusion-entity-node--selected {
+  border-color: var(--fusion-ops-blue);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--fusion-ops-blue) 35%, transparent),
+    0 0 12px color-mix(in srgb, var(--fusion-ops-blue) 20%, transparent);
+}
+
+.fusion-entity-node--pinned {
+  border-color: var(--fusion-ops-blue);
+}
+
+.fusion-entity-node__glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--fusion-radius-sm);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.fusion-entity-node__title {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fusion-entity-node__meta {
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-tertiary);
+  margin-top: 2px;
+}
+
+.fusion-entity-node__handle {
+  width: 6px !important;
+  height: 6px !important;
+  background: var(--fusion-border-strong) !important;
+  border: none !important;
+}
+
+.compliance-graph-node--timeline-focus .fusion-entity-node {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fusion-ops-blue) 35%, transparent);
+  border-color: var(--fusion-ops-blue);
+}
+
+/* In-graph search overlay */
+.fusion-graph-search {
+  position: absolute;
+  top: 48px;
+  left: var(--fusion-space-2);
+  z-index: 12;
+  width: min(320px, calc(100% - var(--fusion-space-4)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--fusion-space-1);
+  padding: var(--fusion-space-2);
+  background: color-mix(in srgb, var(--fusion-bg-panel) 96%, transparent);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.fusion-graph-search__input {
+  width: 100%;
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  background: var(--fusion-bg-deck);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+  color: var(--fusion-text-primary);
+  outline: none;
+}
+
+.fusion-graph-search__input:focus-visible {
+  border-color: var(--fusion-ops-blue);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fusion-ops-blue) 20%, transparent);
+}
+
+.fusion-graph-search__results {
+  max-height: 220px;
+  overflow: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fusion-graph-search__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fusion-space-2);
+  width: 100%;
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  text-align: left;
+  border-radius: var(--fusion-radius-sm);
+  font-size: var(--fusion-text-xs);
+}
+
+.fusion-graph-search__row:hover {
+  background: var(--fusion-bg-interactive);
+}
+
+.fusion-graph-search__close {
+  align-self: flex-end;
+  color: var(--fusion-text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.fusion-graph-search__close:hover {
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-str-pipeline {
+  border-bottom: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-deck);
+  padding: var(--fusion-space-2) var(--fusion-space-3);
+  overflow-x: auto;
+}
+
+.fusion-str-pipeline__track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fusion-space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fusion-str-pipeline__step {
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-1);
+}
+
+.fusion-str-pipeline__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fusion-space-1);
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  border-radius: var(--fusion-radius-sm);
+  border: 1px solid var(--fusion-border);
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fusion-str-pipeline__pill--done {
+  border-color: color-mix(in srgb, var(--fusion-ops-green) 40%, transparent);
+  color: var(--fusion-ops-green);
+  background: color-mix(in srgb, var(--fusion-ops-green) 8%, transparent);
+}
+
+.fusion-str-pipeline__pill--running {
+  border-color: color-mix(in srgb, var(--fusion-ops-blue) 50%, transparent);
+  color: var(--fusion-ops-blue);
+  background: color-mix(in srgb, var(--fusion-ops-blue) 10%, transparent);
+}
+
+.fusion-str-pipeline__pill--pending {
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-str-pipeline__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.fusion-str-pipeline__dot--done {
+  background: var(--fusion-ops-green);
+}
+
+.fusion-str-pipeline__dot--running {
+  background: var(--fusion-ops-blue);
+  animation: fusion-pulse 1.4s ease-in-out infinite;
+}
+
+.fusion-str-pipeline__dot--pending {
+  background: var(--fusion-border-strong);
+}
+
+.fusion-str-pipeline__arrow {
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-timeline-item {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.fusion-timeline-item:hover {
+  background: color-mix(in srgb, var(--fusion-ops-blue) 6%, transparent);
+}
+
+.fusion-timeline-item--active {
+  background: color-mix(in srgb, var(--fusion-ops-blue) 12%, transparent);
+  border-left: 2px solid var(--fusion-ops-blue);
+}
+
+.compliance-graph-node--timeline-focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fusion-ops-blue) 35%, transparent) !important;
+  border-color: var(--fusion-ops-blue) !important;
+}
+
+.compliance-graph-node--hop-dim {
+  opacity: 0.22 !important;
+}
+
+.compliance-graph-node--selected {
+  border-color: var(--fusion-ops-blue) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fusion-ops-blue) 25%, transparent) !important;
+}
+
+.compliance-graph-edge--cascade {
+  stroke: var(--fusion-ops-orange) !important;
+  transition: stroke var(--fusion-motion-fast), stroke-width var(--fusion-motion-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compliance-graph-node--fusion-propagate {
+    animation: none;
+  }
+}
+
+/* WebGL GPU graph (Phase 6 preview, opt-in) */
+.fusion-gpu-graph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--fusion-bg-void);
+}
+
+.fusion-gpu-graph__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.fusion-gpu-graph__perf-hud {
+  position: absolute;
+  right: var(--fusion-space-2);
+  bottom: var(--fusion-space-2);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-2);
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  background: color-mix(in srgb, var(--fusion-bg-panel) 92%, transparent);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.fusion-gpu-graph__perf-badge {
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--fusion-ops-cyan);
+  padding: 1px 6px;
+  border-radius: var(--fusion-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--fusion-ops-cyan) 35%, transparent);
+  background: color-mix(in srgb, var(--fusion-ops-cyan) 8%, transparent);
+}
+
+.fusion-gpu-graph__perf-stat {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-gpu-graph--loading,
+.fusion-gpu-graph--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fusion-text-tertiary);
+}
+
+/* Collaboration live cursors (BroadcastChannel) */
+.fusion-collab-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fusion-collab-cursor {
+  position: absolute;
+  transform: translate(-2px, -2px);
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-1);
+  pointer-events: none;
+  transition: left 80ms linear, top 80ms linear;
+}
+
+.fusion-collab-cursor__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--collab-color, var(--fusion-ops-cyan));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--collab-color, var(--fusion-ops-cyan)) 35%, transparent);
+}
+
+.fusion-collab-cursor__label {
+  font-size: var(--fusion-text-2xs);
+  font-family: var(--fusion-font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: var(--fusion-radius-sm);
+  background: color-mix(in srgb, var(--fusion-bg-panel) 88%, transparent);
+  border: 1px solid var(--fusion-border);
+  color: var(--collab-color, var(--fusion-ops-cyan));
+  white-space: nowrap;
+}
+
+.fusion-collab-presence__dots {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.fusion-collab-presence__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.fusion-gpu-money-flow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}

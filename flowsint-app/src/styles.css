@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 @import './design-system/tokens.css';
+@import './fusion/tokens.css';
+@import './fusion/typography.css';
+@import './fusion/motion.css';
+@import './fusion/panels.css';
+@import './fusion/graph-chrome.css';
+@import './fusion/fusion-graph-os.css';
+@import './fusion/stitch-graph-os.css';
+@import './fusion/executive-mode.css';
 @plugin "@tailwindcss/typography";
 @plugin "tailwindcss-animate";
 
@@ -75,6 +83,27 @@ body {
 :root {
   --fs-risk-clear: var(--fs-accent);
   --fs-font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  /* Fusion tokens at :root — platform chrome outside [data-fusion] shell */
+  --fusion-bg-void: #0B1118;
+  --fusion-bg-deck: #111A24;
+  --fusion-bg-panel: #17222E;
+  --fusion-bg-interactive: #1E2B39;
+  --fusion-border: #2A3847;
+  --fusion-border-strong: #364656;
+  --fusion-text-primary: rgba(255, 255, 255, 0.92);
+  --fusion-text-secondary: rgba(255, 255, 255, 0.68);
+  --fusion-text-tertiary: rgba(255, 255, 255, 0.45);
+  --fusion-ops-blue: #4A8FD4;
+  --fusion-ops-green: #3BA86B;
+  --fusion-ops-yellow: #D4A017;
+  --fusion-ops-red: #D64545;
+  --fusion-ops-purple: #9B7FD4;
+  --fusion-ops-cyan: #2EC4CF;
+  --fusion-risk-low: var(--fusion-ops-green);
+  --fusion-risk-medium: var(--fusion-ops-yellow);
+  --fusion-risk-high: #E07A45;
+  --fusion-risk-critical: var(--fusion-ops-red);
 }
 
 body::-webkit-scrollbar {
@@ -830,24 +859,6 @@ th,
 
   /* IE and Edge */
   -ms-overflow-style: none;
-}
-
-/* Floating Chat Animation */
-@keyframes slideInFromBottomRight {
-  0% {
-    opacity: 0;
-    /* transform: translate(100%, 100%) scale(0.1); */
-  }
-
-  100% {
-    opacity: 1;
-    /* transform: translate(0, 0) scale(1); */
-  }
-}
-
-.floating-chat-animation {
-  animation: slideInFromBottomRight 0.1s ease-out forwards;
-  transform-origin: bottom right;
 }
 
 body {

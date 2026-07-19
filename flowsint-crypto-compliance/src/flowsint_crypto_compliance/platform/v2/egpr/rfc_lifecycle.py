@@ -120,7 +120,7 @@ def propose_rfc_transition(
         "from_stage": entry.stage.value,
         "to_stage": target.value,
         "reviewer": reviewer,
-        "message": "Transition approved (stub — catalog is read-only bootstrap)",
+        "message": "Transition approved (not configured — catalog is read-only bootstrap)",
     }
 
 

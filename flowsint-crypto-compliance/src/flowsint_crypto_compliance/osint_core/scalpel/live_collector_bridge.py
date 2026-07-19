@@ -97,6 +97,57 @@ def hits_from_btc(data: dict[str, Any], address: str) -> list[OpenMentionHit]:
     return hits
 
 
+def hits_from_evm(
+    data: dict[str, Any],
+    address: str,
+    *,
+    chain: str = "eth",
+    explorer: str = "etherscan",
+) -> list[OpenMentionHit]:
+    hits: list[OpenMentionHit] = []
+    tx_count = int(data.get("tx_count") or 0)
+    cps = data.get("counterparties") or []
+    label = {"eth": "ETH", "bsc": "BSC", "polygon": "Polygon"}.get(chain, chain.upper())
+    explorer_url = {
+        "eth": f"https://etherscan.io/address/{address}",
+        "bsc": f"https://bscscan.com/address/{address}",
+        "polygon": f"https://polygonscan.com/address/{address}",
+    }.get(chain, f"https://etherscan.io/address/{address}")
+    if data.get("status") == 200 or tx_count or cps:
+        hits.append(
+            OpenMentionHit(
+                source_type="explorer_tag",
+                source_name=explorer,
+                title_ru=f"{label} · {tx_count} tx · {len(cps)} контрагентов (live)",
+                excerpt_ru=(
+                    f"{explorer} live: {tx_count} native tx, "
+                    f"token={data.get('token_tx_count', 0)}, counterparties={len(cps)}."
+                ),
+                url=explorer_url,
+                risk_tag=f"{chain}_wallet",
+                confidence=0.8,
+                address=address,
+                chain=chain,
+            )
+        )
+    for tr in (data.get("transfers") or [])[:8]:
+        other = tr.get("to") if str(tr.get("from", "")).lower() == address.lower() else tr.get("from")
+        hits.append(
+            OpenMentionHit(
+                source_type="explorer_tag",
+                source_name=explorer,
+                title_ru=f"{tr.get('asset', 'TX')} → {str(other or '')[:14]}…",
+                excerpt_ru=f"tx {str(tr.get('tx_hash', ''))[:16]}… amount={tr.get('amount')}",
+                url=explorer_url,
+                risk_tag="onchain_transfer",
+                confidence=0.74,
+                address=address,
+                chain=chain,
+            )
+        )
+    return hits
+
+
 def hits_from_sanctions(data: dict[str, Any], address: str, chain: str) -> list[OpenMentionHit]:
     if not data.get("flagged"):
         return []
@@ -138,14 +189,19 @@ def hits_from_bitcoinabuse(data: dict[str, Any], address: str) -> list[OpenMenti
 
 def hits_from_maigret(data: dict[str, Any], address: str, chain: str) -> list[OpenMentionHit]:
     hits: list[OpenMentionHit] = []
-    for site in (data.get("sites") or [])[:10]:
+    rows = data.get("sites") or data.get("hits") or []
+    for site in rows[:15]:
+        if not isinstance(site, dict):
+            continue
+        name = site.get("site_name") or site.get("name") or site.get("site") or "site"
+        url = site.get("url")
         hits.append(
             OpenMentionHit(
                 source_type="username",
                 source_name="Maigret",
-                title_ru=f"Профиль · {site.get('site_name', site.get('name', 'site'))}",
-                excerpt_ru=f"Live Maigret: {site.get('url', '')[:120]}",
-                url=site.get("url"),
+                title_ru=site.get("title_ru") or f"Профиль · {name}",
+                excerpt_ru=site.get("excerpt_ru") or f"Live Maigret: {(url or '')[:120]}",
+                url=url,
                 risk_tag="username_match",
                 confidence=0.68,
                 address=address,

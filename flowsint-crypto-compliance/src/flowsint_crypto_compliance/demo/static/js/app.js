@@ -12,6 +12,60 @@ let selectedMsId = null;
 let finskalpRunning = false;
 let fusionRunning = false;
 const kpiPrev = { kpiInst: null, kpiTps: null };
+const feedSeenKeys = new Set();
+let deckGraphNodeSig = "";
+let deckGraphLivePulseTimer = null;
+let platformTab = "modules";
+
+const SOURCE_LABEL_RU = {
+  INST_HUB: "Банковский хаб",
+  TX_MON: "KYT-мониторинг",
+  HOLISTIC: "Скрининг",
+  CORRIDOR: "Трансграничная аналитика",
+  REACTOR: "OSINT Fusion",
+  RISK_ENGINE: "Движок риска",
+  KYT_LIVE: "KYT",
+  FinSkalp: "ФинСкальп",
+  finskalp: "ФинСкальп",
+  KYT: "KYT",
+};
+
+const COLLECTOR_STATUS_RU = {
+  works: "Работает",
+  partial: "Частично",
+  WORKS: "Работает",
+  PARTIAL: "Частично",
+  degraded: "Частично",
+  unavailable: "Недоступен",
+};
+
+function moduleStatusRu(status) {
+  return { operational: "Работает", degraded: "Частично", standby: "Ожидание" }[status] || status;
+}
+
+function formatFeedSource(source) {
+  if (!source) return "ФинСкальп";
+  return SOURCE_LABEL_RU[source] || source;
+}
+
+function formatDurationMs(ms) {
+  if (ms == null || ms === "" || ms === "—") return "—";
+  const n = Number(ms);
+  if (!Number.isFinite(n) || n <= 0) return "—";
+  if (n < 1000) return `${Math.round(n)} мс`;
+  if (n < 60_000) return `${(n / 1000).toFixed(1)} с`;
+  return `${(n / 60_000).toFixed(1)} мин`;
+}
+
+function feedDedupeKey(data) {
+  return [
+    data.type || "",
+    data.source || "",
+    data.text_ru || data.text || "",
+    data.address || "",
+    data.alert_id || "",
+  ].join("|");
+}
 
 function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
@@ -75,12 +129,14 @@ function updateKpiTps(text) {
 
 function staggerWorkspaceCards(root) {
   if (!root || prefersReducedMotion()) return;
-  const cards = root.querySelectorAll(".mega-card, .section, .osint-source-card, .platform-card, .partner-card, .cis-node");
+  const cards = root.querySelectorAll(".fusion-zone, .fusion-deck-metric, .osint-source-card, .platform-card, .partner-card, .cis-node");
   cards.forEach((card, i) => {
     card.classList.remove("motion-stagger-1", "motion-stagger-2", "motion-stagger-3", "motion-stagger-4", "motion-stagger-5");
     card.classList.add(`motion-stagger-${(i % 5) + 1}`);
   });
 }
+
+const DRAWER_VIEWS = new Set(["osint", "wallet", "registries"]);
 
 const VIEW_IDS = {
   dashboard: "viewDashboard",
@@ -95,12 +151,346 @@ const VIEW_IDS = {
 };
 
 const PIPELINE_LABELS = {
-  new: "Новые",
+  new: "Новые STR",
   triage: "Триаж",
-  investigating: "В работе",
-  pending_filing: "К подаче",
+  investigating: "Расследование",
+  pending_filing: "К подаче 115-ФЗ",
   filed_mtd: "Подано (мес.)",
 };
+
+/** Human STR steps aligned with investigation_pipeline.py */
+const STR_INVESTIGATION_STEPS = [
+  { id: "hub_ingest", label: "Приём STR" },
+  { id: "chain_fetch", label: "On-chain" },
+  { id: "registry_match", label: "Реестр 115-ФЗ" },
+  { id: "sovereign", label: "Атрибуция" },
+  { id: "link_scoring", label: "Склейка" },
+  { id: "detection", label: "Детекция" },
+  { id: "report", label: "Отчётность" },
+];
+
+function renderMissionStrip(d) {
+  const el = document.getElementById("missionStrip");
+  if (!el) return;
+  const pipe = d.case_pipeline || {};
+  const active = (pipe.investigating ?? 0) + (pipe.triage ?? 0) + (pipe.new ?? 0);
+  const live = d.data_source === "live";
+  const cells = [
+    ["Objective", live ? "LIVE TRIAGE" : "DEMO OPS"],
+    ["Threat", `${d.critical_queue ?? "—"} crit`, "warn"],
+    ["Status", live ? "LIVE" : "DEMO", "ops"],
+    ["Cases", String(d.cases_active ?? "—")],
+    ["Graph", String(d.graph_nodes_session ?? d.wallets_in_graph_m ?? "—")],
+    ["KYT", String(d.kyt_alerts ?? d.corridors_monitored ?? "—")],
+    ["Queue", String(active || "—")],
+    ["Screening", live
+      ? `${d.transactions_screened_session ?? d.wallet_screens ?? 0}`
+      : `${d.transactions_screened_24h_m ?? "—"}M`],
+    ["SLA", formatDurationMs(d.avg_decision_ms)],
+  ];
+  el.innerHTML = cells.map(([label, value, tone]) =>
+    `<div class="fusion-deck-mission__cell"><span class="fusion-deck-mission__label">${esc(label)}</span><span class="fusion-deck-mission__value${tone ? ` fusion-deck-mission__value--${tone}` : ""}">${esc(String(value))}</span></div>`
+  ).join("");
+}
+
+function renderStrPipeline(d) {
+  const el = document.getElementById("strPipeline");
+  if (!el) return;
+  const pipe = d.case_pipeline || {};
+  let activeIdx = 0;
+  if ((pipe.investigating ?? 0) > 0) activeIdx = 3;
+  else if ((pipe.triage ?? 0) > 0) activeIdx = 1;
+  else if ((pipe.pending_filing ?? 0) > 0) activeIdx = 5;
+  else if ((pipe.filed_mtd ?? 0) > 0) activeIdx = 6;
+  el.innerHTML = STR_INVESTIGATION_STEPS.map((step, i) => {
+    const status = i < activeIdx ? "done" : i === activeIdx ? "running" : "pending";
+    return `<span class="fusion-deck-str__pill fusion-deck-str__pill--${status}">${esc(step.label)}</span>`;
+  }).join('<span class="fusion-deck-str__arrow">→</span>');
+}
+
+let currentDockTab = "timeline";
+
+function switchDockTab(tab) {
+  currentDockTab = tab;
+  document.querySelectorAll(".fusion-dock__tab").forEach((el) => {
+    el.classList.toggle("fusion-dock__tab--active", el.dataset.dockTab === tab);
+  });
+  document.querySelectorAll(".fusion-dock__panel").forEach((el) => {
+    el.classList.toggle("fusion-dock__panel--active", el.dataset.dockPanel === tab);
+  });
+}
+
+function renderMioPanel(inbox, dashboard) {
+  const el = document.getElementById("mioPanel");
+  if (!el) return;
+  const cards = [];
+  const first = inbox?.[0];
+  const recs = first?.report?.recommendations_ru || first?.recommendations_ru || [];
+  recs.slice(0, 4).forEach((text, i) => {
+    cards.push({ id: `rec-${i}`, title: String(text), prio: i === 0 ? "high" : "medium" });
+  });
+  if (!cards.length && (dashboard?.critical_queue ?? 0) > 0) {
+    cards.push({
+      id: "triage-crit",
+      title: `Триаж: ${dashboard.critical_queue} критичных дел в очереди`,
+      rationale: "Проверьте SLA и назначьте аналитика",
+      prio: "critical",
+    });
+  }
+  if (!cards.length && first) {
+    cards.push({
+      id: "open-case",
+      title: `Открыть дело ${first.alert_code || first.case_ref || first.id}`,
+      rationale: "Выберите дело в очереди для расследования",
+      prio: "medium",
+      action: first.id,
+    });
+  }
+  if (!cards.length) {
+    el.innerHTML = `<div class="mio-empty">Ожидание рекомендаций · запустите расследование</div>`;
+    return;
+  }
+  el.innerHTML = cards.map((c) => `
+    <article class="mio-card">
+      <span class="mio-card__prio mio-card__prio--${esc(c.prio || "medium")}">${esc((c.prio || "medium").toUpperCase())}</span>
+      <h4 class="mio-card__title">${esc(c.title)}</h4>
+      ${c.rationale ? `<p class="mio-card__rationale">${esc(c.rationale)}</p>` : ""}
+      <div class="mio-card__actions">
+        ${c.action ? `<button type="button" class="mio-card__btn mio-card__btn--execute" onclick="openCaseFromDeck('${esc(c.action)}')">ОТКРЫТЬ</button>` : ""}
+        <button type="button" class="mio-card__btn" onclick="switchView('osint')">РАССЛЕДОВАНИЕ</button>
+      </div>
+    </article>`).join("");
+}
+
+function renderDockPanels(inbox, dashboard, modules) {
+  const tasksEl = document.getElementById("dockTasks");
+  if (tasksEl && inbox?.length) {
+    const rows = inbox.slice(0, 16).map((a) => {
+      const wf = a.workflow_label_ru || a.workflow_status || "—";
+      return `<tr data-case-id="${esc(a.id)}" onclick="openCaseFromDeck('${a.id}')" tabindex="0" role="button">
+        <td>${esc(a.alert_code || a.case_ref || "—")}</td>
+        <td>${esc(wf)}</td>
+        <td>${esc(a.assignee || a.analyst_name_ru || "—")}</td>
+      </tr>`;
+    }).join("");
+    tasksEl.innerHTML = `<table class="fusion-deck-table"><thead><tr><th>Дело</th><th>Статус</th><th>Аналитик</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else if (tasksEl) {
+    tasksEl.innerHTML = `<div class="fusion-deck-empty">Очередь пуста</div>`;
+  }
+
+  const chainEl = document.getElementById("dockBlockchain");
+  if (chainEl) {
+    const live = dashboard?.data_source === "live";
+    chainEl.innerHTML = `
+      <p style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--fusion-text-tertiary)">СКРИНИНГ</p>
+      <p style="font-family:var(--fusion-font-mono);font-size:12px;margin:4px 0 12px">${live ? (dashboard.transactions_screened_session ?? dashboard.wallet_screens ?? 0) : `${dashboard?.transactions_screened_24h_m ?? "—"}M`}</p>
+      <p style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--fusion-text-tertiary)">МОДУЛИ</p>
+      <p style="font-family:var(--fusion-font-mono);font-size:11px;margin-top:4px">${(modules || []).filter(m => m.status === "operational").length}/${(modules || []).length} operational</p>`;
+  }
+
+  const evidenceEl = document.getElementById("dockEvidence");
+  if (evidenceEl) {
+    const first = inbox?.[0];
+    const evidence = first?.report?.evidence_chain || first?.evidence_chain || [];
+    if (!evidence.length) {
+      evidenceEl.innerHTML = `<div class="fusion-deck-empty">Нет доказательств · выберите дело</div>`;
+    } else {
+      evidenceEl.innerHTML = `<ul style="list-style:none;margin:0;padding:8px;font-family:var(--fusion-font-mono);font-size:11px">${evidence.slice(0, 20).map(e => `<li style="padding:4px 0;border-bottom:1px solid var(--fusion-border)">${esc(String(e))}</li>`).join("")}</ul>`;
+    }
+  }
+
+  const reportsEl = document.getElementById("dockReports");
+  if (reportsEl) {
+    reportsEl.innerHTML = `<div id="reportsRegistry" style="padding:8px"></div>`;
+    if (currentView === "dashboard" || currentView === "reports") loadReportsRegistry();
+  }
+}
+
+function renderDeckCaseQueue(items) {
+  const el = document.getElementById("deckCaseQueue");
+  if (!el) return;
+  if (!items?.length) {
+    el.innerHTML = `<div class="fusion-deck-empty">Очередь пуста</div>`;
+    return;
+  }
+  const rows = items.slice(0, 24).map((a) => {
+    const wf = a.workflow_label_ru || a.workflow_status || "—";
+    const prio = (a.priority || "low").toLowerCase();
+    const sla = a.sla_breached ? '<span class="sla-breach">BREACH</span>' : (a.due_at ? "DUE" : "OK");
+    const isNew = a.status === "new" || a.workflow_status === "new";
+    return `<tr class="${isNew ? "is-new" : ""}" data-case-id="${esc(a.id)}" onclick="openCaseFromDeck('${a.id}')" onkeydown="if(event.key==='Enter'){openCaseFromDeck('${a.id}')}" tabindex="0" role="button">
+      <td>${esc(a.alert_code || a.case_ref || "—")}</td>
+      <td class="prio-${prio}">${esc((a.priority || "—").toUpperCase())}</td>
+      <td>${esc(wf)}</td>
+      <td>${esc(a.assignee || a.analyst_name_ru || "—")}</td>
+      <td>${sla}</td>
+    </tr>`;
+  }).join("");
+  el.innerHTML = `<table class="fusion-deck-table"><thead><tr>
+    <th>Case Ref</th><th>Priority</th><th>Status</th><th>Assignee</th><th>SLA</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderDeckOpsMetrics(d) {
+  const el = document.getElementById("deckOpsMetrics");
+  if (!el) return;
+  const live = d.data_source === "live";
+  const screens = live
+    ? (d.transactions_screened_session ?? d.wallet_screens ?? 0)
+    : `${d.transactions_screened_24h_m ?? "—"}M`;
+  const strCount = live
+    ? (d.str_received ?? d.hub_messages_24h ?? 0)
+    : (d.sar_messages_24h ?? 0);
+  const metrics = [
+    ["Скрининг", screens, ""],
+    ["СОО/STR", strCount.toLocaleString?.("ru") ?? strCount, ""],
+    ["Критичные", d.critical_queue ?? "—", "crit"],
+    ["Активные", d.cases_active ?? "—", "ops"],
+  ];
+  el.innerHTML = metrics.map(([label, value, tone]) =>
+    `<div class="fusion-deck-metric"><span class="fusion-deck-metric__label">${esc(label)}</span><span class="fusion-deck-metric__value${tone ? ` fusion-deck-metric__value--${tone}` : ""}">${esc(String(value))}</span></div>`
+  ).join("");
+}
+
+function renderDeckPipelineBars(pipe) {
+  const el = document.getElementById("deckPipelineBars");
+  if (!el) return;
+  const max = Math.max(...Object.values(pipe || {}).map(Number), 1);
+  const colors = {
+    new: "var(--fusion-ops-cyan)",
+    triage: "var(--fusion-ops-blue)",
+    investigating: "var(--fusion-ops-blue)",
+    pending_filing: "var(--fusion-ops-yellow)",
+    filed_mtd: "var(--fusion-ops-green)",
+  };
+  const bars = Object.entries(PIPELINE_LABELS).map(([key, label]) => {
+    const v = pipe[key] ?? 0;
+    const pct = Math.min(100, (v / max) * 100);
+    return `<div class="fusion-deck-bar">
+      <span class="fusion-deck-bar__label">${esc(label)}</span>
+      <div class="fusion-deck-bar__track"><div class="fusion-deck-bar__fill" style="width:${pct}%;background:${colors[key] || "var(--fusion-ops-gray)"}"></div></div>
+      <span class="fusion-deck-bar__val">${v?.toLocaleString?.("ru") ?? v}</span>
+    </div>`;
+  }).join("");
+  el.innerHTML = `<div class="fusion-deck-pipeline__title">Конвейер дел</div>${bars}`;
+}
+
+function renderDeckModuleHealth(modules) {
+  const el = document.getElementById("deckModuleHealth");
+  if (!el) return;
+  const items = (modules || []).filter((m) => m.ic_code !== "—").slice(0, 6);
+  if (!items.length) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = items.map((m) => {
+    const degraded = m.status === "degraded";
+    return `<div class="fusion-deck-health__item">
+      <span class="fusion-deck-health__name">${esc(m.name_ru || m.code)}</span>
+      <span class="fusion-deck-health__status${degraded ? " fusion-deck-health__status--degraded" : ""}">${esc(m.status_ru || moduleStatusRu(m.status))}</span>
+    </div>`;
+  }).join("");
+}
+
+function openCaseFromDeck(alertId) {
+  switchView("ops");
+  selectAlert(alertId);
+}
+
+function graphNodeSignature(graph) {
+  if (!graph?.nodes?.length) return "";
+  return graph.nodes.map((n) => n.id || n.label).sort().join("|");
+}
+
+function graphDiffSummary(prevSig, nextSig, graph) {
+  if (!prevSig || !nextSig || prevSig === nextSig) return null;
+  const prevIds = new Set(prevSig.split("|").filter(Boolean));
+  const nextIds = new Set(nextSig.split("|").filter(Boolean));
+  let added = 0;
+  nextIds.forEach((id) => { if (!prevIds.has(id)) added += 1; });
+  const label = added
+    ? `+${added} сущност${added === 1 ? "ь" : added < 5 ? "и" : "ей"} в графе`
+    : "Граф обновлён";
+  return { added, label, nodeCount: graph?.nodes?.length ?? 0 };
+}
+
+function pulseDashboardGraph(durationMs = 2800) {
+  const mount = document.getElementById("deckGraphMount");
+  if (!mount || mount.hidden) return;
+  if (prefersReducedMotion()) return;
+  mount.classList.remove("graph-stage--live-breathe");
+  void mount.offsetWidth;
+  mount.classList.add("graph-stage--live-breathe");
+  if (deckGraphLivePulseTimer) clearTimeout(deckGraphLivePulseTimer);
+  deckGraphLivePulseTimer = setTimeout(() => {
+    mount.classList.remove("graph-stage--live-breathe");
+    deckGraphLivePulseTimer = null;
+  }, durationMs);
+}
+
+function pushIntelligenceRibbonItem(data) {
+  appendFeedRow("ribbonFeed", {
+    ...data,
+    severity: data.severity || "info",
+    source: data.source || "GRAPH",
+    text_ru: data.text_ru || data.text || "",
+    ts: data.ts || Date.now(),
+  });
+}
+
+function notifyGraphDiff(prevSig, nextSig, graph) {
+  const summary = graphDiffSummary(prevSig, nextSig, graph);
+  if (!summary) return;
+  pulseDashboardGraph();
+  pushIntelligenceRibbonItem({
+    type: "graph_diff",
+    severity: summary.added ? "warning" : "info",
+    source: "GRAPH",
+    text_ru: summary.label,
+    ts: Date.now(),
+  });
+}
+
+async function mountDashboardGraph(items) {
+  const mount = document.getElementById("deckGraphMount");
+  const placeholder = document.getElementById("deckGraphPlaceholder");
+  if (!mount || !placeholder) return;
+  const first = items?.[0];
+  if (!first?.id) {
+    mount.hidden = true;
+    placeholder.hidden = false;
+    FinSkalpGraph?.destroy?.({ containerId: "deckGraphMount", skipWrap: true });
+    return;
+  }
+  let graph = first.evidence_graph || first.report?.live_fusion || first.report?.graph_viz;
+  if (!FinSkalpGraph?.hasGraphData?.(graph)) {
+    try {
+      graph = await fetch(`${API}/api/inbox/${first.id}/graph`).then((r) => (r.ok ? r.json() : null));
+    } catch {
+      graph = null;
+    }
+  }
+  if (!FinSkalpGraph?.hasGraphData?.(graph)) {
+    mount.hidden = true;
+    placeholder.hidden = false;
+    placeholder.textContent = "Граф появится после расследования · выберите дело в очереди";
+    FinSkalpGraph?.destroy?.({ containerId: "deckGraphMount", skipWrap: true });
+    return;
+  }
+  placeholder.hidden = true;
+  mount.hidden = false;
+  const nextSig = graphNodeSignature(graph);
+  notifyGraphDiff(deckGraphNodeSig, nextSig, graph);
+  deckGraphNodeSig = nextSig;
+  requestAnimationFrame(() => {
+    FinSkalpGraph?.mount("deckGraphMount", graph, {
+      alwaysShow: true,
+      compact: true,
+      mlScore: first.report?.live_fusion?.ml_score?.score,
+    });
+    if (feedEs) mount.classList.add("graph-stage--live");
+  });
+}
 
 const WORKFLOW_STEPS = [
   { id: "new", label: "Новое" },
@@ -154,17 +544,19 @@ const SOURCE_TYPE_RU = {
 };
 
 async function refreshAll() {
-  await Promise.all([loadDashboard(), loadInbox(), pollWatchlistBadge()]);
+  await Promise.all([loadDashboard(), loadInbox(), pollNavBadges()]);
   if (currentView === "reports") loadReportsRegistry();
 }
 
-async function pollWatchlistBadge() {
+async function pollNavBadges() {
   try {
-    const d = await fetch(`${API}/api/kyt/watchlist`).then((r) => r.json());
-    const n = d.count ?? (d.addresses?.length ?? 0);
-    document.querySelectorAll("[data-watchlist-badge]").forEach((el) => {
-      el.textContent = String(n);
-      el.hidden = !n;
+    const items = await fetch(`${API}/api/inbox`).then((r) => r.json());
+    const newCount = items.filter(
+      (a) => a.status === "new" || a.workflow_status === "new"
+    ).length;
+    document.querySelectorAll("[data-ops-badge]").forEach((el) => {
+      el.textContent = String(newCount);
+      el.hidden = !newCount;
     });
   } catch {
     /* ignore */
@@ -172,85 +564,25 @@ async function pollWatchlistBadge() {
 }
 
 async function loadDashboard() {
-  const megaEl = document.getElementById("megaStats");
-  if (megaEl && !megaEl.dataset.hydrated && window.FinSkalpUI) {
-    megaEl.innerHTML = FinSkalpUI.skeletonHtml(2, 4);
+  const queueEl = document.getElementById("deckCaseQueue");
+  if (queueEl && !queueEl.dataset.hydrated && window.FinSkalpUI) {
+    queueEl.innerHTML = FinSkalpUI.skeletonHtml(6, 1);
   }
   try {
-    const [d, platform] = await Promise.all([
+    const [d, inbox, modules] = await Promise.all([
       fetch(`${API}/api/dashboard`).then(r => r.json()),
-      fetch(`${API}/api/platform`).then(r => r.json()),
+      fetch(`${API}/api/inbox`).then(r => r.json()),
+      fetch(`${API}/api/platform/modules`).then(r => r.json()),
     ]);
 
-    updateKpiInst(`${d.institutions_online}/${d.institutions_connected}`);
-    const live = d.data_source === "live";
-    const screens = d.transactions_screened_session ?? d.wallet_screens ?? 0;
-    updateKpiTps(live
-      ? `${d.screening_tps || 0} т/с · live`
-      : `${d.screening_tps} т/с`);
-    ["kpiInst", "kpiTps"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.remove("kpi-pulse");
-      void el.offsetWidth;
-      el.classList.add("kpi-pulse");
-    });
-    if (live && document.getElementById("orgName")) {
-      document.getElementById("orgName").textContent =
-        "FinSkalp · LIVE · on-chain KPI · 115-ФЗ";
-    }
+    renderMissionStrip(d);
+    renderStrPipeline(d);
+    renderDeckCaseQueue(inbox);
+    renderMioPanel(inbox, d);
+    renderDockPanels(inbox, d, modules);
+    await mountDashboardGraph(inbox);
 
-    document.getElementById("megaStats").innerHTML = live ? `
-      <div class="mega-card accent"><div class="mega-v">${screens}</div><div class="mega-k">Скринингов · сессия</div></div>
-      <div class="mega-card"><div class="mega-v">${(d.str_received ?? d.hub_messages_24h ?? 0).toLocaleString("ru")}</div><div class="mega-k">СОО / STR · сессия</div></div>
-      <div class="mega-card"><div class="mega-v">${(d.investigations_session ?? 0).toLocaleString("ru")}</div><div class="mega-k">Расследований · live</div></div>
-      <div class="mega-card"><div class="mega-v">${(d.graph_nodes_session ?? 0).toLocaleString("ru")}</div><div class="mega-k">Узлов в графах · сессия</div></div>
-      <div class="mega-card"><div class="mega-v">${d.avg_decision_ms || "—"}${d.avg_decision_ms ? "мс" : ""}</div><div class="mega-k">Средняя задержка решения</div></div>
-      <div class="mega-card crit"><div class="mega-v">${d.critical_queue}</div><div class="mega-k">Критичные · в очереди</div></div>
-      <div class="mega-card"><div class="mega-v">${d.cases_active}</div><div class="mega-k">Активных дел</div></div>
-      <div class="mega-card"><div class="mega-v">${(d.kyt_alerts ?? d.corridors_monitored ?? 0)}</div><div class="mega-k">Live KYT · алерты</div></div>` : `
-      <div class="mega-card accent"><div class="mega-v">${d.transactions_screened_24h_m}M</div><div class="mega-k">Транзакций проверено · 24ч</div></div>
-      <div class="mega-card"><div class="mega-v">${d.sar_messages_24h.toLocaleString("ru")}</div><div class="mega-k">СОО / STR · 24ч</div></div>
-      <div class="mega-card"><div class="mega-v">${d.vasp_otc_flagged.toLocaleString("ru")}</div><div class="mega-k">VASP/OTC · под риском</div></div>
-      <div class="mega-card"><div class="mega-v">${d.wallets_in_graph_m}M</div><div class="mega-k">Кошельков · граф расследований</div></div>
-      <div class="mega-card"><div class="mega-v">${d.avg_decision_ms}мс</div><div class="mega-k">Средняя задержка решения</div></div>
-      <div class="mega-card crit"><div class="mega-v">${d.critical_queue}</div><div class="mega-k">Критичные · в очереди</div></div>
-      <div class="mega-card"><div class="mega-v">${d.cases_active}</div><div class="mega-k">Активных расследований</div></div>
-      <div class="mega-card"><div class="mega-v">${d.false_positive_rate_pct}%</div><div class="mega-k">Доля ложных срабатываний</div></div>`;
-
-    const pipe = d.case_pipeline || {};
-    document.getElementById("casePipeline").innerHTML = Object.entries(PIPELINE_LABELS).map(([key, label]) => {
-      const v = pipe[key] ?? 0;
-      const colors = { new: "var(--accent)", triage: "#6366f1", investigating: "#0891b2", pending_filing: "var(--gold)", filed_mtd: "var(--low)" };
-      return `
-      <div class="funnel-step">
-        <div class="funnel-bar" style="width:${Math.min(100, (v / (pipe.investigating || 1)) * 60 + 20)}%;background:${colors[key]}"></div>
-        <span class="funnel-label">${label}</span><span class="funnel-val">${v?.toLocaleString?.("ru") ?? v}</span>
-      </div>`;
-    }).join("");
-
-    const modules = await fetch(`${API}/api/platform/modules`).then(r => r.json());
-    document.getElementById("slaGrid").innerHTML = modules.filter(m => m.ic_code !== "—").slice(0, 4).map(m => `
-      <div class="sla-item"><span>${esc(m.code)}</span><span class="sla-pct">${m.sla_pct}%</span></div>`).join("");
-
-    document.getElementById("partnersGrid").innerHTML = (platform.integrations || []).map(p => `
-      <div class="partner-card ${p.status}">
-        <div class="partner-name">${esc(p.name)}</div>
-        <div class="partner-products">${(p.products_ru || p.products || []).map(esc).join(" · ")}</div>
-        <div class="partner-mode">${esc(p.mode_ru || p.mode || "")}</div>
-        <span class="partner-status">${p.status === "connected" ? "● Подключено" : "◆ Нативный паритет"}</span>
-      </div>`).join("");
-
-    const cis = await fetch(`${API}/api/cis`).then(r => r.json());
-    document.getElementById("cisMap").innerHTML = cis.map(c => `
-      <div class="cis-node ${c.status}">
-        <div class="cis-code">${esc(c.code)}</div>
-        <div class="cis-name">${esc(c.name_ru)}</div>
-        <div class="cis-meta">${c.entities ? c.entities.toLocaleString("ru") + " субъектов" : "транзит"}</div>
-        <div class="cis-fiu">${esc(c.fiu)}</div>
-      </div>`).join("");
-    if (megaEl) megaEl.dataset.hydrated = "1";
-    staggerWorkspaceCards(document.getElementById("viewDashboard"));
+    if (queueEl) queueEl.dataset.hydrated = "1";
   } catch {}
 }
 
@@ -404,7 +736,7 @@ async function loadOsintCollectors() {
         <input type="checkbox" name="osintCollector" value="${esc(c.id)}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""} />
         <span>
           <span class="name">${esc(c.name_ru)}${c.category === "darknet" ? " 🧅" : ""}${hot}</span>
-          <span class="id">${esc(cat)} · ${esc(c.status || "—")}</span>
+          <span class="id">${esc(cat)} · ${esc(COLLECTOR_STATUS_RU[c.status] || c.status_ru || c.status || "—")}</span>
         </span>
       </label>`;
     }).join("");
@@ -733,7 +1065,7 @@ async function addToKytWatchlist(address) {
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail || r.statusText);
     toast(`KYT watchlist · ${shortAddress(d.address)} · всего ${d.watchlist_size}`);
-    pollWatchlistBadge();
+    pollNavBadges();
   } catch (e) {
     toast(`Watchlist: ${e.message || e}`);
   }
@@ -1090,8 +1422,8 @@ async function loadPlatformSuite() {
   document.getElementById("platformGrid").innerHTML = platformCache.map(m => `
     <div class="platform-card">
       <div class="pc-head">
-        <span class="pc-code">${esc(m.code)}</span>
-        <span class="pc-sla">${m.sla_pct}% SLA</span>
+        <span class="pc-code">${esc(m.name_ru)}</span>
+        <span class="pc-sla pc-status-${m.status}">${esc(m.status_ru || moduleStatusRu(m.status))}</span>
       </div>
       <h3>${esc(m.name_ru)}</h3>
       <div class="pc-parity">${esc(m.capability_tag_ru)}</div>
@@ -1099,6 +1431,16 @@ async function loadPlatformSuite() {
       <div class="pc-caps">${(m.capabilities_ru || []).map(c => `<span class="cap-tag">${esc(c)}</span>`).join("")}</div>
       ${m.ic_code !== "—" ? `<button class="btn-run-ic" onclick="runInstrument('${m.ic_code}')">Запустить модуль</button>` : `<span class="pc-native">Нативный · ${esc(m.suite_ru)}</span>`}
     </div>`).join("");
+}
+
+function switchPlatformTab(tab) {
+  platformTab = tab;
+  document.getElementById("btnPlatformModules")?.classList.toggle("active", tab === "modules");
+  document.getElementById("btnPlatformServices")?.classList.toggle("active", tab === "services");
+  document.getElementById("platformGrid")?.classList.toggle("hidden", tab !== "modules");
+  document.getElementById("platformServicesPane")?.classList.toggle("hidden", tab !== "services");
+  if (tab === "modules") loadPlatformSuite();
+  else loadMicroservices();
 }
 
 function startLiveFeed() {
@@ -1120,11 +1462,20 @@ function startOpsLiveFeed() {
 function handleLiveFeedEvent(ev) {
   let data;
   try { data = JSON.parse(ev.data); } catch { return; }
-  appendFeedRow("liveFeed", data);
+  appendFeedRow("ribbonFeed", data);
   appendFeedRow("opsLiveFeed", data);
   const sev = data.severity || "info";
   const isCase = data.type === "case_new" || data.type === "case_transition" || data.type === "case_investigation_done";
   const isLiveScreen = data.type === "wallet_screened" || data.type === "investigation_completed";
+  const isGraphSignal =
+    data.type === "graph_update" ||
+    data.type === "graph_diff" ||
+    data.type === "case_investigation_done" ||
+    data.type === "investigation_completed" ||
+    /граф|graph|fusion|entity|сущност/i.test(String(data.text_ru || data.text || ""));
+  if (isGraphSignal && currentView === "dashboard") {
+    pulseDashboardGraph();
+  }
   if (isCase || isLiveScreen || sev === "critical" || sev === "severe" || sev === "high") {
     toast(data.text_ru || `${data.source}: ${data.text_ru || ""}`);
   }
@@ -1139,24 +1490,46 @@ function handleLiveFeedEvent(ev) {
 }
 
 function appendFeedRow(listId, data) {
-  const list = document.getElementById(listId);
-  if (!list) return;
-  const row = document.createElement("div");
-  const liveTag = combatMode && data.source && /KYT|FinSkalp|TX_MON|INST_HUB/i.test(data.source)
-    ? " feed-live" : "";
-  row.className = `feed-row sev-${data.severity || "info"}${data.type?.startsWith("case") ? " feed-case" : ""}${liveTag}`;
-  const clickable = data.alert_id ? ` role="button" tabindex="0" onclick="openCaseFromFeed('${data.alert_id}')"` : "";
-  row.innerHTML = `<span class="feed-src">${esc(data.source || "FinSkalp")}</span><span class="feed-text">${esc(data.text_ru || data.text || "")}</span>`;
-  if (data.alert_id) {
-    row.setAttribute("role", "button");
-    row.tabIndex = 0;
-    row.onclick = () => openCaseFromFeed(data.alert_id);
-    row.onkeydown = (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCaseFromFeed(data.alert_id); }
-    };
+  const key = feedDedupeKey(data);
+  if (feedSeenKeys.has(key)) return;
+  feedSeenKeys.add(key);
+  if (feedSeenKeys.size > 300) {
+    feedSeenKeys.clear();
+    feedSeenKeys.add(key);
   }
-  list.prepend(row);
-  while (list.children.length > 40) list.lastChild.remove();
+
+  const targets = [];
+  if (listId === "ribbonFeed") {
+    targets.push("ribbonFeed", "dockTimeline");
+  } else if (listId) {
+    targets.push(listId);
+  }
+
+  const ts = data.ts_label || (data.ts
+    ? new Date(Number(data.ts) * (Number(data.ts) < 1e12 ? 1000 : 1)).toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : new Date().toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+  const html = `<span class="feed-ts mono">${esc(ts)}</span><span class="feed-src">${esc(formatFeedSource(data.source))}</span><span class="feed-text">${esc(data.text_ru || data.text || "")}</span>`;
+
+  for (const id of targets) {
+    const list = document.getElementById(id);
+    if (!list) continue;
+    const row = document.createElement("div");
+    const liveTag = combatMode && data.source && /KYT|FinSkalp|TX_MON|INST_HUB|Банковский/i.test(data.source)
+      ? " feed-live" : "";
+    row.className = `feed-row sev-${data.severity || "info"}${data.type?.startsWith("case") ? " feed-case" : ""}${data.type === "graph_diff" ? " feed-graph-diff" : ""}${liveTag}`;
+    row.dataset.feedKey = key;
+    row.innerHTML = html;
+    if (data.alert_id) {
+      row.setAttribute("role", "button");
+      row.tabIndex = 0;
+      row.onclick = () => openCaseFromFeed(data.alert_id);
+      row.onkeydown = (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCaseFromFeed(data.alert_id); }
+      };
+    }
+    list.prepend(row);
+    while (list.children.length > 40) list.lastChild.remove();
+  }
 }
 
 function openCaseFromFeed(alertId) {
@@ -1200,21 +1573,42 @@ function applyCombatUi() {
 }
 
 function switchView(view) {
+  if (view === "wallet") {
+    window.__fsQuickScreen = true;
+  }
+  if (view === "microservices") {
+    view = "platform";
+    platformTab = "services";
+  }
   const prevView = currentView;
-  const prevEl = document.getElementById(VIEW_IDS[prevView]);
-  const nextEl = document.getElementById(VIEW_IDS[view]);
+  const missionEl = document.getElementById("viewDashboard");
   const doSwitch = () => {
+    if (prevView === "dashboard" && view !== "dashboard") {
+      FinSkalpGraph?.destroy?.({ containerId: "deckGraphMount", skipWrap: true });
+    }
     currentView = view;
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === view));
-    Object.values(VIEW_IDS).forEach(id => {
+    document.querySelectorAll(".fusion-rail__btn[data-fs-view]").forEach((n) => {
+      n.classList.toggle("fusion-rail__btn--active", n.dataset.fsView === view || (view === "wallet" && n.dataset.fsView === "wallet"));
+    });
+    const showMission = view === "dashboard" || DRAWER_VIEWS.has(view);
+    missionEl?.classList.toggle("hidden", !showMission);
+    missionEl?.classList.toggle("fusion-workspace-mission", showMission);
+    const backdrop = document.getElementById("fusionDrawerBackdrop");
+    if (backdrop) backdrop.classList.toggle("fusion-drawer-backdrop--open", DRAWER_VIEWS.has(view));
+    Object.entries(VIEW_IDS).forEach(([key, id]) => {
+      if (key === "dashboard") return;
       const el = document.getElementById(id);
       if (!el) return;
-      el.classList.add("hidden");
-      el.classList.remove("workspace-enter", "workspace-exit");
+      const isDrawer = DRAWER_VIEWS.has(key);
+      if (isDrawer) {
+        el.classList.add("fusion-context-drawer");
+        el.classList.toggle("fusion-context-drawer--open", key === view);
+        el.classList.toggle("hidden", key !== view);
+      } else {
+        el.classList.remove("fusion-context-drawer", "fusion-context-drawer--open");
+        el.classList.toggle("hidden", key !== view);
+      }
     });
-    nextEl?.classList.remove("hidden");
-    if (!prefersReducedMotion()) nextEl?.classList.add("workspace-enter");
-    staggerWorkspaceCards(nextEl);
     if (view === "dashboard") { loadDashboard(); startLiveFeed(); }
     if (view === "wallet") focusWalletInput();
     if (view === "osint") {
@@ -1222,10 +1616,13 @@ function switchView(view) {
       if (wa && !document.getElementById("fsAddress")?.value) {
         document.getElementById("fsAddress").value = wa;
       }
+      if (window.__fsQuickScreen) {
+        window.__fsQuickScreen = false;
+        toast("Быстрая проверка — введите адрес и нажмите «Проверить».");
+      }
       loadOsintCenter();
     }
-    if (view === "microservices") loadMicroservices();
-    if (view === "platform") loadPlatformSuite();
+    if (view === "platform") switchPlatformTab(platformTab);
     if (view === "instruments") loadInstrumentsConsole();
     if (view === "registries") loadRegistry();
     if (view === "reports") loadReportsRegistry();
@@ -1235,12 +1632,7 @@ function switchView(view) {
       startOpsLiveFeed();
     }
   };
-  if (prevEl && nextEl && prevEl !== nextEl && !prefersReducedMotion()) {
-    prevEl.classList.add("workspace-exit");
-    setTimeout(() => doSwitch(), 140);
-  } else {
-    doSwitch();
-  }
+  doSwitch();
 }
 
 async function loadInstrumentsConsole() {
@@ -1249,11 +1641,10 @@ async function loadInstrumentsConsole() {
   document.getElementById("instrumentsList").innerHTML = items.map(ic => `
     <div class="ic-row">
       <div class="ic-row-head">
-        <span class="ic-code">${esc(ic.platform_code || ic.code)}</span>
+        <span class="ic-code">${esc(ic.name_ru_module || ic.name_ru)}</span>
         <span class="ic-intl">${esc(ic.capability_tag_ru || ic.capability_ru || "")}</span>
       </div>
-      <div class="ic-name">${esc(ic.name_ru_module || ic.name_ru)}</div>
-      <div class="ic-suite">${esc(ic.suite_ru || ic.category_label_ru || "")}</div>
+      <div class="ic-name">${esc(ic.suite_ru || ic.category_label_ru || "")}</div>
       <button class="btn-run-ic" onclick="runInstrument('${ic.code}')" id="btn-${ic.code}">▶ Выполнить</button>
     </div>`).join("");
 }
@@ -1327,8 +1718,12 @@ async function loadRegistry() {
       tier: esc(b.tier),
       _filter: `${b.bic} ${b.name} ${b.tier}`.toLowerCase(),
     }));
+    const notice = data.demo_notice_ru
+      ? `<p class="wallet-note reg-demo-notice">${esc(data.demo_notice_ru)}</p>`
+      : "";
     el.innerHTML = `
-      <div class="reg-summary"><b>${data.total}</b> уполномоченных банков · банковский хаб · 115-ФЗ</div>
+      <div class="reg-summary"><b>${data.total}</b> банков · демо-выборка · 115-ФЗ</div>
+      ${notice}
       <input type="search" class="table-filter" id="registryFilter" placeholder="Фильтр по БИК или названию…" aria-label="Фильтр реестра" />
       <div class="data-table-wrap"><div id="registryTableMount"></div></div>`;
     paintRegistryTable();
@@ -1903,7 +2298,7 @@ function initGlobalSearch() {
 }
 
 loadServerInfo();
-pollWatchlistBadge();
+pollNavBadges();
 initGlobalSearch();
 switchView("dashboard");
 setInterval(refreshAll, 15000);

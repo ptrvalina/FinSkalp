@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-router'
 import GraphPanel from '@/components/sketches'
 import { sketchService } from '@/api/sketch-service'
 import { useQuery } from '@tanstack/react-query'
@@ -8,6 +8,8 @@ import { AnalysisPage } from '@/components/analyses/analysis-page'
 import { useGraphControls } from '@/stores/graph-controls-store'
 import { useGraphStore } from '@/stores/graph-store'
 import { useEffect } from 'react'
+import { FusionPlatformShell } from '@/fusion'
+import { complianceService } from '@/api/compliance-service'
 
 const services = {
   graph: sketchService.getGraphDataById,
@@ -35,12 +37,10 @@ const GraphPageContent = () => {
     // @ts-ignore
     queryFn: () => services[type](id),
     enabled: ['graph', 'analysis'].includes(type),
-    // refetchInterval: 5000,
     refetchOnWindowFocus: false,
     initialData: sketch
   })
 
-  // Reset graph store when sketchId changes or is null
   useEffect(() => {
     reset()
   }, [id, reset])
@@ -58,12 +58,26 @@ const GraphPageContent = () => {
   }, [refetch, setActions, id, data])
 
   if (type === 'graph') {
-    return <GraphPanel isLoading={isLoading} isRefetching={isRefetching} graphData={data} />
+    return (
+      <FusionPlatformShell
+        title="Flow Architect"
+        subtitle={`Sketch ${id}`}
+        activeSection="flows"
+      >
+        <GraphPanel isLoading={isLoading} isRefetching={isRefetching} graphData={data} />
+      </FusionPlatformShell>
+    )
   }
 
   if (type === 'analysis') {
     return (
-      <AnalysisPage analysis={data} isLoading={isLoading} isError={isError} refetch={refetch} />
+      <FusionPlatformShell
+        title="Analysis"
+        subtitle={`Run ${id}`}
+        activeSection="flows"
+      >
+        <AnalysisPage analysis={data} isLoading={isLoading} isError={isError} refetch={refetch} />
+      </FusionPlatformShell>
     )
   }
 
@@ -78,6 +92,21 @@ const GraphPageContent = () => {
 }
 
 export const Route = createFileRoute('/_auth/dashboard/investigations/$investigationId/$type/$id')({
+  beforeLoad: async ({ params }) => {
+    if (params.type !== 'graph') return
+    try {
+      const matched = await complianceService.findCaseByInvestigationId(params.investigationId)
+      if (matched?.case_ref) {
+        throw redirect({
+          to: '/dashboard/fusion/investigation/$caseRef',
+          params: { caseRef: matched.case_ref },
+          replace: true,
+        })
+      }
+    } catch (err) {
+      if (err && typeof err === 'object' && 'to' in err) throw err
+    }
+  },
   loader: async ({ params: { id, type, investigationId } }) => {
     // @ts-ignore
     const sketch = await services[type](id)
@@ -138,9 +167,9 @@ export const Route = createFileRoute('/_auth/dashboard/investigations/$investiga
             </svg>
             Reload Page
           </button>
-          <Link to="/dashboard">
+          <Link to="/dashboard/fusion">
             <button className="w-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground px-4 py-2 rounded-md font-medium transition-colors">
-              Go home
+              Mission Control
             </button>
           </Link>
         </div>

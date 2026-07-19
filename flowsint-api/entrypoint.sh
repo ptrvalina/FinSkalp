@@ -11,5 +11,8 @@ else
   echo "Skipping database migrations (SKIP_MIGRATIONS=true)..."
 fi
 
+echo "Seeding demo operator (if enabled)..."
+python -m app.bootstrap_demo_user || true
+
 echo "Starting application..."
 exec "$@"

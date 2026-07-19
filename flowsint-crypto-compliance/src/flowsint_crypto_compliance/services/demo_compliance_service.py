@@ -157,6 +157,19 @@ class DemoComplianceService:
         }
         case.fusion_result = fusion_payload
         case.status = "fused"
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.GRAPH_UPDATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "graph_stats": fusion_payload.get("graph_stats"),
+            },
+        )
         return fusion_payload
 
     async def fuse_case_with_report(
@@ -213,6 +226,27 @@ class DemoComplianceService:
         )
         case.fusion_result = payload
         case.status = "reported"
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.GRAPH_UPDATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "graph_stats": payload.get("graph_stats"),
+            },
+        )
+        publish_operator_event(
+            OperatorEventType.REPORT_GENERATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "format": "json",
+            },
+        )
         return payload
 
     async def seed_scenario(self, scenario_id: str) -> dict[str, Any]:

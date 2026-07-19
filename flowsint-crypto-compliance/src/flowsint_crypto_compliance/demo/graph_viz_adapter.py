@@ -63,10 +63,14 @@ def onchain_summary_to_fusion_graph(
                 "id": eid,
                 "from": frm,
                 "to": to,
+                "source": frm,
+                "target": to,
                 "amount": tx.get("amount"),
                 "asset": tx.get("asset"),
                 "tx_hash": tx.get("hash"),
                 "rel_type": "SENT_TO",
+                "timestamp": tx.get("timestamp") or tx.get("block_timestamp"),
+                "occurred_at": tx.get("timestamp") or tx.get("block_timestamp"),
             }
         )
 

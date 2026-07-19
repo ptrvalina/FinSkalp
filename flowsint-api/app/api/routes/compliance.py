@@ -13,6 +13,7 @@ from sse_starlette.sse import EventSourceResponse
 from flowsint_core.core.models import Profile
 from flowsint_core.core.postgre_db import get_db
 from flowsint_crypto_compliance.services.compliance_service import ComplianceService
+from flowsint_crypto_compliance.services.graph_timestamps import enrich_serialized_graph
 from flowsint_crypto_compliance.services.wallet_screening import (
     WalletScreeningRequest,
     WalletScreeningService,
@@ -49,6 +50,8 @@ from app.api.schemas.compliance import (
     FusionAsyncResponse,
     FusionResultRead,
     FusionRunRead,
+    GraphMergeRequest,
+    GraphMergeResponse,
     LiveFusionRequest,
     LiveFusionAsyncResponse,
     ComplianceAuditLogRead,
@@ -111,6 +114,37 @@ async def screen_wallet(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     COMPLIANCE_WALLET_SCREEN_TOTAL.labels(risk_level=result.risk_level.value).inc()
+    screen_body = result.model_dump(mode="json")
+    from flowsint_crypto_compliance.platform.v2.multi_dimensional_confidence import (
+        build_confidence_dimensions,
+    )
+    from flowsint_crypto_compliance.reporting.forensic_enrichment import build_risk_score_breakdown
+
+    dims = build_confidence_dimensions(screen_body)
+    screen_body["confidence_dimensions"] = dims.model_dump()
+    screen_body["explain"] = {
+        "dimensions": dims.explain_ru,
+        "risk_breakdown": build_risk_score_breakdown(
+            screening=screen_body,
+            attribution={},
+            open_osint=None,
+            pattern=None,
+        ),
+    }
+    from flowsint_crypto_compliance.platform.v2.entity_base import entity_from_label
+
+    attr = (screen_body.get("onchain_summary") or {}).get("attribution") or {}
+    primary = attr.get("primary_label") or {}
+    if primary.get("label") or primary.get("entity_name"):
+        screen_body["entity"] = entity_from_label(
+            chain=screen_body["chain"],
+            address=screen_body["address"],
+            label=str(primary.get("label") or primary.get("entity_name") or screen_body["address"]),
+            category=primary.get("category"),
+            confidence=float(primary.get("confidence") or screen_body.get("confidence") or 0.5),
+            risk_score=float(screen_body.get("risk_score") or 0),
+            sources=[str(primary.get("source") or "screening")],
+        )
     if not COMPLIANCE_DEMO_MODE:
         _service(db).log_audit(
             actor_id=current_user.id,
@@ -123,7 +157,22 @@ async def screen_wallet(
             },
         )
         db.commit()
-    return WalletScreenResultRead(**result.model_dump(mode="json"))
+    from flowsint_crypto_compliance.platform.v2.operator_events import (
+        OperatorEventType,
+        publish_operator_event,
+    )
+
+    publish_operator_event(
+        OperatorEventType.RISK_RECALCULATED,
+        payload={
+            "address": screen_body["address"],
+            "chain": screen_body["chain"],
+            "score": screen_body["risk_score"],
+            "risk_level": screen_body["risk_level"],
+        },
+        actor=str(current_user.id),
+    )
+    return WalletScreenResultRead(**screen_body)
 
 
 @router.post(
@@ -144,6 +193,17 @@ async def create_compliance_case(
         owner_id=current_user.id,
         investigation_id=payload.investigation_id,
     )
+    from flowsint_crypto_compliance.platform.v2.operator_events import (
+        OperatorEventType,
+        publish_operator_event,
+    )
+
+    publish_operator_event(
+        OperatorEventType.INVESTIGATION_CREATED,
+        payload={"case_ref": case.case_ref, "case_id": str(case.id)},
+        investigation_id=case.investigation_id,
+        actor=str(current_user.id),
+    )
     return case
 
 
@@ -153,11 +213,13 @@ async def get_compliance_case(
     db: Session = Depends(get_db),
     current_user: Profile = Depends(get_current_user),
 ):
+    from app.api.routes.compliance_ops import _case_read_payload
+
     service = _service(db)
     case = service.get_case(case_id)
     if not case or case.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Case not found")
-    return case
+    return _case_read_payload(db, case)
 
 
 @router.post("/cases/{case_id}/bank-feeds", status_code=status.HTTP_202_ACCEPTED)
@@ -399,9 +461,43 @@ async def get_case_evidence_graph(
     case = service.get_case(case_id)
     if not case or case.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Case not found")
-    if not case.fusion_result or "evidence_graph" not in case.fusion_result:
-        raise HTTPException(status_code=404, detail="Evidence graph not available")
-    return case.fusion_result["evidence_graph"]
+
+    graph = (case.fusion_result or {}).get("evidence_graph")
+    if graph and graph.get("nodes"):
+        return enrich_serialized_graph(graph)
+
+    from flowsint_crypto_compliance.storage.graph_store import EvidenceGraphStore
+
+    stored = EvidenceGraphStore().load(case.case_ref)
+    if stored.get("nodes"):
+        return enrich_serialized_graph(stored)
+
+    raise HTTPException(status_code=404, detail="Evidence graph not available")
+
+
+@router.post("/cases/{case_id}/graph/merge", response_model=GraphMergeResponse)
+async def merge_case_evidence_graph(
+    case_id: UUID,
+    body: GraphMergeRequest,
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:transition")),
+):
+    service = _service(db)
+    case = service.get_case(case_id)
+    if not case or case.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Case not found")
+    if not body.evidence_graph.get("nodes"):
+        raise HTTPException(status_code=422, detail="evidence_graph.nodes required")
+    try:
+        result = service.merge_case_graph(
+            case_id,
+            body.evidence_graph,
+            merge_mode=body.merge_mode,
+            actor_id=current_user.id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return GraphMergeResponse(**result)
 
 
 @router.post("/cases/{case_id}/graph/export")
@@ -415,6 +511,12 @@ async def export_case_graph(
     if not case or case.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Case not found")
     graph = (case.fusion_result or {}).get("evidence_graph")
+    if not graph or not graph.get("nodes"):
+        from flowsint_crypto_compliance.storage.graph_store import EvidenceGraphStore
+
+        stored = EvidenceGraphStore().load(case.case_ref)
+        if stored.get("nodes"):
+            graph = stored
     if not graph:
         raise HTTPException(status_code=404, detail="Run fusion before graph export")
 
@@ -623,6 +725,19 @@ async def get_case_report_pdf(
         filename = f"{case.case_ref}-report.pdf"
         if media_type.startswith("text/html"):
             filename = filename.replace(".pdf", ".html")
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.REPORT_GENERATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "format": "pdf",
+            },
+        )
         return Response(
             content=content,
             media_type=media_type,
@@ -640,6 +755,21 @@ async def get_case_report_pdf(
     filename = f"{case.case_ref}-report.pdf"
     if media_type.startswith("text/html"):
         filename = filename.replace(".pdf", ".html")
+    from flowsint_crypto_compliance.platform.v2.operator_events import (
+        OperatorEventType,
+        publish_operator_event,
+    )
+
+    publish_operator_event(
+        OperatorEventType.REPORT_GENERATED,
+        payload={
+            "case_id": str(case_id),
+            "case_ref": case.case_ref,
+            "format": "pdf",
+        },
+        investigation_id=case.investigation_id,
+        actor=str(current_user.id),
+    )
     return Response(
         content=content,
         media_type=media_type,
@@ -669,6 +799,21 @@ async def get_case_report_xlsx(
 
     content = render_regulator_xlsx(report)
     filename = f"{report.get('case_ref', case_id)}-report.xlsx"
+    from flowsint_crypto_compliance.platform.v2.operator_events import (
+        OperatorEventType,
+        publish_operator_event,
+    )
+
+    publish_operator_event(
+        OperatorEventType.REPORT_GENERATED,
+        payload={
+            "case_id": str(case_id),
+            "case_ref": report.get("case_ref") or getattr(case, "case_ref", str(case_id)),
+            "format": "xlsx",
+        },
+        investigation_id=getattr(case, "investigation_id", None),
+        actor=str(current_user.id),
+    )
     return Response(
         content=content,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -753,8 +898,11 @@ async def scalpel_status():
                 "scalpel_collect_onchain",
                 "scalpel_collect_sanctions",
                 "scalpel_collect_username",
+                "scalpel_collect_username_probe",
                 "scalpel_collect_abuse",
                 "scalpel_collect_darknet",
+                "scalpel_collect_darknet_tor",
+                "scalpel_collect_clearnet",
                 "scalpel_collect_vasp",
                 "scalpel_collect_court",
                 "scalpel_collect_dns",
@@ -776,6 +924,35 @@ async def scalpel_status():
     }
 
 
+@router.get("/scalpel/collectors")
+async def scalpel_collectors_catalog(
+    current_user: Profile = Depends(get_current_user),
+):
+    """Scalpel Console — collector catalog with health, metrics, and call history."""
+    from flowsint_crypto_compliance.config.env_loader import trongrid_key_configured
+    from flowsint_crypto_compliance.osint_core.scalpel import ScalpelEngine
+    from flowsint_crypto_compliance.osint_core.scalpel.console_catalog import build_scalpel_console_catalog
+
+    engine = ScalpelEngine()
+    tor_probe = await engine._gw.probe_tor()
+    tor_ok = engine._gw.config.tor_enabled() or bool(
+        tor_probe.get("ok") or tor_probe.get("reachable")
+    )
+    catalog = await build_scalpel_console_catalog(
+        tor_available=tor_ok,
+        trongrid_configured=trongrid_key_configured(),
+    )
+    return {
+        **catalog,
+        "tor_probe": tor_probe,
+        "osint_depth_labels": {
+            "1": "Target address only",
+            "2": "Address + 1-hop counterparties (on-chain)",
+            "3": "2-hop: counterparties + OSINT entity addresses",
+        },
+    }
+
+
 @router.post(
     "/scalpel/collect/async",
     response_model=ScalpelAsyncResponse,
@@ -793,6 +970,7 @@ async def scalpel_collect_async(
             "depth": body.depth,
             "counterparties": body.counterparties,
             "usernames": body.usernames,
+            "collectors": body.collectors or None,
         },
     )
     return ScalpelAsyncResponse(task_id=task.id, status="queued")
@@ -1006,7 +1184,7 @@ async def live_multihop_fusion(
 
 @router.get("/events/stream")
 async def compliance_events_stream(
-    current_user: Profile = Depends(require_permission("batch:screen")),
+    current_user: Profile = Depends(require_permission("case:read")),
 ):
     """SSE relay for compliance domain events (Redis Streams / memory)."""
     from flowsint_crypto_compliance.infrastructure.compliance_events import get_event_bus

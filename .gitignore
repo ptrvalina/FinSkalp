@@ -180,3 +180,10 @@ cython_debug/
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/flowsint-enricher-builder/
+
+# Scratch / runtime dumps (do not commit)
+data/tmp_stitch/
+data/osint_evidence/
+flowsint-crypto-compliance/data/osint_evidence/
+flowsint-app/src/_legacy/
+docs/stitch/

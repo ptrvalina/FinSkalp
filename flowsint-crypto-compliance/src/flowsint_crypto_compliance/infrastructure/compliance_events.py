@@ -46,13 +46,20 @@ class ComplianceEventBus:
         event = {
             "id": str(uuid.uuid4()),
             "type": event_type,
+            "schema_version": "1.0.0",
             "severity": severity,
             "payload": payload or {},
             "correlation_id": correlation_id,
             "text_ru": text_ru or _default_text_ru(event_type, payload or {}),
-            "source": payload.get("source", "finskalp") if payload else "finskalp",
+            "source": (payload or {}).get("source", "finskalp"),
             "ts": time.time(),
         }
+        if payload and payload.get("operator_event_type"):
+            event["operator_event_type"] = payload["operator_event_type"]
+            event["operator_schema_version"] = payload.get("operator_schema_version", "1.0.0")
+        if payload and payload.get("v2_event_type"):
+            event["platform_event_type"] = payload["v2_event_type"]
+            event["platform_schema_version"] = "2.0.0"
         with self._lock:
             self._memory.appendleft(event)
         if self._redis:

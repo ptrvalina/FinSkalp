@@ -4,8 +4,8 @@
     dashboard: "Командный центр",
     osint: "Центр OSINT",
     wallet: "Проверка кошелька",
-    microservices: "Микросервисы",
-    platform: "Модули платформы",
+    platform: "Модули и сервисы",
+    microservices: "Модули и сервисы",
     ops: "Расследования",
     instruments: "Консоль ИЦ",
     registries: "Реестры",
@@ -18,6 +18,7 @@
     });
     const bc = document.getElementById("fsBreadcrumb");
     if (bc) bc.textContent = BREADCRUMB[view] || view;
+    document.body.classList.toggle("fusion-deck-mode", view === "dashboard");
   }
 
   function patchSwitchView() {

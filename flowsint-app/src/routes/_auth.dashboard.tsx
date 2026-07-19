@@ -1,18 +1,14 @@
-import FloatingChat from '@/components/chat/floating-chat'
-import RootLayout from '@/components/layout/root.layout'
-import { useGraphSettingsStore } from '@/stores/graph-settings-store'
+import { ConfirmContextProvider } from '@/components/use-confirm-dialog'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_auth/dashboard')({
-  component: DashboardPage
+  component: DashboardPage,
 })
 
 function DashboardPage() {
-  const settings = useGraphSettingsStore((s) => s.settings)
   return (
-    <RootLayout>
+    <ConfirmContextProvider>
       <Outlet />
-      {Boolean(settings?.general?.showFlow?.value) && <FloatingChat />}
-    </RootLayout>
+    </ConfirmContextProvider>
   )
 }

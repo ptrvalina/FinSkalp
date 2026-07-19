@@ -1,15 +1,5 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import { CaseOverviewPage } from "@/components/dashboard/investigation/case-overview-page"
+import { Navigate, createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_auth/dashboard/investigations/$investigationId/')({
-  component: InvestigationPage,
+  component: () => <Navigate to="/dashboard/fusion" replace />,
 })
-
-function InvestigationPage() {
-  const { investigation } = useLoaderData({
-    from: '/_auth/dashboard/investigations/$investigationId'
-  })
-  return (
-    <CaseOverviewPage investigation={investigation} />
-  )
-}

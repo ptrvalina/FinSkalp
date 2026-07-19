@@ -64,13 +64,28 @@ export function EntityIcon({ kind, className = 'shrink-0', size = 16 }: Props) {
 
 export function entityGraphColorVar(kind: EntityIconKind): string {
   const map: Partial<Record<EntityIconKind, string>> = {
-    wallet: 'var(--fs-graph-wallet)',
-    person: 'var(--fs-graph-person)',
-    company: 'var(--fs-graph-company)',
-    bank: 'var(--fs-graph-exchange)',
-    document: 'var(--fs-graph-document)',
-    evidence: 'var(--fs-graph-evidence)',
-    investigation: 'var(--fs-graph-investigation)',
+    wallet: 'var(--fusion-graph-wallet)',
+    person: 'var(--fusion-graph-person)',
+    company: 'var(--fusion-graph-company)',
+    bank: 'var(--fusion-graph-exchange)',
+    document: 'var(--fusion-graph-document)',
+    evidence: 'var(--fusion-graph-evidence)',
+    investigation: 'var(--fusion-graph-investigation)',
   }
-  return map[kind] ?? 'var(--fs-text-secondary)'
+  return map[kind] ?? 'var(--fusion-text-secondary)'
+}
+
+/** Map API graph node kind → icon kind for ReactFlow glyph nodes. */
+export function resolveEntityIconKind(kind: string): EntityIconKind {
+  const k = kind.toLowerCase()
+  if (k.includes('wallet') || k.includes('address')) return 'wallet'
+  if (k.includes('person')) return 'person'
+  if (k.includes('company') || k.includes('org')) return 'company'
+  if (k.includes('bank') || k.includes('exchange')) return 'bank'
+  if (k.includes('evidence') || k.includes('osint')) return 'evidence'
+  if (k.includes('document') || k.includes('report')) return 'document'
+  if (k.includes('domain')) return 'domain'
+  if (k.includes('device')) return 'device'
+  if (k.includes('investigation') || k.includes('case')) return 'investigation'
+  return 'company'
 }

@@ -26,6 +26,7 @@ class ComplianceCase(Base):
     due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     sla_hours: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sla_breached: Mapped[bool] = mapped_column(Boolean, server_default="false")
+    queue_priority: Mapped[int | None] = mapped_column(Integer, nullable=True)
     fusion_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

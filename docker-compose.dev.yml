@@ -75,6 +75,7 @@ services:
       - ./flowsint-core:/app/flowsint-core
       - ./flowsint-types:/app/flowsint-types
       - ./flowsint-enrichers:/app/flowsint-enrichers
+      - ./flowsint-crypto-compliance:/app/flowsint-crypto-compliance
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DATABASE_URL=postgresql://flowsint:flowsint@postgres:5432/flowsint
@@ -84,6 +85,25 @@ services:
       - AUTH_SECRET=${AUTH_SECRET}
       - MASTER_VAULT_KEY_V1=${MASTER_VAULT_KEY_V1}
       - REDIS_URL=redis://redis:6379/0
+      - SKIP_MIGRATIONS=${SKIP_MIGRATIONS:-true}
+      - COMPLIANCE_COMBAT_MODE=${COMPLIANCE_COMBAT_MODE:-1}
+      - COMPLIANCE_DEMO_MODE=${COMPLIANCE_DEMO_MODE:-0}
+      - COMPLIANCE_INVESTIGATE_TIMEOUT_SEC=${COMPLIANCE_INVESTIGATE_TIMEOUT_SEC:-900}
+      - FINSKALP_ENTITY_STORE=${FINSKALP_ENTITY_STORE:-postgres}
+      - FINSKALP_FUSION_MODE=${FINSKALP_FUSION_MODE:-rfc0003}
+      - FINSKALP_ECCF_POSTGRES_PERSISTENCE=${FINSKALP_ECCF_POSTGRES_PERSISTENCE:-1}
+      - FINSKALP_WORKSPACE_FULL_PANELS=${FINSKALP_WORKSPACE_FULL_PANELS:-1}
+      - FINSKALP_ENTERPRISE_REPORT_SECTIONS=${FINSKALP_ENTERPRISE_REPORT_SECTIONS:-1}
+      - FINSKALP_IDOO_REAL_HEALTH_PROBES=${FINSKALP_IDOO_REAL_HEALTH_PROBES:-1}
+      - TRONGRID_API_KEY=${TRONGRID_API_KEY:-}
+      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY:-}
+      - BSCSCAN_API_KEY=${BSCSCAN_API_KEY:-}
+      - POLYGONSCAN_API_KEY=${POLYGONSCAN_API_KEY:-}
+      - BITCOINABUSE_API_KEY=${BITCOINABUSE_API_KEY:-}
+      - FINSKALP_TOR_SOCKS=${FINSKALP_TOR_SOCKS:-}
+      - FINSKALP_TRON_PROVIDER=${FINSKALP_TRON_PROVIDER:-failover}
+      - FINSKALP_COMBAT_SEED_ADDRESS=${FINSKALP_COMBAT_SEED_ADDRESS:-}
+      - FINSKALP_COMBAT_SEED_CHAIN=${FINSKALP_COMBAT_SEED_CHAIN:-tron}
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,13 +126,16 @@ services:
       target: dev
     container_name: flowsint-celery-dev
     restart: unless-stopped
-    command: celery -A flowsint_core.core.celery worker --loglevel=info --pool=threads --concurrency=10
+    command: >
+      celery -A flowsint_core.core.celery worker --loglevel=info --pool=threads --concurrency=10
+      -Q celery,scalpel-onchain,scalpel-sanctions,scalpel-username,scalpel-abuse,scalpel-darknet,scalpel-clearnet,scalpel-vasp,scalpel-court,scalpel-dns,scalpel-fusion,scalpel-enforcement,live-onchain,live-sanctions,live-abuse,live-username,live-darknet
     volumes:
       - ./flowsint-api:/app/flowsint-api
       - /app/flowsint-api/.venv
       - ./flowsint-core:/app/flowsint-core
       - ./flowsint-types:/app/flowsint-types
       - ./flowsint-enrichers:/app/flowsint-enrichers
+      - ./flowsint-crypto-compliance:/app/flowsint-crypto-compliance
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DATABASE_URL=postgresql://flowsint:flowsint@postgres:5432/flowsint
@@ -123,6 +146,21 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - SKIP_MIGRATIONS=true
       - AUTH_SECRET=${AUTH_SECRET}
+      - COMPLIANCE_COMBAT_MODE=${COMPLIANCE_COMBAT_MODE:-1}
+      - COMPLIANCE_DEMO_MODE=${COMPLIANCE_DEMO_MODE:-0}
+      - COMPLIANCE_INVESTIGATE_TIMEOUT_SEC=${COMPLIANCE_INVESTIGATE_TIMEOUT_SEC:-900}
+      - FINSKALP_ENTITY_STORE=${FINSKALP_ENTITY_STORE:-postgres}
+      - FINSKALP_FUSION_MODE=${FINSKALP_FUSION_MODE:-rfc0003}
+      - FINSKALP_ECCF_POSTGRES_PERSISTENCE=${FINSKALP_ECCF_POSTGRES_PERSISTENCE:-1}
+      - FINSKALP_WORKSPACE_FULL_PANELS=${FINSKALP_WORKSPACE_FULL_PANELS:-1}
+      - FINSKALP_ENTERPRISE_REPORT_SECTIONS=${FINSKALP_ENTERPRISE_REPORT_SECTIONS:-1}
+      - TRONGRID_API_KEY=${TRONGRID_API_KEY:-}
+      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY:-}
+      - BSCSCAN_API_KEY=${BSCSCAN_API_KEY:-}
+      - POLYGONSCAN_API_KEY=${POLYGONSCAN_API_KEY:-}
+      - BITCOINABUSE_API_KEY=${BITCOINABUSE_API_KEY:-}
+      - FINSKALP_TOR_SOCKS=${FINSKALP_TOR_SOCKS:-}
+      - FINSKALP_TRON_PROVIDER=${FINSKALP_TRON_PROVIDER:-failover}
     healthcheck:
       # Celery has no HTTP server — Dockerfile's curl-based healthcheck always fails.
       # Use celery's own ping primitive instead.

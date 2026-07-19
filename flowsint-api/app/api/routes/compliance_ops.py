@@ -15,14 +15,22 @@ from app.api.schemas.compliance import (
     BatchScreenJobRead,
     CaseCommentCreate,
     CaseCommentRead,
+    CaseQueueOrderRequest,
     CaseTransitionRequest,
     ComplianceCaseListItem,
     ComplianceCaseRead,
+    ComplianceInboxItem,
+    ComplianceReportListItem,
+    CrossCaseGraphLink,
+    CrossCaseGraphLinksRead,
+    RiskHistoryPoint,
+    RiskHistoryRead,
     WatchlistSubscribeRequest,
     WatchlistSubscriptionRead,
     WebhookRegisterRequest,
     WebhookRegisterResponse,
 )
+from flowsint_crypto_compliance.services.case_display import resolve_assignee_fields
 from flowsint_core.core.models import Profile
 from flowsint_core.core.postgre_db import get_db
 from flowsint_crypto_compliance.observability.metrics import COMPLIANCE_WEBHOOK_INGEST_TOTAL
@@ -50,6 +58,59 @@ def _svc(db: Session) -> ComplianceService:
     return ComplianceService(db)
 
 
+def _case_list_items(db: Session, cases: list) -> list[ComplianceCaseListItem]:
+    svc = _svc(db)
+    assignee_ids = {c.assignee_id for c in cases if c.assignee_id}
+    profiles = svc.load_profiles(assignee_ids)
+    out: list[ComplianceCaseListItem] = []
+    for c in cases:
+        names = resolve_assignee_fields(c.assignee_id, profiles)
+        out.append(
+            ComplianceCaseListItem(
+                id=c.id,
+                case_ref=c.case_ref,
+                status=c.status,
+                investigation_id=c.investigation_id,
+                workflow_status=c.workflow_status or "new",
+                assignee_id=c.assignee_id,
+                assignee_name=names["assignee_name"],
+                analyst_name_ru=names["analyst_name_ru"],
+                priority=c.priority or "normal",
+                due_at=c.due_at,
+                sla_breached=bool(c.sla_breached),
+                queue_priority=c.queue_priority,
+                created_at=c.created_at,
+                updated_at=c.updated_at,
+            )
+        )
+    return out
+
+
+def _case_read_payload(db: Session, case) -> ComplianceCaseRead:
+    svc = _svc(db)
+    profiles = svc.load_profiles({case.assignee_id} if case.assignee_id else set())
+    names = resolve_assignee_fields(case.assignee_id, profiles)
+    history = svc.get_case_risk_history(case.id)
+    return ComplianceCaseRead(
+        id=case.id,
+        case_ref=case.case_ref,
+        status=case.status,
+        investigation_id=case.investigation_id,
+        fusion_result=case.fusion_result,
+        workflow_status=case.workflow_status,
+        assignee_id=case.assignee_id,
+        assignee_name=names["assignee_name"],
+        analyst_name_ru=names["analyst_name_ru"],
+        priority=case.priority,
+        due_at=case.due_at,
+        sla_breached=bool(case.sla_breached),
+        queue_priority=case.queue_priority,
+        risk_trend=history or None,
+        created_at=case.created_at,
+        updated_at=case.updated_at,
+    )
+
+
 def _ensure_case_access(db: Session, user: Profile, case_id: UUID):
     svc = _svc(db)
     case = svc.get_case(case_id)
@@ -72,22 +133,7 @@ async def list_compliance_cases(
     role = get_user_compliance_role(db, current_user.id)
     owner_filter = None if role == ComplianceRole.ADMIN else current_user.id
     cases = _svc(db).list_cases(owner_filter, workflow_status=workflow_status, limit=limit, offset=offset)
-    return [
-        ComplianceCaseListItem(
-            id=c.id,
-            case_ref=c.case_ref,
-            status=c.status,
-            investigation_id=c.investigation_id,
-            workflow_status=c.workflow_status or "new",
-            assignee_id=c.assignee_id,
-            priority=c.priority or "normal",
-            due_at=c.due_at,
-            sla_breached=bool(c.sla_breached),
-            created_at=c.created_at,
-            updated_at=c.updated_at,
-        )
-        for c in cases
-    ]
+    return _case_list_items(db, cases)
 
 
 @router.patch("/cases/{case_id}", response_model=ComplianceCaseRead)
@@ -107,10 +153,11 @@ async def transition_compliance_case(
             actor_id=current_user.id,
             assignee_id=body.assignee_id,
             priority=body.priority,
+            queue_priority=body.queue_priority,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return updated
+    return _case_read_payload(db, updated)
 
 
 @router.get("/cases/{case_id}/comments", response_model=list[CaseCommentRead])
@@ -268,6 +315,77 @@ async def compliance_workflow_stats(
     return _svc(db).workflow_stats(owner_filter)
 
 
+def _inbox_owner_filter(db: Session, user: Profile) -> UUID | None:
+    role = get_user_compliance_role(db, user.id)
+    if role in (ComplianceRole.ADMIN, ComplianceRole.COMPLIANCE_OFFICER):
+        return None
+    return user.id
+
+
+@router.get("/inbox", response_model=list[ComplianceInboxItem])
+async def list_compliance_inbox(
+    workflow_status: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:read")),
+):
+    """Single operator inbox — same cases as kanban, no duplicate :8877 queue."""
+    owner_filter = _inbox_owner_filter(db, current_user)
+    cases = _svc(db).list_cases(owner_filter, workflow_status=workflow_status, limit=limit, offset=offset)
+    profiles = _svc(db).load_profiles({c.assignee_id for c in cases if c.assignee_id})
+    return [
+        ComplianceInboxItem(
+            id=str(c.id),
+            case_id=str(c.id),
+            case_ref=c.case_ref,
+            alert_code=c.case_ref,
+            priority=c.priority or "normal",
+            workflow_status=c.workflow_status or "new",
+            title_ru=f"Дело {c.case_ref}",
+            investigation_id=c.investigation_id,
+            assignee_id=c.assignee_id,
+            **resolve_assignee_fields(c.assignee_id, profiles),
+            sla_breached=bool(c.sla_breached),
+            due_at=c.due_at,
+        )
+        for c in cases
+    ]
+
+
+@router.get("/reports", response_model=list[ComplianceReportListItem])
+async def list_compliance_reports(
+    case_ref: str | None = None,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:read")),
+):
+    owner_filter = _inbox_owner_filter(db, current_user)
+    cases = _svc(db).list_cases(owner_filter, limit=limit, offset=0)
+    if case_ref:
+        cases = [c for c in cases if c.case_ref == case_ref]
+    out: list[ComplianceReportListItem] = []
+    for c in cases:
+        fusion = c.fusion_result or {}
+        fz = fusion.get("fz115_report") if isinstance(fusion.get("fz115_report"), dict) else fusion
+        if not isinstance(fz, dict):
+            continue
+        if not (fz.get("report_id") or fz.get("decision_ru")):
+            continue
+        out.append(
+            ComplianceReportListItem(
+                case_id=str(c.id),
+                case_ref=c.case_ref,
+                report_id=fz.get("report_id"),
+                typology_code=fz.get("typology_code"),
+                risk_level=fz.get("risk_level"),
+                decision_ru=fz.get("decision_ru"),
+                generated_at=fz.get("generated_at"),
+            )
+        )
+    return out
+
+
 @router.get("/cases/{case_id}/workflow")
 async def get_case_workflow(
     case_id: UUID,
@@ -276,3 +394,51 @@ async def get_case_workflow(
 ):
     case, _ = _ensure_case_access(db, current_user, case_id)
     return workflow_payload(case)
+
+
+@router.get("/cases/{case_id}/risk-history", response_model=RiskHistoryRead)
+async def get_case_risk_history(
+    case_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:read")),
+):
+    _ensure_case_access(db, current_user, case_id)
+    svc = _svc(db)
+    points = svc.get_case_risk_history(case_id)
+    return RiskHistoryRead(
+        case_id=str(case_id),
+        points=[RiskHistoryPoint(**p) for p in points],
+        trend=svc.risk_trend_indicator(points),
+    )
+
+
+@router.post("/cases/queue-order")
+async def reorder_compliance_queue(
+    body: CaseQueueOrderRequest,
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:transition")),
+):
+    updated = _svc(db).reorder_case_queue(body.case_ids, actor_id=current_user.id)
+    return {"ok": True, "updated": updated}
+
+
+@router.get("/graph/links", response_model=CrossCaseGraphLinksRead)
+async def get_cross_case_graph_links(
+    case_ref: str = Query(..., min_length=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: Profile = Depends(require_permission("case:read")),
+):
+    svc = _svc(db)
+    case = svc.get_case_by_ref(case_ref)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    role = get_user_compliance_role(db, current_user.id)
+    if not can_access_case(current_user, case, role):
+        raise HTTPException(status_code=403, detail="Access denied")
+    links = svc.get_cross_case_graph_links(case_ref, limit=limit)
+    return CrossCaseGraphLinksRead(
+        case_ref=case_ref,
+        links=[CrossCaseGraphLink(**link) for link in links],
+        count=len(links),
+    )

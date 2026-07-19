@@ -84,7 +84,7 @@ OSINT_SOURCES: list[dict[str, Any]] = [
     },
     {
         "id": "open_osint",
-        "name_ru": "FinSkalp Scalpel · 8 легальных коллекторов",
+        "name_ru": "FinSkalp Scalpel · 11 легальных коллекторов",
         "type": "open",
         "priority": 5,
         "description_ru": (

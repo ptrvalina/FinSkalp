@@ -1,0 +1,33 @@
+name: Fusion Perf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'flowsint-app/**'
+  pull_request:
+    paths:
+      - 'flowsint-app/**'
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flowsint-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Perf regression tests
+        run: npm run test:perf

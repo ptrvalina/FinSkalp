@@ -40,8 +40,11 @@ celery.conf.update(
         "scalpel_collect_onchain": {"queue": "scalpel-onchain"},
         "scalpel_collect_sanctions": {"queue": "scalpel-sanctions"},
         "scalpel_collect_username": {"queue": "scalpel-username"},
+        "scalpel_collect_username_probe": {"queue": "scalpel-username"},
         "scalpel_collect_abuse": {"queue": "scalpel-abuse"},
         "scalpel_collect_darknet": {"queue": "scalpel-darknet"},
+        "scalpel_collect_darknet_tor": {"queue": "scalpel-darknet"},
+        "scalpel_collect_clearnet": {"queue": "scalpel-clearnet"},
         "scalpel_collect_vasp": {"queue": "scalpel-vasp"},
         "scalpel_collect_court": {"queue": "scalpel-court"},
         "scalpel_collect_dns": {"queue": "scalpel-dns"},
@@ -115,6 +118,12 @@ try:
 
     @worker_process_init.connect
     def _init_celery_otel(**_kwargs: object) -> None:
+        try:
+            from flowsint_crypto_compliance.demo.combat_mode import apply_combat_env_defaults
+
+            apply_combat_env_defaults()
+        except Exception:
+            pass
         from flowsint_crypto_compliance.observability.tracing import init_worker_tracing
 
         init_worker_tracing()

@@ -67,6 +67,7 @@ class LiveOpsMetrics:
                     if self.decision_samples
                     else None
                 ),
+                "decision_samples": self.decision_samples,
                 "screening_tps": tps,
                 "uptime_sec": uptime,
                 "last_screen_risk": self.last_screen_risk,

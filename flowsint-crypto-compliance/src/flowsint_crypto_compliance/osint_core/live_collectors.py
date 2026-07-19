@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 from typing import Any
 from urllib.parse import quote
 
@@ -37,7 +38,14 @@ def _headers() -> dict[str, str]:
     return h
 
 
-async def _get_json(url: str, *, source: str, cache_key: str, category: str) -> dict[str, Any]:
+async def _get_json(
+    url: str,
+    *,
+    source: str,
+    cache_key: str,
+    category: str,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
     from flowsint_crypto_compliance.infrastructure.circuit_breaker import get_breaker
     from flowsint_crypto_compliance.osint_core.scalpel.security import is_safe_external_url
 
@@ -67,10 +75,11 @@ async def _get_json(url: str, *, source: str, cache_key: str, category: str) -> 
 
     last_err: Exception | None = None
     degraded = False
+    req_headers = headers or _headers()
     for attempt in range(3):
         try:
             async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-                resp = await client.get(url, headers=_headers())
+                resp = await client.get(url, headers=req_headers)
             if resp.status_code == 429:
                 await asyncio.sleep(2**attempt)
                 continue
@@ -80,10 +89,14 @@ async def _get_json(url: str, *, source: str, cache_key: str, category: str) -> 
                 "url": url,
             }
             if resp.status_code == 200:
+                ctype = (resp.headers.get("content-type") or "").lower()
                 try:
-                    body = resp.json()
+                    if "json" in ctype or "api.opensanctions" in url:
+                        body = resp.json()
+                    else:
+                        body = {"raw": resp.text[:8000]}
                 except Exception:
-                    body = {"raw": resp.text[:4000]}
+                    body = {"raw": resp.text[:8000]}
                 data["data"] = body
                 cache_set_json(cache_key, data, category=category)
                 breaker.record_success()
@@ -550,14 +563,58 @@ async def collect_solana_chain(address: str) -> dict[str, Any]:
 
 
 async def collect_sanctions(query: str) -> dict[str, Any]:
-    """OpenSanctions — живой поиск."""
-    url = f"{_OPENSANCTIONS}?q={quote(query[:128])}&limit=10"
+    """OpenSanctions — живой поиск (wallet address или ФИО/организация)."""
+    from flowsint_crypto_compliance.osint_core.scalpel.seed_query import (
+        bare_seed_query,
+        is_named_seed,
+    )
+
+    search_q = bare_seed_query(query)[:128]
+    url = f"{_OPENSANCTIONS}?q={quote(search_q)}&limit=10"
+    headers = dict(_headers())
+    api_key = os.getenv("OPENSANCTIONS_API_KEY", "").strip()
+    if api_key:
+        headers["Authorization"] = api_key
+
     out = await _get_json(
         url,
         source="opensanctions",
-        cache_key=f"live:sanctions:{query[:48]}",
+        cache_key=f"live:sanctions:{search_q[:48]}",
         category="sanctions_live",
+        headers=headers,
     )
+    # 401 without key: fall back to DuckDuckGo surface of opensanctions.org
+    if out.get("status") in (401, 403) and not api_key:
+        ddg = await _get_json(
+            f"https://html.duckduckgo.com/html/?q={quote(search_q + ' site:opensanctions.org')}",
+            source="opensanctions_ddg",
+            cache_key=f"live:sanctions:ddg:{search_q[:48]}",
+            category="sanctions_live",
+        )
+        body = str((ddg.get("data") or {}).get("raw") or "")
+        if ddg.get("status") == 200 and (
+            "opensanctions.org" in body.lower() or "result__a" in body
+        ):
+            caption = search_q
+            m = re.search(r"opensanctions\.org/entities/[^\"'\s<>]+", body, re.I)
+            hits = [
+                {
+                    "id": m.group(0) if m else "opensanctions_web",
+                    "caption": caption,
+                    "schema": "Person",
+                    "datasets": ["opensanctions_web"],
+                }
+            ]
+            flagged = _sanctions_flagged(search_q, hits, named=is_named_seed(query))
+            return {
+                **ddg,
+                "query": search_q,
+                "hit_count": len(hits),
+                "hits": hits,
+                "flagged": flagged,
+                "fallback": "duckduckgo",
+            }
+
     results = (out.get("data") or {}).get("results") or []
     hits = [
         {
@@ -568,20 +625,37 @@ async def collect_sanctions(query: str) -> dict[str, Any]:
         }
         for r in results
     ]
-    # Only flag when search result explicitly references the queried wallet address
-    addr_l = query.strip().lower()
-    flagged = any(
-        addr_l in str(h.get("caption") or "").lower()
-        or addr_l in str(h.get("id") or "").lower()
-        for h in hits
-    )
+    flagged = _sanctions_flagged(search_q, hits, named=is_named_seed(query))
     return {
         **out,
-        "query": query,
+        "query": search_q,
         "hit_count": len(hits),
         "hits": hits,
         "flagged": flagged,
     }
+
+
+def _sanctions_flagged(query: str, hits: list[dict[str, Any]], *, named: bool) -> bool:
+    """Wallet: require exact substring. Name/org: token overlap on OpenSanctions results."""
+    if not hits:
+        return False
+    q = query.strip().lower()
+    if not q:
+        return False
+    if not named:
+        return any(
+            q in str(h.get("caption") or "").lower() or q in str(h.get("id") or "").lower()
+            for h in hits
+        )
+    tokens = [t for t in re.split(r"\s+", q) if len(t) >= 3]
+    if not tokens:
+        return True
+    for h in hits:
+        blob = f"{h.get('caption') or ''} {h.get('id') or ''}".lower()
+        if any(t.lower() in blob for t in tokens):
+            return True
+    # OpenSanctions ranked results for this name query — surface as probable
+    return True
 
 
 async def collect_bitcoinabuse(address: str) -> dict[str, Any]:
@@ -625,16 +699,62 @@ async def collect_maigret(username: str) -> dict[str, Any]:
     from flowsint_crypto_compliance.osint_core.scalpel.workers.maigret_runner import run_maigret
 
     loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(None, lambda: run_maigret(username, top_sites=80))
+    top_sites = int(os.getenv("FINSKALP_MAIGRET_TOP_SITES", "40"))
+    timeout_sec = float(os.getenv("FINSKALP_MAIGRET_TIMEOUT", "45"))
+    try:
+        result = await loop.run_in_executor(
+            None,
+            lambda: run_maigret(username, top_sites=top_sites, timeout_sec=timeout_sec),
+        )
+    except ValueError as exc:
+        return {
+            "status": 400,
+            "source": "maigret",
+            "username": username,
+            "profiles_found": 0,
+            "sites": [],
+            "hits": [],
+            "flagged": False,
+            "error": str(exc),
+        }
+
+    # run_maigret returns {hits: [...]} — normalize to sites for bridge consumers
+    raw_hits = result.get("hits") or result.get("sites") or []
+    sites: list[dict[str, Any]] = []
+    for row in raw_hits:
+        if isinstance(row, dict):
+            sites.append(
+                {
+                    "site_name": row.get("site") or row.get("site_name") or row.get("name") or "site",
+                    "name": row.get("site") or row.get("name") or "site",
+                    "url": row.get("url"),
+                    "title_ru": row.get("title_ru"),
+                    "excerpt_ru": row.get("excerpt_ru"),
+                }
+            )
+        else:
+            # OpenMentionHit-like
+            sites.append(
+                {
+                    "site_name": getattr(row, "source_name", "maigret"),
+                    "name": getattr(row, "source_name", "maigret"),
+                    "url": getattr(row, "url", None),
+                }
+            )
+
     out = {
-        "status": 200,
+        "status": 200 if sites or result.get("status") in ("ok", "embedded", "miss") else 500,
         "source": "maigret",
         "username": username,
-        "profiles_found": len(result.get("sites") or []),
-        "sites": (result.get("sites") or [])[:20],
-        "flagged": bool(result.get("sites")),
+        "profiles_found": len(sites),
+        "sites": sites[:40],
+        "hits": sites[:40],
+        "flagged": bool(sites),
+        "engine": result.get("engine"),
+        "detail": result.get("detail"),
     }
-    cache_set_json(cache_key, out, category="maigret_live")
+    if sites:
+        cache_set_json(cache_key, out, category="maigret_live")
     return out
 
 

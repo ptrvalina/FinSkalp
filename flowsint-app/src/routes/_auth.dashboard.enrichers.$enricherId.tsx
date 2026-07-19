@@ -3,6 +3,7 @@ import Loader from '@/components/loader'
 import { templateService } from '@/api/template-service'
 import { TemplateEditor } from '@/components/templates/template-editor'
 import { CONFIG } from '@/config'
+import { FusionPlatformShell, FusionPlatformEditor } from '@/fusion'
 
 export const Route = createFileRoute('/_auth/dashboard/enrichers/$enricherId')({
   beforeLoad: async () => {
@@ -38,6 +39,14 @@ export const Route = createFileRoute('/_auth/dashboard/enrichers/$enricherId')({
 function TemplatePage() {
   const { template } = Route.useLoaderData()
   return (
-    <TemplateEditor key={template.id} templateId={template.id} initialContent={template.content} />
+    <FusionPlatformShell
+      title={template.name ?? 'Enricher template'}
+      subtitle="Template editor"
+      activeSection="enrichers"
+    >
+      <FusionPlatformEditor className="h-full min-h-[70vh]">
+        <TemplateEditor key={template.id} templateId={template.id} initialContent={template.content} />
+      </FusionPlatformEditor>
+    </FusionPlatformShell>
   )
 }

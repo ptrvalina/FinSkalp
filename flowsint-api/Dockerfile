@@ -27,6 +27,7 @@ COPY pyproject.toml uv.lock ./
 COPY flowsint-types ./flowsint-types
 COPY flowsint-core ./flowsint-core
 COPY flowsint-enrichers ./flowsint-enrichers
+COPY flowsint-crypto-compliance ./flowsint-crypto-compliance
 COPY flowsint-api ./flowsint-api
 
 RUN uv sync --frozen --no-dev
@@ -39,10 +40,16 @@ ENV PYTHONUNBUFFERED=1 \
     APP_ENV=development \
     PATH="/app/.venv/bin:$PATH"
 
-# Install runtime dependencies
+# Install runtime dependencies (WeasyPrint needs pango/gdk-pixbuf/fonts)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi8 \
+    shared-mime-info \
+    fonts-dejavu-core \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,6 +62,7 @@ COPY --from=builder /app/.venv ./.venv
 COPY flowsint-core ./flowsint-core
 COPY flowsint-types ./flowsint-types
 COPY flowsint-enrichers ./flowsint-enrichers
+COPY flowsint-crypto-compliance ./flowsint-crypto-compliance
 COPY flowsint-api ./flowsint-api
 
 WORKDIR /app/flowsint-api
@@ -81,10 +89,16 @@ ENV PYTHONUNBUFFERED=1 \
     APP_ENV=production \
     PATH="/app/.venv/bin:$PATH"
 
-# Install runtime dependencies only
+# Install runtime dependencies only (WeasyPrint needs pango/gdk-pixbuf/fonts)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi8 \
+    shared-mime-info \
+    fonts-dejavu-core \
     curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
@@ -102,6 +116,7 @@ COPY --from=builder --chown=flowsint:flowsint /app/.venv ./.venv
 COPY --chown=flowsint:flowsint flowsint-core ./flowsint-core
 COPY --chown=flowsint:flowsint flowsint-types ./flowsint-types
 COPY --chown=flowsint:flowsint flowsint-enrichers ./flowsint-enrichers
+COPY --chown=flowsint:flowsint flowsint-crypto-compliance ./flowsint-crypto-compliance
 COPY --chown=flowsint:flowsint flowsint-api ./flowsint-api
 
 WORKDIR /app/flowsint-api

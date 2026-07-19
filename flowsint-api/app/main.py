@@ -83,6 +83,31 @@ async def bootstrap_platform_v2_startup() -> None:
 
     await bootstrap_platform_v2()
 
+
+@app.on_event("startup")
+async def bootstrap_attribution_combat() -> None:
+    """Load OFAC / OpenSanctions / exchange seeds into entity store (non-blocking)."""
+    import asyncio
+    import logging
+
+    from flowsint_crypto_compliance.demo.combat_mode import is_combat_mode
+
+    if not is_combat_mode():
+        return
+
+    log = logging.getLogger("flowsint.attribution")
+
+    async def _run() -> None:
+        try:
+            from flowsint_crypto_compliance.attribution.attribution_engine import AttributionEngine
+
+            stats = await AttributionEngine().ensure_bootstrap()
+            log.info("attribution bootstrap: %s", stats)
+        except Exception as exc:
+            log.warning("attribution bootstrap failed: %s", exc)
+
+    asyncio.create_task(_run())
+
 from flowsint_crypto_compliance.observability.middleware import CorrelationIdMiddleware
 from flowsint_crypto_compliance.observability.tracing import instrument_fastapi
 

@@ -1,6 +1,4 @@
-"""
-Реестр 8 легальных коллекторов OSINT Scalpel + Celery task mapping.
-"""
+"""Реестр легальных коллекторов OSINT Scalpel и mapping на Celery tasks."""
 
 from __future__ import annotations
 
@@ -30,6 +28,9 @@ from flowsint_crypto_compliance.osint_core.scalpel.collectors.reverse_whois_dns 
 from flowsint_crypto_compliance.osint_core.scalpel.collectors.sanctions_watchlist import (
     SanctionsWatchlistCollector,
 )
+from flowsint_crypto_compliance.osint_core.scalpel.collectors.username_probe import (
+    UsernameProbeCollector,
+)
 from flowsint_crypto_compliance.osint_core.scalpel.collectors.username_social import (
     UsernameSocialCollector,
 )
@@ -41,6 +42,7 @@ SCALPEL_COLLECTORS = [
     OnchainExplorerCollector,
     SanctionsWatchlistCollector,
     UsernameSocialCollector,
+    UsernameProbeCollector,
     AbuseScamRegistryCollector,
     DarknetIndexCollector,
     DarknetTorCollector,
@@ -54,6 +56,7 @@ CELERY_COLLECTOR_TASKS: dict[str, str] = {
     "onchain_explorer": "scalpel_collect_onchain",
     "sanctions_watchlist": "scalpel_collect_sanctions",
     "username_social": "scalpel_collect_username",
+    "username_probe": "scalpel_collect_username_probe",
     "abuse_scam_registry": "scalpel_collect_abuse",
     "darknet_index": "scalpel_collect_darknet",
     "darknet_tor": "scalpel_collect_darknet_tor",
@@ -78,12 +81,17 @@ _COLLECTOR_UI: dict[str, dict[str, Any]] = {
     },
     "username_social": {
         "status": "works",
-        "status_ru": "Maigret live · usernames из wave-0 hits (depth≥2 hop-1)",
+        "status_ru": "Maigret live · ФИО→handles / usernames",
+        "default_checked": True,
+    },
+    "username_probe": {
+        "status": "works",
+        "status_ru": "Sherlock-паттерн · быстрый probe публичных профилей",
         "default_checked": True,
     },
     "abuse_scam_registry": {
         "status": "partial",
-        "status_ru": "BitcoinAbuse (BTC) + локальный scam-корпус",
+        "status_ru": "Chainabuse + BitcoinAbuse (BTC) + локальный scam-корпус",
         "default_checked": True,
     },
     "darknet_index": {
@@ -107,7 +115,7 @@ _COLLECTOR_UI: dict[str, dict[str, Any]] = {
     },
     "vasp_registry": {
         "status": "works",
-        "status_ru": "Реестр VASP СНГ · 115-ФЗ",
+        "status_ru": "Реестр VASP СНГ · 115-ФЗ + match по имени/кошельку",
         "default_checked": True,
     },
     "court_enforcement": {
@@ -130,7 +138,7 @@ def _category_for(cls: type) -> str:
         return "onchain"
     if cls.collector_id == "sanctions_watchlist":
         return "sanctions"
-    if cls.collector_id == "username_social":
+    if cls.collector_id in {"username_social", "username_probe"}:
         return "username"
     if cls.collector_id == "abuse_scam_registry":
         return "abuse"

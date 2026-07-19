@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import os
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -25,6 +26,7 @@ from flowsint_crypto_compliance.osint_core.scalpel.ml_scoring import score_risk
 from flowsint_crypto_compliance.osint_core.scalpel.evidence_bridge import (
     build_scalpel_evidence_graph,
     scalpel_case_ref,
+    serialize_evidence_graph,
 )
 from flowsint_crypto_compliance.storage.graph_store import EvidenceGraphStore
 from flowsint_crypto_compliance.osint_core.scalpel.registry import (
@@ -86,6 +88,7 @@ class ScalpelResult:
     ml_risk_score: float = 0.0
     ml_detail: dict[str, Any] = field(default_factory=dict)
     graph_persist: dict[str, Any] = field(default_factory=dict)
+    evidence_graph: dict[str, Any] = field(default_factory=dict)
     fusion_confidence: dict[str, Any] = field(default_factory=dict)
     query_expansion: dict[str, Any] = field(default_factory=dict)
     scalpel_version: str = "2.2.0-live"
@@ -115,6 +118,7 @@ class ScalpelResult:
             "ml_risk_score": round(self.ml_risk_score, 1),
             "ml_detail": self.ml_detail,
             "graph_persist": self.graph_persist,
+            "evidence_graph": self.evidence_graph,
             "fusion_confidence": self.fusion_confidence,
             "query_expansion": self.query_expansion,
             "legal_collectors": registry_manifest(),
@@ -218,24 +222,31 @@ class ScalpelEngine:
                 return
 
             async def _run_one(collector: Any) -> None:
+                key = collector.collector_id if wave == 0 else f"{collector.collector_id}:hop{wave}"
+                collector_timeout = float(
+                    os.getenv("FINSKALP_COLLECTOR_TIMEOUT_SEC", "55")
+                )
                 try:
-                    res = await collector.collect(
-                        target,
-                        chain,
-                        counterparties=wave_cps if wave_cps else None,
-                        context=context,
+                    res = await asyncio.wait_for(
+                        collector.collect(
+                            target,
+                            chain,
+                            counterparties=wave_cps if wave_cps else None,
+                            context=context,
+                        ),
+                        timeout=collector_timeout,
                     )
                     tag = f"{collector.collector_id}@hop{wave}" if wave else collector.collector_id
                     if tag not in collectors_run:
                         collectors_run.append(tag)
-                    key = collector.collector_id if wave == 0 else f"{collector.collector_id}:hop{wave}"
                     status[key] = res.to_status()
                     raw_hits.extend(res.hits)
                     if res.entities:
                         all_entities[key] = res.entities
                     context["mentions"].extend([h.to_dict() for h in res.hits])
+                except asyncio.TimeoutError:
+                    status[key] = "timeout"
                 except Exception as exc:
-                    key = collector.collector_id if wave == 0 else f"{collector.collector_id}:hop{wave}"
                     status[key] = f"error:{exc.__class__.__name__}"
 
             await asyncio.gather(*[_run_one(c) for c in wave_collectors])
@@ -245,15 +256,40 @@ class ScalpelEngine:
         partial_wave0 = dedupe_mentions_by_excerpt(_dedupe_hits(raw_hits))
         _enrich_context_from_hits(context, partial_wave0, all_entities, address)
 
+        # Promote on-chain counterparties into branch targets (depth≥2)
+        if depth >= 2:
+            for key, payload in all_entities.items():
+                if not isinstance(payload, dict):
+                    continue
+                for cp in payload.get("counterparties") or []:
+                    addr = str(cp).strip()
+                    if addr and addr != address and addr not in branch_targets:
+                        branch_targets.append(addr)
+                for tr in payload.get("transfers") or []:
+                    if not isinstance(tr, dict):
+                        continue
+                    for side in (tr.get("from"), tr.get("to")):
+                        addr = str(side or "").strip()
+                        if addr and addr != address and addr not in branch_targets:
+                            branch_targets.append(addr)
+
         if depth >= 2:
             hop1_ids: set[str] = set()
             active_ids = {c.collector_id for c in active}
-            if "username_social" in active_ids and context.get("usernames"):
-                hop1_ids.add("username_social")
+            if context.get("usernames"):
+                if "username_social" in active_ids:
+                    hop1_ids.add("username_social")
+                if "username_probe" in active_ids:
+                    hop1_ids.add("username_probe")
             if "reverse_whois_dns" in active_ids and context.get("domains"):
                 hop1_ids.add("reverse_whois_dns")
+            # Screen top counterparties for sanctions/abuse/VASP at hop-1
+            screen_ids = {"sanctions_watchlist", "abuse_scam_registry", "vasp_registry"} & active_ids
             if hop1_ids:
                 await _run_wave(address, None, wave=1, only_ids=hop1_ids)
+            for cp in branch_targets[:8]:
+                if screen_ids:
+                    await _run_wave(cp, None, wave=1, only_ids=screen_ids)
 
         if depth >= 3:
             branch_ids = {
@@ -307,6 +343,7 @@ class ScalpelEngine:
             extracted_entities=merged_entities,
         )
         evidence_graph = build_scalpel_evidence_graph(partial)
+        evidence_graph_payload = serialize_evidence_graph(evidence_graph)
         ml_out = score_risk(
             address,
             chain.value,
@@ -327,6 +364,7 @@ class ScalpelEngine:
             ml_risk_score=float(ml_out["score"]),
             ml_detail=ml_out,
             graph_persist=graph_out.to_dict(),
+            evidence_graph=evidence_graph_payload,
             correlation_score=corr,
             source_status=status,
             independent_sources=indep,

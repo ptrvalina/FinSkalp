@@ -1,0 +1,73 @@
+/* Phase 7 — Executive presentation layout (read-only briefing mode) */
+
+.fusion-shell--executive .fusion-rail {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fusion-shell--executive .fusion-mission-strip,
+.fusion-shell--executive .fusion-str-pipeline,
+.fusion-shell--executive .fusion-intelligence-ribbon {
+  display: none;
+}
+
+.fusion-shell--executive .fusion-workspace-aside {
+  display: none !important;
+}
+
+.fusion-shell--executive .fusion-dock-layout__dock,
+.fusion-shell--executive [data-fusion-dock] {
+  display: none !important;
+}
+
+.fusion-shell--executive .fusion-inspector,
+.fusion-shell--executive .fusion-float-panel {
+  display: none !important;
+}
+
+.fusion-shell--executive .fusion-shell__body {
+  padding: 0;
+}
+
+.fusion-shell--executive .fusion-graph-stage {
+  border: none;
+  border-radius: 0;
+}
+
+.fusion-shell--executive .fusion-graph-hud > *:not(.fusion-cinematic-bar):not(.fusion-collab-presence) {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.fusion-shell--executive .fusion-cinematic-bar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  padding: 8px 16px;
+  border-radius: var(--fusion-radius-md);
+  background: color-mix(in srgb, var(--fusion-bg-deck) 92%, transparent);
+  border: 1px solid var(--fusion-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.fusion-shell--executive .fusion-graph-stage__canvas {
+  pointer-events: auto;
+}
+
+.fusion-shell--executive::after {
+  content: 'EXECUTIVE BRIEFING';
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 110;
+  font-size: var(--fusion-text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--fusion-ops-yellow);
+  pointer-events: none;
+}

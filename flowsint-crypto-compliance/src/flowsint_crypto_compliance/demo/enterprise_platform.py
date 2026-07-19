@@ -9,6 +9,12 @@ from typing import Any, Literal
 
 ModuleStatus = Literal["operational", "degraded", "standby"]
 
+MODULE_STATUS_RU: dict[str, str] = {
+    "operational": "Работает",
+    "degraded": "Частично",
+    "standby": "Ожидание",
+}
+
 
 @dataclass(frozen=True)
 class PlatformModule:
@@ -23,6 +29,11 @@ class PlatformModule:
     sla_pct: float = 99.97
 
     def to_dict(self) -> dict[str, Any]:
+        status_ru = {
+            "operational": "Работает",
+            "degraded": "Частично",
+            "standby": "Ожидание",
+        }.get(self.status, self.status)
         return {
             "code": self.code,
             "ic_code": self.ic_code,
@@ -32,7 +43,8 @@ class PlatformModule:
             "description_ru": self.description_ru,
             "capabilities_ru": self.capabilities_ru,
             "status": self.status,
-            "sla_pct": self.sla_pct,
+            "status_ru": status_ru,
+            "health_label_ru": status_ru,
         }
 
 

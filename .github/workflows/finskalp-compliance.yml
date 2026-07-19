@@ -6,6 +6,9 @@ on:
       - "flowsint-crypto-compliance/**"
       - "flowsint-types/**"
       - "flowsint-core/**"
+      - "flowsint-api/Dockerfile"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/finskalp-compliance.yml"
   push:
     branches:
@@ -14,6 +17,9 @@ on:
       - "flowsint-crypto-compliance/**"
       - "flowsint-types/**"
       - "flowsint-core/**"
+      - "flowsint-api/Dockerfile"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/finskalp-compliance.yml"
 
 concurrency:
@@ -64,4 +70,16 @@ jobs:
             tests/test_forensic_enrichment.py \
             tests/test_demo_compliance.py \
             tests/test_fz115_report.py \
+            tests/test_multi_dimensional_confidence.py \
+            tests/test_operator_events.py \
             -q --tb=short
+
+  docker-api-image:
+    name: Verify flowsint-api Docker image (migrations in image)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build production API image
+        run: docker build -f flowsint-api/Dockerfile --target production -t flowsint-api:ci .

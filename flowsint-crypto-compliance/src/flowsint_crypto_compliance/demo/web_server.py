@@ -5,11 +5,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import html
 import json
 import os
 import socket
+import time
 import uuid
+from collections import deque
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1977,6 +1980,37 @@ async def run_instrument(code: str, body: InstrumentRunRequest | None = None):
     return result
 
 
+_feed_recent_hashes: deque[tuple[str, float]] = deque(maxlen=120)
+
+
+def _feed_row_key(row: dict[str, Any]) -> str:
+    addr = row.get("address") or row.get("alert_id") or ""
+    raw = f"{row.get('source', '')}|{row.get('text_ru', '')}|{addr}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _feed_should_emit(row: dict[str, Any]) -> bool:
+    now = time.time()
+    while _feed_recent_hashes and now - _feed_recent_hashes[0][1] > 120:
+        _feed_recent_hashes.popleft()
+    key = _feed_row_key(row)
+    if any(k == key for k, _ in _feed_recent_hashes):
+        return False
+    _feed_recent_hashes.append((key, now))
+    return True
+
+
+def _feed_row_from_event(ev: dict[str, Any]) -> dict[str, Any]:
+    payload = ev.get("payload") or {}
+    return {
+        "source": ev.get("source", "finskalp"),
+        "text_ru": ev.get("text_ru", ""),
+        "severity": ev.get("severity", "info"),
+        "type": ev.get("type"),
+        **payload,
+    }
+
+
 @app.get("/api/feed/live")
 async def live_feed():
     from flowsint_crypto_compliance.infrastructure.compliance_events import get_event_bus
@@ -1986,30 +2020,18 @@ async def live_feed():
     async def events():
         loop = asyncio.get_event_loop()
         for ev in bus.recent(5):
-            payload = ev.get("payload") or {}
-            row = {
-                "source": ev.get("source", "finskalp"),
-                "text_ru": ev.get("text_ru", ""),
-                "severity": ev.get("severity", "info"),
-                "type": ev.get("type"),
-                **payload,
-            }
-            yield f"data: {json.dumps(row, ensure_ascii=False)}\n\n"
+            row = _feed_row_from_event(ev)
+            if _feed_should_emit(row):
+                row["ts"] = time.time()
+                yield f"data: {json.dumps(row, ensure_ascii=False)}\n\n"
         while True:
             ev = await loop.run_in_executor(None, _poll_event, bus)
             if ev:
-                payload = ev.get("payload") or {}
-                row = {
-                    "source": ev.get("source", "finskalp"),
-                    "text_ru": ev.get("text_ru", ""),
-                    "severity": ev.get("severity", "info"),
-                    "type": ev.get("type"),
-                    **payload,
-                }
+                row = _feed_row_from_event(ev)
             else:
                 row = live_feed_event()
-            if row:
-                row["ts"] = asyncio.get_event_loop().time()
+            if row and _feed_should_emit(row):
+                row["ts"] = time.time()
                 yield f"data: {json.dumps(row, ensure_ascii=False)}\n\n"
             await asyncio.sleep(1.0 if ev else 3.0)
 
@@ -2313,6 +2335,11 @@ def _lan_ip() -> str:
 def main() -> None:
     import uvicorn
 
+    os.environ.setdefault("FINSKALP_REGULATOR_STAND", "1")
+    from flowsint_crypto_compliance.demo.combat_mode import apply_combat_env_defaults
+
+    apply_combat_env_defaults()
+
     host = demo_bind_host()
     port = int(os.getenv("COMPLIANCE_DEMO_PORT", "8877"))
     lan = _lan_ip()
@@ -2326,6 +2353,8 @@ def main() -> None:
     print("  LAN: задайте COMPLIANCE_DEMO_BIND_HOST=0.0.0.0 и COMPLIANCE_DEMO_ALLOW_ALL_CORS=1")
     print("  Масштаб:      100 банков · 1 847 OTC · 187M+ население · 11 юрисдикций СНГ")
     print("  Остановка:    Ctrl+C")
+    print("  Режим:        ДЕМО / интеграционный стенд (не production UI)")
+    print("  Оператор:      http://localhost:5173  (JWT + RBAC)")
     print("=" * 64)
     print()
     uvicorn.run(

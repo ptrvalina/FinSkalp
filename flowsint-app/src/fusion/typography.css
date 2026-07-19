@@ -1,0 +1,51 @@
+/* FinSkalp Fusion — typography */
+
+.fusion-root .fusion-heading-zone {
+  font-size: var(--fusion-text-md);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-root .fusion-heading-panel {
+  font-size: var(--fusion-text-base);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fusion-text-primary);
+}
+
+.fusion-root .fusion-text-data {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+  line-height: 1.4;
+  color: var(--fusion-text-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.fusion-root .fusion-text-body {
+  font-size: var(--fusion-text-sm);
+  line-height: 1.45;
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-root .fusion-text-micro {
+  font-size: var(--fusion-text-2xs);
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-root .fusion-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fusion-root code,
+.fusion-root .fusion-code {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+}

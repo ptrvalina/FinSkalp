@@ -81,13 +81,26 @@ def _bootstrap_defaults(reg: PluginRegistry) -> None:
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.abuse_scam_registry import (
         AbuseScamRegistryCollector,
     )
+    from flowsint_crypto_compliance.osint_core.scalpel.collectors.clearnet_intel import (
+        ClearnetIntelCollector,
+    )
+    from flowsint_crypto_compliance.osint_core.scalpel.collectors.court_enforcement import (
+        CourtEnforcementCollector,
+    )
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.darknet_index import DarknetIndexCollector
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.darknet_tor import DarknetTorCollector
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.onchain_explorer import OnchainExplorerCollector
+    from flowsint_crypto_compliance.osint_core.scalpel.collectors.reverse_whois_dns import (
+        ReverseWhoisDnsCollector,
+    )
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.sanctions_watchlist import (
         SanctionsWatchlistCollector,
     )
+    from flowsint_crypto_compliance.osint_core.scalpel.collectors.username_probe import (
+        UsernameProbeCollector,
+    )
     from flowsint_crypto_compliance.osint_core.scalpel.collectors.username_social import UsernameSocialCollector
+    from flowsint_crypto_compliance.osint_core.scalpel.collectors.vasp_registry import VaspRegistryCollector
 
     defaults: list[tuple[str, PluginKind, str, str, Callable[..., Any] | None]] = [
         ("scalpel.onchain", PluginKind.BLOCKCHAIN, "1.0", "On-chain explorer", _scalpel_collector_factory(OnchainExplorerCollector)),
@@ -95,7 +108,12 @@ def _bootstrap_defaults(reg: PluginRegistry) -> None:
         ("scalpel.darknet", PluginKind.OSINT, "1.0", "Darknet / Ahmia", _scalpel_collector_factory(DarknetIndexCollector)),
         ("scalpel.darknet_tor", PluginKind.OSINT, "1.0", "Darknet Tor", _scalpel_collector_factory(DarknetTorCollector)),
         ("scalpel.username", PluginKind.OSINT, "1.0", "Username / social", _scalpel_collector_factory(UsernameSocialCollector)),
+        ("scalpel.username_probe", PluginKind.OSINT, "1.0", "Username probe", _scalpel_collector_factory(UsernameProbeCollector)),
         ("scalpel.abuse", PluginKind.REGISTRY, "1.0", "Abuse registry", _scalpel_collector_factory(AbuseScamRegistryCollector)),
+        ("scalpel.clearnet", PluginKind.OSINT, "1.0", "Clearnet intel", _scalpel_collector_factory(ClearnetIntelCollector)),
+        ("scalpel.court", PluginKind.OSINT, "1.0", "Court / enforcement", _scalpel_collector_factory(CourtEnforcementCollector)),
+        ("scalpel.dns", PluginKind.OSINT, "1.0", "Reverse WHOIS / DNS", _scalpel_collector_factory(ReverseWhoisDnsCollector)),
+        ("scalpel.vasp", PluginKind.REGISTRY, "1.0", "VASP registry", _scalpel_collector_factory(VaspRegistryCollector)),
         ("ocr.paddle", PluginKind.OCR, "1.0", "OCR документов", None),
         ("analytics.xgboost", PluginKind.ANALYTICS, "1.0", "ML risk scoring", None),
     ]

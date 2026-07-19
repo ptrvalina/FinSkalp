@@ -4,20 +4,35 @@
 (function (global) {
   const THEME_KEY = "finskalp-theme";
 
+  function themeIcon(theme) {
+    return theme === "dark" ? "dark_mode" : "light_mode";
+  }
+
+  function syncThemeBtn(theme) {
+    const btn = document.getElementById("themeToggle");
+    if (!btn) return;
+    const isDark = theme === "dark";
+    btn.setAttribute("aria-pressed", isDark ? "false" : "true");
+    btn.title = isDark ? "Светлая тема" : "Тёмная тема";
+    btn.innerHTML = isDark
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+
   function initTheme() {
     const saved = localStorage.getItem(THEME_KEY) || "dark";
     document.documentElement.setAttribute("data-theme", saved);
-    const btn = document.getElementById("themeToggle");
-    if (btn) btn.setAttribute("aria-pressed", saved === "light" ? "true" : "false");
+    document.documentElement.classList.toggle("dark", saved === "dark");
+    syncThemeBtn(saved);
   }
 
   function toggleTheme() {
     const cur = document.documentElement.getAttribute("data-theme") || "dark";
     const next = cur === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
     localStorage.setItem(THEME_KEY, next);
-    const btn = document.getElementById("themeToggle");
-    if (btn) btn.setAttribute("aria-pressed", next === "light" ? "true" : "false");
+    syncThemeBtn(next);
     global.dispatchEvent(new CustomEvent("finskalp:theme", { detail: { theme: next } }));
   }
 
@@ -178,5 +193,10 @@
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     initKeyboardNav();
+  });
+
+  global.addEventListener("finskalp:theme", (ev) => {
+    const theme = ev.detail?.theme;
+    if (theme) syncThemeBtn(theme);
   });
 })(window);

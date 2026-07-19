@@ -17,7 +17,11 @@ function AuthLayout() {
   return <Outlet />
 }
 
-function ErrorComponent() {
+function ErrorComponent({ error }: { error: Error }) {
+  const isDev = import.meta.env.DEV
+  const message = error instanceof Error ? error.message : String(error)
+  const stack = error instanceof Error ? error.stack : undefined
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md">
@@ -29,6 +33,12 @@ function ErrorComponent() {
           <CardDescription>
             We encountered an unexpected error. Please try again or navigate to a safe location.
           </CardDescription>
+          {isDev && message ? (
+            <pre className="mt-4 max-h-48 overflow-auto rounded border border-destructive/30 bg-destructive/5 p-3 text-left text-xs text-destructive whitespace-pre-wrap">
+              {message}
+              {stack ? `\n\n${stack}` : ''}
+            </pre>
+          ) : null}
         </CardHeader>
 
         <CardFooter className="flex flex-col gap-2">

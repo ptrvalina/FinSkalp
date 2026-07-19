@@ -38,7 +38,12 @@ copy .env.example flowsint-app\.env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-UI: http://localhost:5173
+UI: http://localhost:5173  
+API: http://localhost:5001  
+
+Логин демо (после `make seed` / первого старта): см. seed-скрипты / `analyst@example.com`.
+
+Режим **combat** по умолчанию (`COMPLIANCE_COMBAT_MODE=1`): live OSINT/on-chain коллекторы, без synthetic demo-сценариев для боевых кейсов `FSK-*`.
 
 ### Crypto-compliance (standalone)
 

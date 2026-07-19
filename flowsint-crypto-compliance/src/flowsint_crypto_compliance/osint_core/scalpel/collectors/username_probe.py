@@ -86,6 +86,12 @@ class UsernameProbeCollector(ScalpelCollector):
 
 
 def _usernames_from_context(address: str, context: dict[str, Any] | None) -> list[str]:
+    from flowsint_crypto_compliance.osint_core.scalpel.seed_query import (
+        bare_seed_query,
+        person_to_usernames,
+        seed_kind,
+    )
+
     out: list[str] = []
     if context:
         for u in context.get("usernames") or []:
@@ -97,11 +103,21 @@ def _usernames_from_context(address: str, context: dict[str, Any] | None) -> lis
                 for part in ex.split():
                     if part.startswith("@") and len(part) > 2:
                         out.append(part[1:].strip(".,;"))
+
+    kind = seed_kind(address)
+    bare = bare_seed_query(address)
+    if kind == "person" or (kind == "unknown" and " " in bare):
+        for u in person_to_usernames(bare):
+            if u not in out:
+                out.append(u)
+    elif kind == "user" and bare and bare not in out:
+        out.append(bare)
+
     if address.startswith("TRU_") or "_" in address[:8]:
         slug = address.split("_")[-1].lower()[:16]
         if slug and slug not in out:
             out.append(f"otc_{slug}")
-    return out[:5]
+    return out[:6]
 
 
 def _load_sites() -> list[dict[str, Any]]:

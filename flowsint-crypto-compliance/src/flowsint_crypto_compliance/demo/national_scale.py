@@ -28,20 +28,8 @@ RU_BANKS: list[dict[str, str]] = [
     {"bic": "BCSBRUMM", "name": "АО «БКС Банк»", "tier": "regional"},
 ]
 
-_BANK_SUFFIXES = [
-    "Урал", "Сибирь", "Волга", "Север", "Юг", "Центр", "Дальний Восток",
-    "Поволжье", "Кавказ", "Алтай", "Байкал", "Нева", "Дон", "Ока", "Кама",
-]
-
-for i in range(len(RU_BANKS), 100):
-    tier = "regional" if i > 30 else "major"
-    suffix = _BANK_SUFFIXES[i % len(_BANK_SUFFIXES)]
-    num = i + 1
-    RU_BANKS.append({
-        "bic": f"BNK{num:04d}RU",
-        "name": f"АО «Региональный банк {suffix} №{num}»",
-        "tier": tier,
-    })
+BANK_REGISTRY_CONNECTED = False
+BANK_REGISTRY_DEMO_NOTICE_RU = "Демо-данные — реестр не подключён"
 
 JURISDICTIONS: list[dict[str, Any]] = [
     {"code": "RU", "name_ru": "Российская Федерация", "fiu": "Росфинмониторинг", "status": "hub", "entities": 0},
@@ -68,8 +56,8 @@ for j in JURISDICTIONS:
     j["entities"] = _VASP_META["by_jurisdiction"].get(j["code"], 0)
 
 OPERATIONAL_METRICS = {
-    "institutions_connected": 100,
-    "institutions_online": 97,
+    "institutions_connected": len(RU_BANKS),
+    "institutions_online": len(RU_BANKS),
     "sar_messages_24h": 2847,
     "vasp_otc_flagged": sum(1 for e in EXCHANGERS_REGISTRY if e.get("risk") in ("high", "severe")),
     "vasp_monitored": sum(1 for e in EXCHANGERS_REGISTRY if e.get("status") == "monitored"),
@@ -137,6 +125,8 @@ def build_live_dashboard(
         "str_received": int(metrics.get("str_received") or 0),
         "investigations_session": inv,
         "graph_nodes_session": nodes,
+        "decision_samples": int(metrics.get("decision_samples") or 0),
+        "graph_data_warning": screens > 10 and nodes < max(5, screens // 10) and inv == 0,
         "case_pipeline": {
             "new": pipe.get("new", 0),
             "triage": pipe.get("triage", 0),
@@ -179,7 +169,14 @@ CIS_COUNTRIES = JURISDICTIONS
 
 
 def list_banks(*, offset: int = 0, limit: int = 50) -> dict[str, Any]:
-    return {"total": len(RU_BANKS), "offset": offset, "limit": limit, "items": RU_BANKS[offset : offset + limit]}
+    return {
+        "total": len(RU_BANKS),
+        "offset": offset,
+        "limit": limit,
+        "items": RU_BANKS[offset : offset + limit],
+        "connected": BANK_REGISTRY_CONNECTED,
+        "demo_notice_ru": None if BANK_REGISTRY_CONNECTED else BANK_REGISTRY_DEMO_NOTICE_RU,
+    }
 
 
 def list_exchangers(

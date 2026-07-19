@@ -101,5 +101,29 @@ def match_vasp_for_address(address: str, chain: str) -> dict[str, Any] | None:
     return None
 
 
+def match_vasp_by_name(query: str) -> list[dict[str, Any]]:
+    """Поиск VASP по юридическому имени / id (для org: seeds)."""
+    q = (query or "").strip().lower()
+    if len(q) < 2:
+        return []
+    # Strip Fusion prefixes
+    for prefix in ("org:", "organization:", "person:", "seed:"):
+        if q.startswith(prefix):
+            q = q[len(prefix) :].strip()
+    hits: list[dict[str, Any]] = []
+    for entry in load_cis_vasp_registry():
+        name = str(entry.get("legal_name_ru") or entry.get("label_ru") or "").lower()
+        eid = str(entry.get("id") or "").lower()
+        website = str(entry.get("website") or "").lower()
+        if q in name or q in eid or (website and q in website):
+            hits.append(entry)
+            continue
+        # Token overlap for multi-word org names
+        tokens = [t for t in q.replace("«", " ").replace("»", " ").split() if len(t) >= 3]
+        if tokens and all(t in name or t in eid for t in tokens[:3]):
+            hits.append(entry)
+    return hits[:10]
+
+
 def lookup_vasp_by_wallet(address: str, chain: str) -> dict[str, Any] | None:
     return match_vasp_for_address(address, chain)

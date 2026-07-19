@@ -59,6 +59,6 @@ def graphql_manifest() -> dict[str, Any]:
         ],
         "mutations": [],
         "subscriptions": [],
-        "principle_ru": "GraphQL — read-only запросы для дашборда расследования (stub)",
+        "principle_ru": "GraphQL — read-only запросы для дашборда расследования (not configured)",
         "technical_debt": "TD-ASPP-1",
     }

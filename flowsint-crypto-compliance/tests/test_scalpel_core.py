@@ -85,29 +85,31 @@ def test_noise_filter_blocks_leak_source():
     assert res.rejected
 
 
-def test_registry_eight_collectors():
+def test_registry_combat_collectors():
     from flowsint_crypto_compliance.osint_core.scalpel.registry import (
         CELERY_COLLECTOR_TASKS,
         SCALPEL_COLLECTORS,
         registry_manifest,
     )
 
-    assert len(SCALPEL_COLLECTORS) == 10
-    assert len(registry_manifest()) == 10
-    assert len(CELERY_COLLECTOR_TASKS) == 10
+    assert len(SCALPEL_COLLECTORS) == 11
+    assert len(registry_manifest()) == 11
+    assert len(CELERY_COLLECTOR_TASKS) == 11
+    assert "username_probe" in CELERY_COLLECTOR_TASKS
 
 
 @pytest.mark.asyncio
 async def test_scalpel_engine_demo_hub():
     engine = ScalpelEngine(timeout=3.0)
     st = engine.status()
-    assert len(st["collectors"]) == 10
+    assert len(st["collectors"]) == 11
     result = await engine.collect("TRU_HUB_MSK", Chain.TRON)
     assert result.mentions
     assert result.noise_filter["quality_score"] > 0
     d = result.to_dict()
     assert d["engine"] == "FinSkalp Scalpel"
     assert "open_source_stack" in d
+    assert d.get("evidence_graph", {}).get("nodes")
     assert result.osint_depth == 1
 
 

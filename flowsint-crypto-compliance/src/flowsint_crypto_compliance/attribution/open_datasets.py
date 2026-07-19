@@ -35,6 +35,72 @@ _OPENSANCTIONS_CRYPTO_URL = os.getenv(
 )
 _TRONSCAN_ACCOUNT = "https://apilist.tronscanapi.com/api/accountv2"
 _BOOTSTRAPPED = False
+_LOCAL_SEEDS_LOADED = False
+
+
+def ensure_local_attribution_seeds(store: EntityLabelStore) -> int:
+    """Sync load of bundled OFAC/exchange seeds for Scalpel graph (no network)."""
+    global _LOCAL_SEEDS_LOADED
+    if _LOCAL_SEEDS_LOADED and store.count() > 0:
+        return store.count()
+    loaded = 0
+    try:
+        labels: list[EntityLabel] = []
+        tron_path = _DATA_DIR / "tron_exchange_seed.json"
+        if tron_path.is_file():
+            raw = json.loads(tron_path.read_text(encoding="utf-8"))
+            for row in raw if isinstance(raw, list) else raw.get("labels", []):
+                addr = row.get("address")
+                if not addr:
+                    continue
+                cat = _infer_category(str(row.get("label") or row.get("tag") or ""))
+                labels.append(
+                    EntityLabel(
+                        address=addr,
+                        chain="tron",
+                        label=str(row.get("label") or row.get("tag")),
+                        category=cat,
+                        confidence=float(row.get("confidence") or 0.75),
+                        source="tronscan",
+                        tier=TIER_OPEN_DATASET,
+                        risk_score=_category_risk(cat),
+                        evidence="tronscan:seed",
+                    )
+                )
+        for cached, source, tier, sanctioned in [
+            (_DATA_DIR / "ofac_crypto.json", "ofac_sdn", TIER_SANCTIONS, True),
+            (_DATA_DIR / "opensanctions_crypto.json", "opensanctions", TIER_SANCTIONS, True),
+        ]:
+            if cached.is_file():
+                labels.extend(
+                    _labels_from_json(cached, source=source, tier=tier, sanctioned=sanctioned)
+                )
+        gs = _DATA_DIR / "graphsense_seed.csv"
+        if gs.is_file():
+            with gs.open(encoding="utf-8", newline="") as f:
+                for row in csv.DictReader(f):
+                    chain = (row.get("chain") or "").lower()
+                    addr = row.get("address") or ""
+                    if not chain or not addr:
+                        continue
+                    labels.append(
+                        EntityLabel(
+                            address=addr,
+                            chain=chain,
+                            label=row.get("label") or row.get("entity") or "GraphSense",
+                            category=(row.get("category") or "exchange").lower(),
+                            confidence=float(row.get("confidence") or 0.8),
+                            source="graphsense",
+                            tier=TIER_OPEN_DATASET,
+                            risk_score=float(row.get("risk_score") or 15),
+                            evidence="graphsense:seed",
+                        )
+                    )
+        loaded = store.bulk_upsert(labels)
+        _LOCAL_SEEDS_LOADED = True
+    except Exception as exc:
+        _log.warning("Local attribution seeds failed: %s", exc)
+    return loaded
 
 
 async def bootstrap_open_datasets(store: EntityLabelStore) -> dict[str, Any]:
@@ -343,12 +409,16 @@ def _infer_chain_addr(value: str) -> tuple[str | None, str | None]:
 
 def _infer_category(name: str) -> str:
     n = name.lower()
-    if any(k in n for k in ("binance", "okx", "bybit", "kraken", "huobi", "htx", "exchange", "hot wallet")):
+    if any(k in n for k in ("binance", "okx", "bybit", "kraken", "huobi", "htx", "kucoin", "gate.io", "exchange", "hot wallet")):
         return "exchange"
     if any(k in n for k in ("gambling", "casino", "bet", "stake", "bc.game", "shuffle")):
         return "gambling"
     if any(k in n for k in ("sanction", "ofac", "mixer", "tornado")):
         return "sanctions"
+    if any(k in n for k in ("scam", "phishing", "ransomware", "hack")):
+        return "scam"
+    if any(k in n for k in (" llc", " ltd", " inc", "ao ", "ooo ", "ооо", "банк", "bank")):
+        return "organization"
     return "other"
 
 

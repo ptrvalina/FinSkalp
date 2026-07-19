@@ -65,7 +65,7 @@ export function useCan(role: InvestigationRole | null | undefined): Permissions 
 /**
  * Read permissions from the $investigationId layout route loader data.
  * Works anywhere rendered under that route — including components in
- * RootLayout like DetailsPanel, since the route is active when they render.
+ * the investigation workspace (e.g. DetailsPanel), since the route is active when they render.
  */
 export function usePermissions(): Permissions {
   const data = useLoaderData({ strict: false }) as

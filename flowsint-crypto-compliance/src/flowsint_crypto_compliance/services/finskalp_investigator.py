@@ -63,6 +63,8 @@ class FinSkalpInvestigationRequest:
     osint_depth: int = 2
     limit: int = 300
     collectors: list[str] | None = None
+    usernames: list[str] | None = None
+    counterparties: list[str] | None = None
 
 
 @dataclass
@@ -210,14 +212,17 @@ class FinSkalpInvestigator:
             f"контрагентов: {onchain.get('counterparties', 0)}",
         )
 
-        counterparties = _extract_counterparties(screening)
+        counterparties = list(
+            dict.fromkeys([*(req.counterparties or []), *_extract_counterparties(screening)])
+        )
         with span("finskalp.scalpel", depth=req.osint_depth, collectors=len(req.collectors or [])):
             scalpel_result = await self._scalpel.collect(
                 address,
                 chain,
-                counterparties=counterparties,
+                counterparties=counterparties or None,
                 depth=req.osint_depth,
                 collectors=req.collectors,
+                usernames=req.usernames,
             )
         open_result = scalpel_result.to_open_osint_result()
         open_dict = scalpel_result.to_dict()

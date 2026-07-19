@@ -30,7 +30,7 @@ export const useLogin = () => {
     mutationFn: authService.login,
     onSuccess: (data) => {
       setAuth(data.access_token, data.user)
-      navigate({ to: '/' })
+      navigate({ to: '/dashboard/fusion' })
     }
   })
 }

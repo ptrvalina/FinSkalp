@@ -53,7 +53,7 @@ export const REQUIRED_COMPONENTS = {
   cards: ['Card', 'WalletCard', 'InvestigationCard', 'EvidenceCard'],
   graph: ['ReactFlow', 'Minimap', 'Controls', 'Background'],
   timeline: ['ActivityTimeline'],
-  dashboards: ['CompliancePage', 'MetricsGrid'],
+  dashboards: ['FusionCommandCenter', 'FusionMissionStrip'],
 } as const
 
 export const BREAKPOINTS = {

@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, Navigate } from '@tanstack/react-router'
 import { Briefcase } from 'lucide-react'
 import { complianceService } from '@/api/compliance-service'
 import { useInvestigationUiContext } from '@/design-system'
-import { AnalystWorkspaceShell } from '@/components/analyst-workspace'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -59,11 +58,18 @@ export function InvestigationWorkspaceSection({ investigationId, investigationNa
 
   if (linkedCaseQuery.isLoading) {
     return (
-      <AnalystWorkspaceShell
-        investigationId={investigationId}
-        investigationName={investigationName}
-        caseRef={null}
-        linkedCaseLoading
+      <div className="flex min-h-[240px] items-center justify-center text-sm text-muted-foreground">
+        Загрузка кейса комплаенса…
+      </div>
+    )
+  }
+
+  if (caseRef) {
+    return (
+      <Navigate
+        to="/dashboard/fusion/investigation/$caseRef"
+        params={{ caseRef }}
+        replace
       />
     )
   }
@@ -89,7 +95,7 @@ export function InvestigationWorkspaceSection({ investigationId, investigationNa
             Создать кейс комплаенса
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <Link to="/dashboard/compliance">Открыть комплаенс</Link>
+            <Link to="/dashboard/fusion">Открыть Fusion Center</Link>
           </Button>
         </CardContent>
       </Card>
@@ -97,10 +103,10 @@ export function InvestigationWorkspaceSection({ investigationId, investigationNa
   }
 
   return (
-    <AnalystWorkspaceShell
-      investigationId={investigationId}
-      investigationName={investigationName}
-      caseRef={caseRef}
+    <Navigate
+      to="/dashboard/fusion/investigation/$caseRef"
+      params={{ caseRef: caseRef! }}
+      replace
     />
   )
 }

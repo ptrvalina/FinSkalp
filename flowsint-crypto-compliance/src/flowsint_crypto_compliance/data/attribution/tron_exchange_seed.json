@@ -3,7 +3,13 @@
   {"address": "TLaGjwhvAeiXQ3kf7eBT6ZtqjndSfy9Dir", "label": "Binance Hot Wallet", "category": "exchange", "confidence": 0.85},
   {"address": "TKHuVq1oK6XTBDXiwro9i6mYs2GCXdEJgZ", "label": "OKX", "category": "exchange", "confidence": 0.82},
   {"address": "TYASr5UV6HEcXatwdFQfmLVUqQQQMUxHLS", "label": "Bybit", "category": "exchange", "confidence": 0.82},
-  {"address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", "label": "USDT Contract", "category": "payment", "confidence": 0.99},
+  {"address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", "label": "USDT Contract (TRC20)", "category": "payment", "confidence": 0.99},
+  {"address": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8", "label": "USDC Contract (TRC20)", "category": "payment", "confidence": 0.95},
   {"address": "TGzz8AQViAVt5PJ7FQviLmZcEk2cGiwKoK", "label": "Huobi", "category": "exchange", "confidence": 0.8},
-  {"address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S", "label": "SunSwap", "category": "exchange", "confidence": 0.7}
+  {"address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S", "label": "SunSwap", "category": "dex", "confidence": 0.7},
+  {"address": "TXpqf8oAoRmSyY7vHa6VZYMKTGN9XdQJBG", "label": "KuCoin", "category": "exchange", "confidence": 0.8},
+  {"address": "TMdZgxWHg3Yr3LhQ7Je5ZEeLPfQ6kZyU6J", "label": "Gate.io", "category": "exchange", "confidence": 0.78},
+  {"address": "TAUN6FwrnwykaAxFjFJGTUqmMxmWKxYcX4", "label": "Poloniex", "category": "exchange", "confidence": 0.75},
+  {"address": "TKkeiboTkxXKJp4kdBgMpE9xbRjXBJkQBv", "label": "HTX Hot", "category": "exchange", "confidence": 0.78},
+  {"address": "TAzsQ9Gx8eqFNFSKcdXQHiRnj4wYs1YdJq", "label": "Bitfinex TRON", "category": "exchange", "confidence": 0.75}
 ]

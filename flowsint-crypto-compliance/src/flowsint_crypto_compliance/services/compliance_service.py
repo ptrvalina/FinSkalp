@@ -22,15 +22,13 @@ from flowsint_crypto_compliance.storage.db_models import (
     ComplianceCase,
     ComplianceCaseComment,
     ComplianceFusionRun,
+    OsintFinding,
 )
 from flowsint_crypto_compliance.storage.neo4j_exporter import EvidenceGraphNeo4jExporter
 from flowsint_crypto_compliance.platform.v2.neo4j_projection import project_evidence_graph
 from flowsint_crypto_compliance.storage.cache_factory import build_label_cache
 from flowsint_crypto_compliance.storage.neo4j_pivots import ComplianceNeo4jPivotExporter
-from flowsint_types.fiat_crypto import (
-    ControlPurchaseEvent,
-    LicensedPlatformEvent,
-)
+from flowsint_crypto_compliance.services.graph_timestamps import enrich_serialized_graph
 
 class ComplianceService:
     """Persistence + fusion orchestration for regulator compliance cases."""
@@ -286,21 +284,57 @@ class ComplianceService:
         )
         result = await engine.fuse(bundle)
 
-        evidence_graph = _serialize_evidence_graph(result.graph)
-        neo4j_unified = project_evidence_graph(
-            result.graph,
-            case_ref=case.case_ref,
-            investigation_id=str(case.investigation_id) if case.investigation_id else None,
+        existing_fr = case.fusion_result if isinstance(case.fusion_result, dict) else {}
+        existing_eg = (
+            existing_fr.get("evidence_graph")
+            if isinstance(existing_fr.get("evidence_graph"), dict)
+            else None
         )
-        neo4j_export = EvidenceGraphNeo4jExporter().export(
-            result.graph,
-            case_ref=case.case_ref,
-            investigation_id=str(case.investigation_id) if case.investigation_id else None,
-        )
-        neo4j_pivots = ComplianceNeo4jPivotExporter().export(
-            result.graph,
-            case_ref=case.case_ref,
-        )
+
+        fused_graph = enrich_serialized_graph(_serialize_evidence_graph(result.graph))
+        if existing_eg and (existing_eg.get("nodes") or fused_graph.get("nodes")):
+            from flowsint_crypto_compliance.services.graph_merge import merge_evidence_graphs
+
+            evidence_graph = enrich_serialized_graph(
+                merge_evidence_graphs(existing_eg, fused_graph, "append")
+            )
+        else:
+            evidence_graph = fused_graph
+
+        try:
+            neo4j_unified = project_evidence_graph(
+                result.graph,
+                case_ref=case.case_ref,
+                investigation_id=str(case.investigation_id) if case.investigation_id else None,
+            )
+        except Exception:
+            neo4j_unified = {"projected": 0, "case_ref": case.case_ref, "error": "projection_skipped"}
+
+        try:
+            neo4j_export = EvidenceGraphNeo4jExporter().export(
+                result.graph,
+                case_ref=case.case_ref,
+                investigation_id=str(case.investigation_id) if case.investigation_id else None,
+            )
+        except Exception:
+            neo4j_export = {"exported": False}
+
+        try:
+            neo4j_pivots = ComplianceNeo4jPivotExporter().export(
+                result.graph,
+                case_ref=case.case_ref,
+            )
+        except Exception:
+            neo4j_pivots = {}
+
+        hyps = list(existing_fr.get("hypotheses") or [])
+        if not hyps:
+            hyps = [
+                {
+                    "statement_ru": "Граф OSINT собран; банковские фиды отсутствуют — склейка ограниченная",
+                    "confidence": 0.55,
+                }
+            ]
 
         fusion_payload = {
             "case_ref": case.case_ref,
@@ -308,13 +342,14 @@ class ComplianceService:
             "bridges": [b.model_dump() for b in result.bridges],
             "linkage_scores": result.linkage_scores,
             "graph_stats": {
-                "nodes": len(result.graph.nodes),
-                "edges": len(result.graph.edges),
+                "nodes": len(evidence_graph.get("nodes") or []),
+                "edges": len(evidence_graph.get("edges") or []),
             },
             "evidence_graph": evidence_graph,
             "neo4j_unified": neo4j_unified,
             "neo4j_export": neo4j_export,
             "neo4j_pivots": neo4j_pivots,
+            "hypotheses": hyps,
         }
         case.fusion_result = fusion_payload
         case.status = "fused"
@@ -328,6 +363,21 @@ class ComplianceService:
             },
         )
         self._db.commit()
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.GRAPH_UPDATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "graph_stats": fusion_payload.get("graph_stats"),
+            },
+            investigation_id=case.investigation_id,
+            actor=str(case.owner_id),
+        )
         return fusion_payload
 
     def fuse_case_sync(
@@ -414,6 +464,31 @@ class ComplianceService:
         case.fusion_result = payload
         case.status = "reported"
         self._db.commit()
+        from flowsint_crypto_compliance.platform.v2.operator_events import (
+            OperatorEventType,
+            publish_operator_event,
+        )
+
+        publish_operator_event(
+            OperatorEventType.GRAPH_UPDATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "graph_stats": payload.get("graph_stats"),
+            },
+            investigation_id=case.investigation_id,
+            actor=str(case.owner_id),
+        )
+        publish_operator_event(
+            OperatorEventType.REPORT_GENERATED,
+            payload={
+                "case_id": str(case_id),
+                "case_ref": case.case_ref,
+                "format": "json",
+            },
+            investigation_id=case.investigation_id,
+            actor=str(case.owner_id),
+        )
         return payload
 
     def list_cases(
@@ -424,7 +499,10 @@ class ComplianceService:
         limit: int = 50,
         offset: int = 0,
     ) -> list[ComplianceCase]:
-        q = self._db.query(ComplianceCase).order_by(ComplianceCase.updated_at.desc())
+        q = self._db.query(ComplianceCase).order_by(
+            ComplianceCase.queue_priority.asc().nullslast(),
+            ComplianceCase.updated_at.desc(),
+        )
         if owner_id:
             q = q.filter(
                 (ComplianceCase.owner_id == owner_id) | (ComplianceCase.assignee_id == owner_id)
@@ -441,6 +519,7 @@ class ComplianceService:
         actor_id: uuid.UUID,
         assignee_id: uuid.UUID | None = None,
         priority: str | None = None,
+        queue_priority: int | None = None,
     ) -> ComplianceCase:
         from flowsint_crypto_compliance.services.case_workflow import (
             can_transition,
@@ -460,6 +539,8 @@ class ComplianceService:
             case.assignee_id = assignee_id
         if priority:
             case.priority = priority
+        if queue_priority is not None:
+            case.queue_priority = queue_priority
         case.due_at = sla_due_at(workflow_status)
         case.sla_breached = is_sla_breached(case.due_at, workflow_status)
         if case.sla_breached:
@@ -499,6 +580,150 @@ class ComplianceService:
             .all()
         )
 
+    def load_profiles(self, user_ids: set[uuid.UUID]) -> dict[uuid.UUID, Any]:
+        if not user_ids:
+            return {}
+        from flowsint_core.core.models import Profile
+
+        rows = self._db.query(Profile).filter(Profile.id.in_(user_ids)).all()
+        return {row.id: row for row in rows}
+
+    def get_case_risk_history(self, case_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Risk score time-series from audit log and stored fusion reports."""
+        from flowsint_crypto_compliance.services.graph_timestamps import _normalize_timestamp
+
+        points: list[dict[str, Any]] = []
+        seen: set[tuple[str, float]] = set()
+
+        def _add(ts_raw: Any, score: float, source: str) -> None:
+            ts = _normalize_timestamp(ts_raw)
+            if not ts or score is None:
+                return
+            key = (ts, round(float(score), 2))
+            if key in seen:
+                return
+            seen.add(key)
+            points.append({"ts": ts, "score": round(float(score), 2), "source": source})
+
+        for row in reversed(self.list_audit_log(case_id=case_id, limit=200)):
+            payload = row.payload or {}
+            score: float | None = None
+            if row.action == "wallet_screened" and payload.get("risk_score") is not None:
+                score = float(payload["risk_score"])
+            elif row.action in ("risk_score_changed", "risk_recalculated") and (
+                payload.get("score") is not None or payload.get("risk_score") is not None
+            ):
+                score = float(payload.get("score") if payload.get("score") is not None else payload["risk_score"])
+            if score is not None:
+                _add(row.created_at, score, row.action)
+
+        case = self.get_case(case_id)
+        if case and case.fusion_result:
+            fusion = case.fusion_result
+            fz = fusion.get("fz115_report") if isinstance(fusion.get("fz115_report"), dict) else fusion
+            if isinstance(fz, dict):
+                for key in ("illegal_flow_score", "risk_score"):
+                    if fz.get(key) is not None:
+                        _add(
+                            fz.get("generated_at") or case.updated_at,
+                            float(fz[key]),
+                            "fz115_report",
+                        )
+                        break
+            report = fusion.get("forensic_report") if isinstance(fusion.get("forensic_report"), dict) else None
+            if report and report.get("risk_score") is not None:
+                _add(case.updated_at, float(report["risk_score"]), "forensic_report")
+
+        points.sort(key=lambda p: p["ts"])
+        return points
+
+    def risk_trend_indicator(self, history: list[dict[str, Any]]) -> str | None:
+        if len(history) < 2:
+            return None
+        prev = float(history[-2]["score"])
+        curr = float(history[-1]["score"])
+        delta = curr - prev
+        if delta >= 5:
+            return "↑"
+        if delta <= -5:
+            return "↓"
+        return "→"
+
+    def get_cross_case_graph_links(self, case_ref: str, *, limit: int = 20) -> list[dict[str, Any]]:
+        case = self.get_case_by_ref(case_ref)
+        if not case:
+            return []
+
+        entity_keys: set[str] = set()
+        fusion = case.fusion_result or {}
+        graph = fusion.get("evidence_graph") if isinstance(fusion.get("evidence_graph"), dict) else {}
+        for node in graph.get("nodes") or []:
+            if not isinstance(node, dict):
+                continue
+            label = str(node.get("label") or node.get("id") or "").strip()
+            if not label:
+                continue
+            if ":" in label:
+                entity_keys.add(label.split(":", 1)[-1].lower())
+            elif len(label) >= 8:
+                entity_keys.add(label.lower())
+
+        findings = self._db.query(OsintFinding).filter(OsintFinding.case_id == case.id).all()
+        for finding in findings:
+            entity_keys.add(str(finding.entity_value).lower())
+
+        if not entity_keys:
+            return []
+
+        keys = list(entity_keys)[:50]
+        rows = (
+            self._db.query(OsintFinding, ComplianceCase)
+            .join(ComplianceCase, ComplianceCase.id == OsintFinding.case_id)
+            .filter(
+                OsintFinding.case_id != case.id,
+                OsintFinding.entity_value.in_(keys),
+            )
+            .order_by(ComplianceCase.updated_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+        links: list[dict[str, Any]] = []
+        seen: set[tuple[str, str]] = set()
+        for finding, other_case in rows:
+            dedupe = (other_case.case_ref, finding.entity_value)
+            if dedupe in seen:
+                continue
+            seen.add(dedupe)
+            links.append(
+                {
+                    "case_ref": other_case.case_ref,
+                    "case_id": str(other_case.id),
+                    "entity_type": finding.entity_type,
+                    "entity_value": finding.entity_value,
+                    "relation": "shared_entity",
+                    "confidence": finding.confidence,
+                }
+            )
+        return links
+
+    def reorder_case_queue(self, ordered_case_ids: list[uuid.UUID], *, actor_id: uuid.UUID) -> int:
+        updated = 0
+        for index, case_id in enumerate(ordered_case_ids):
+            case = self.get_case(case_id)
+            if not case:
+                continue
+            case.queue_priority = index
+            updated += 1
+        if updated:
+            self.log_audit(
+                actor_id=actor_id,
+                action="queue_reordered",
+                payload={"ordered_count": updated, "case_ids": [str(cid) for cid in ordered_case_ids[:50]]},
+            )
+            self._db.commit()
+        return updated
+
     def workflow_stats(self, owner_id: uuid.UUID | None = None) -> dict[str, Any]:
         from flowsint_crypto_compliance.services.case_workflow import WORKFLOW_STATUSES
 
@@ -515,27 +740,130 @@ class ComplianceService:
             "sla_breached": sum(1 for c in cases if c.sla_breached),
         }
 
+    def merge_case_graph(
+        self,
+        case_id: uuid.UUID,
+        evidence_graph: dict[str, Any],
+        *,
+        merge_mode: str = "append",
+        actor_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
+        from flowsint_crypto_compliance.services.graph_merge import merge_evidence_graphs
+        from flowsint_crypto_compliance.services.graph_timestamps import enrich_serialized_graph
+
+        case = self.get_case(case_id)
+        if not case:
+            raise ValueError("Case not found")
+
+        fusion = dict(case.fusion_result or {})
+        current = fusion.get("evidence_graph") if isinstance(fusion.get("evidence_graph"), dict) else None
+        merged = merge_evidence_graphs(current, evidence_graph, merge_mode)
+        merged = enrich_serialized_graph(merged)
+        stats = {"nodes": len(merged.get("nodes") or []), "edges": len(merged.get("edges") or [])}
+
+        fusion["evidence_graph"] = merged
+        fusion["graph_stats"] = stats
+        fusion.setdefault("case_ref", case.case_ref)
+        case.fusion_result = fusion
+        self._db.commit()
+        self._db.refresh(case)
+
+        if actor_id:
+            self.log_audit(
+                actor_id=actor_id,
+                action="graph_merged",
+                payload={
+                    "case_id": str(case_id),
+                    "case_ref": case.case_ref,
+                    "merge_mode": merge_mode,
+                    "graph_stats": stats,
+                },
+            )
+            self._db.commit()
+
+        return {
+            "ok": True,
+            "case_ref": case.case_ref,
+            "graph_stats": stats,
+            "evidence_graph": merged,
+        }
+
 
 def _serialize_evidence_graph(graph) -> dict[str, Any]:
-    return {
-        "nodes": [
-            {
+    """Prefer Scalpel bridge serializer so attribution/sanctions flags survive merge."""
+    try:
+        from flowsint_crypto_compliance.osint_core.scalpel.evidence_bridge import (
+            serialize_evidence_graph as _scalpel_serialize,
+        )
+
+        payload = _scalpel_serialize(graph)
+        from flowsint_crypto_compliance.services.graph_timestamps import (
+            _normalize_timestamp,
+            _payload_timestamp,
+        )
+
+        for node_row, node in zip(payload.get("nodes") or [], graph.nodes):
+            ts = _payload_timestamp(node.payload or {})
+            if ts:
+                node_row["timestamp"] = ts
+                node_row["occurred_at"] = ts
+        for edge_row, edge in zip(payload.get("edges") or [], graph.edges):
+            for hint in edge.evidence or []:
+                ts = _normalize_timestamp(hint) if isinstance(hint, str) and "T" in hint else None
+                if ts:
+                    edge_row["timestamp"] = ts
+                    edge_row["occurred_at"] = ts
+                    break
+        return payload
+    except Exception:
+        from flowsint_crypto_compliance.services.graph_timestamps import (
+            _normalize_timestamp,
+            _payload_timestamp,
+        )
+
+        nodes: list[dict[str, Any]] = []
+        for node in graph.nodes:
+            node_payload = node.payload or {}
+            ts = _payload_timestamp(node_payload)
+            node_row: dict[str, Any] = {
                 "id": node.node_id,
                 "kind": node.kind.value,
-                "label": node.primary_key,
+                "label": node_payload.get("display_label") or node.primary_key,
                 "region": node.region,
                 "confidence": node.confidence,
             }
-            for node in graph.nodes
-        ],
-        "edges": [
-            {
+            for key in (
+                "address",
+                "attribution",
+                "owner",
+                "owner_category",
+                "sanctioned",
+                "scam",
+                "flags",
+                "risk_tags",
+            ):
+                if key in node_payload:
+                    node_row[key] = node_payload[key]
+            if ts:
+                node_row["timestamp"] = ts
+                node_row["occurred_at"] = ts
+            nodes.append(node_row)
+
+        edges: list[dict[str, Any]] = []
+        for edge in graph.edges:
+            edge_row: dict[str, Any] = {
                 "id": edge.edge_id,
                 "source": edge.from_id,
                 "target": edge.to_id,
                 "rel_type": edge.rel_type,
                 "strength": edge.strength,
             }
-            for edge in graph.edges
-        ],
-    }
+            for hint in edge.evidence or []:
+                ts = _normalize_timestamp(hint) if isinstance(hint, str) and "T" in hint else None
+                if ts:
+                    edge_row["timestamp"] = ts
+                    edge_row["occurred_at"] = ts
+                    break
+            edges.append(edge_row)
+
+        return {"nodes": nodes, "edges": edges}

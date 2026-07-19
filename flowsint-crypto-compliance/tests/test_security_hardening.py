@@ -32,6 +32,24 @@ def test_sanitize_username_rejects_shell():
         pass
 
 
+def test_sanitize_username_transliterates_cyrillic_fio():
+    assert sanitize_username("Иванов Алексей") == "ivanov_aleksey"
+    assert sanitize_username("ivanov_aleksey") == "ivanov_aleksey"
+
+
+def test_bare_seed_query_strips_prefixes():
+    from flowsint_crypto_compliance.osint_core.scalpel.seed_query import (
+        bare_seed_query,
+        person_to_usernames,
+        seed_kind,
+    )
+
+    assert bare_seed_query("org:ООО Пример") == "ООО Пример"
+    assert bare_seed_query("person:Иванов Алексей") == "Иванов Алексей"
+    assert seed_kind("org:Acme") == "org"
+    assert "ivanov_aleksey" in person_to_usernames("Иванов Алексей")
+
+
 def test_upload_size_limit():
     try:
         assert_upload_size(100 * 1024 * 1024)

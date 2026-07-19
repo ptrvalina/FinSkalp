@@ -16,10 +16,50 @@ class ComplianceCaseRead(BaseModel):
     status: str
     investigation_id: Optional[UUID] = None
     fusion_result: Optional[dict[str, Any]] = None
+    workflow_status: Optional[str] = None
+    assignee_id: Optional[UUID] = None
+    assignee_name: Optional[str] = None
+    analyst_name_ru: Optional[str] = None
+    priority: Optional[str] = None
+    due_at: Optional[datetime] = None
+    sla_breached: bool = False
+    queue_priority: Optional[int] = None
+    risk_trend: Optional[list[dict[str, Any]]] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+
+class RiskHistoryPoint(BaseModel):
+    ts: str
+    score: float
+    source: str = ""
+
+
+class RiskHistoryRead(BaseModel):
+    case_id: str
+    points: list[RiskHistoryPoint] = Field(default_factory=list)
+    trend: Optional[str] = None
+
+
+class CrossCaseGraphLink(BaseModel):
+    case_ref: str
+    case_id: str
+    entity_type: str
+    entity_value: str
+    relation: str = "shared_entity"
+    confidence: float = 0.5
+
+
+class CrossCaseGraphLinksRead(BaseModel):
+    case_ref: str
+    links: list[CrossCaseGraphLink] = Field(default_factory=list)
+    count: int = 0
+
+
+class CaseQueueOrderRequest(BaseModel):
+    case_ids: list[UUID] = Field(..., min_length=1, max_length=200)
 
 
 class BankFeedBatchIn(BaseModel):
@@ -60,6 +100,9 @@ class WalletScreenResultRead(BaseModel):
     onchain_summary: dict[str, Any]
     recommendations_ru: List[str]
     limitations_ru: List[str]
+    confidence_dimensions: Optional[dict[str, Any]] = None
+    explain: Optional[dict[str, Any]] = None
+    entity: Optional[dict[str, Any]] = None
 
 
 class FusionResultRead(BaseModel):
@@ -123,6 +166,7 @@ class ScalpelCollectRequest(BaseModel):
     depth: int = Field(2, ge=1, le=3)
     counterparties: List[str] = Field(default_factory=list)
     usernames: List[str] = Field(default_factory=list)
+    collectors: List[str] = Field(default_factory=list)
 
 
 class ScalpelAsyncResponse(BaseModel):
@@ -217,9 +261,12 @@ class ComplianceCaseListItem(BaseModel):
     investigation_id: Optional[UUID] = None
     workflow_status: str = "new"
     assignee_id: Optional[UUID] = None
+    assignee_name: Optional[str] = None
+    analyst_name_ru: Optional[str] = None
     priority: str = "normal"
     due_at: Optional[datetime] = None
     sla_breached: bool = False
+    queue_priority: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -230,6 +277,7 @@ class CaseTransitionRequest(BaseModel):
     workflow_status: str = Field(..., pattern="^(new|triage|investigating|pending_filing|filed|archived)$")
     assignee_id: Optional[UUID] = None
     priority: Optional[str] = Field(None, pattern="^(low|normal|high|critical)$")
+    queue_priority: Optional[int] = Field(None, ge=0, le=9999)
 
 
 class CaseCommentCreate(BaseModel):
@@ -288,4 +336,43 @@ class WebhookRegisterResponse(BaseModel):
     bank_id: str
     secret_hint: str
     enabled: bool
+
+
+class ComplianceInboxItem(BaseModel):
+    """Unified operator inbox row — backed by ComplianceCase (single source of truth)."""
+
+    id: str
+    case_id: str
+    case_ref: str
+    alert_code: str
+    priority: str
+    workflow_status: str
+    title_ru: str
+    investigation_id: Optional[UUID] = None
+    assignee_id: Optional[UUID] = None
+    assignee_name: Optional[str] = None
+    analyst_name_ru: Optional[str] = None
+    sla_breached: bool = False
+    due_at: Optional[datetime] = None
+
+
+class ComplianceReportListItem(BaseModel):
+    case_id: str
+    case_ref: str
+    report_id: Optional[str] = None
+    typology_code: Optional[str] = None
+    risk_level: Optional[str] = None
+    decision_ru: Optional[str] = None
+    generated_at: Optional[str] = None
+
+class GraphMergeRequest(BaseModel):
+    evidence_graph: dict[str, Any]
+    merge_mode: str = Field(default="append", pattern=r"^(append|replace)$")
+
+
+class GraphMergeResponse(BaseModel):
+    ok: bool = True
+    case_ref: str
+    graph_stats: dict[str, int]
+    evidence_graph: dict[str, Any]
 

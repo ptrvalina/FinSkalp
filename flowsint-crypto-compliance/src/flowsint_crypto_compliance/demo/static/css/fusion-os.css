@@ -1,0 +1,837 @@
+/* FinSkalp Fusion OS — Constitution v3.0 (self-contained shell, no legacy tokens) */
+
+:root,
+body.fusion-os {
+  --fusion-bg-void: #0B1118;
+  --fusion-bg-deck: #111A24;
+  --fusion-bg-panel: #17222E;
+  --fusion-bg-interactive: #1E2B39;
+  --fusion-bg-raised: #1E2B39;
+  --fusion-border: #2A3847;
+  --fusion-border-strong: #364656;
+
+  --fusion-text-primary: rgba(255, 255, 255, 0.92);
+  --fusion-text-secondary: rgba(255, 255, 255, 0.68);
+  --fusion-text-tertiary: rgba(255, 255, 255, 0.45);
+  --fusion-text-mono: rgba(255, 255, 255, 0.82);
+
+  --fusion-ops-green: #3BA86B;
+  --fusion-ops-yellow: #D4A017;
+  --fusion-ops-orange: #D4A017;
+  --fusion-ops-red: #D64545;
+  --fusion-ops-purple: #9B7FD4;
+  --fusion-ops-cyan: #2EC4CF;
+  --fusion-ops-blue: #4A8FD4;
+  --fusion-ops-gray: rgba(255, 255, 255, 0.45);
+
+  --fusion-radius-sm: 2px;
+  --fusion-radius-md: 4px;
+
+  --fusion-space-1: 4px;
+  --fusion-space-2: 8px;
+  --fusion-space-3: 12px;
+  --fusion-space-4: 16px;
+
+  --fusion-rail-width: 48px;
+  --fusion-strip-height: 48px;
+  --fusion-ribbon-height: 28px;
+  --fusion-dock-height: 28%;
+  --fusion-dock-min: 180px;
+  --fusion-panel-header: 28px;
+  --fusion-row-height: 26px;
+
+  --fusion-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --fusion-font-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  --fusion-text-2xs: 9px;
+  --fusion-text-xs: 10px;
+  --fusion-text-sm: 11px;
+  --fusion-text-base: 12px;
+  --fusion-text-md: 13px;
+}
+
+/* ── Reset legacy admin shell ── */
+body.fusion-os {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  background: var(--fusion-bg-void) !important;
+  color: var(--fusion-text-primary);
+  font-family: var(--fusion-font-sans);
+  font-size: var(--fusion-text-sm);
+}
+
+body.fusion-os .fs-topbar,
+body.fusion-os aside.bg-surface-dim,
+body.fusion-os footer.fixed,
+body.fusion-os .fs-kpi,
+body.fusion-os .mega-stats,
+body.fusion-os .dash-grid,
+body.fusion-os .page-title {
+  display: none !important;
+}
+
+body.fusion-os::before {
+  display: none !important;
+}
+
+body.fusion-os .fs-app-main {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body.fusion-os .material-symbols-outlined {
+  display: none !important;
+}
+
+/* ── Demo banner ── */
+.fusion-demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fusion-space-2);
+  background: color-mix(in srgb, var(--fusion-ops-yellow) 12%, var(--fusion-bg-deck));
+  border-bottom: 1px solid color-mix(in srgb, var(--fusion-ops-yellow) 35%, transparent);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-demo-banner a {
+  color: var(--fusion-ops-cyan);
+}
+
+body.fusion-os.has-demo-banner .fusion-root {
+  top: 22px;
+  height: calc(100vh - 22px);
+}
+
+/* ── Root shell ── */
+.fusion-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  background: var(--fusion-bg-void);
+  z-index: 100;
+}
+
+/* ── Icon rail ── */
+.fusion-rail {
+  width: var(--fusion-rail-width);
+  min-width: var(--fusion-rail-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fusion-space-1);
+  padding: var(--fusion-space-2) 0;
+  background: var(--fusion-bg-deck);
+  border-right: 1px solid var(--fusion-border);
+  z-index: 10;
+}
+
+.fusion-rail__brand {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+  font-weight: 700;
+  color: var(--fusion-ops-blue);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  margin-bottom: var(--fusion-space-2);
+}
+
+.fusion-rail__ver {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-tertiary);
+  margin-bottom: var(--fusion-space-2);
+}
+
+.fusion-rail__sep {
+  width: 28px;
+  height: 1px;
+  background: var(--fusion-border);
+  margin: var(--fusion-space-1) 0;
+}
+
+.fusion-rail__btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--fusion-radius-sm);
+  background: transparent;
+  color: var(--fusion-text-tertiary);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-sm);
+  cursor: pointer;
+  transition: color 80ms, background 80ms, border-color 80ms;
+}
+
+.fusion-rail__btn:hover {
+  color: var(--fusion-text-secondary);
+  background: var(--fusion-bg-raised);
+}
+
+.fusion-rail__btn--active {
+  color: var(--fusion-ops-cyan);
+  border-color: color-mix(in srgb, var(--fusion-ops-cyan) 30%, transparent);
+  background: color-mix(in srgb, var(--fusion-ops-cyan) 8%, transparent);
+  box-shadow: inset 2px 0 0 var(--fusion-ops-cyan);
+}
+
+.fusion-rail__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  background: var(--fusion-ops-red);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+
+.fusion-rail__spacer {
+  flex: 1;
+}
+
+/* ── Main column ── */
+.fusion-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Intelligence ribbon (alerts ticker) ── */
+.intelligence-ribbon {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--fusion-ribbon-height);
+  max-height: var(--fusion-ribbon-height);
+  border-bottom: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-panel);
+  overflow: hidden;
+}
+
+.intelligence-ribbon::before {
+  content: 'LIVE';
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--fusion-space-3);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--fusion-ops-cyan);
+  border-right: 1px solid var(--fusion-border);
+}
+
+.fusion-ribbon-ticker {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-space-4);
+  overflow-x: auto;
+  padding: 0 var(--fusion-space-3);
+  scrollbar-width: none;
+}
+
+.fusion-ribbon-ticker::-webkit-scrollbar {
+  display: none;
+}
+
+.fusion-ribbon-ticker .feed-row {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-secondary);
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.fusion-ribbon-ticker .feed-row.feed-graph-diff {
+  color: var(--fusion-ops-cyan);
+}
+
+.fusion-ribbon-ticker .feed-row.feed-graph-diff .feed-src {
+  color: var(--fusion-ops-blue);
+}
+
+/* Living graph pulse (U10 parity) */
+.graph-stage--live-breathe {
+  animation: fusion-graph-breathe 2.8s ease-out 1;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fusion-ops-cyan) 35%, transparent);
+}
+
+.graph-stage--live.graph-stage--live-breathe {
+  animation: fusion-graph-breathe 2.8s ease-out infinite;
+}
+
+@keyframes fusion-graph-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  40% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fusion-ops-cyan) 55%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graph-stage--live-breathe {
+    animation: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fusion-ops-cyan) 25%, transparent);
+  }
+}
+
+/* ── Mission strip ── */
+.mission-strip,
+.fusion-deck__mission {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  min-height: var(--fusion-strip-height);
+  border-bottom: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-deck);
+  scrollbar-width: thin;
+}
+
+.fusion-deck-mission__cell {
+  flex: 0 0 auto;
+  min-width: 88px;
+  padding: var(--fusion-space-2) var(--fusion-space-3);
+  border-right: 1px solid var(--fusion-border);
+}
+
+.fusion-deck-mission__label {
+  display: block;
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-deck-mission__value {
+  display: block;
+  margin-top: var(--fusion-space-1);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-base);
+  font-weight: 600;
+  color: var(--fusion-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.fusion-deck-mission__value--ops { color: var(--fusion-ops-blue); }
+.fusion-deck-mission__value--warn { color: var(--fusion-ops-orange); }
+.fusion-deck-mission__value--crit { color: var(--fusion-ops-red); }
+
+/* ── STR pipeline ── */
+.str-pipeline,
+.fusion-deck__str {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fusion-space-1);
+  padding: var(--fusion-space-2) var(--fusion-space-3);
+  border-bottom: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-panel);
+  min-height: 32px;
+}
+
+.fusion-deck-str__pill {
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px var(--fusion-space-2);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  color: var(--fusion-text-tertiary);
+  white-space: nowrap;
+}
+
+.fusion-deck-str__pill--done {
+  color: var(--fusion-ops-green);
+  border-color: color-mix(in srgb, var(--fusion-ops-green) 35%, transparent);
+}
+
+.fusion-deck-str__pill--running {
+  color: var(--fusion-ops-cyan);
+  border-color: color-mix(in srgb, var(--fusion-ops-cyan) 40%, transparent);
+  background: color-mix(in srgb, var(--fusion-ops-cyan) 8%, transparent);
+}
+
+.fusion-deck-str__arrow {
+  color: var(--fusion-text-tertiary);
+  font-size: var(--fusion-text-2xs);
+}
+
+/* ── Workspace: queue | graph 67% | MIO ── */
+.fusion-workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.fusion-workspace-mission {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 18% 1fr 22%;
+  gap: 1px;
+  background: var(--fusion-border);
+}
+
+.fusion-workspace-alt {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--fusion-bg-void);
+}
+
+.fusion-workspace-alt .page-title,
+.fusion-workspace-alt .wallet-screen-layout,
+.fusion-workspace-alt .osint-layout,
+.fusion-workspace-alt .ops-workspace,
+.fusion-workspace-alt .ic-layout,
+.fusion-workspace-alt .ms-layout,
+.fusion-workspace-alt .platform-grid {
+  background: var(--fusion-bg-void);
+}
+
+/* ── Zones ── */
+.fusion-zone {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--fusion-bg-deck);
+  overflow: hidden;
+}
+
+.fusion-zone--graph {
+  background: var(--fusion-bg-void);
+}
+
+.fusion-zone__label {
+  flex: 0 0 auto;
+  height: var(--fusion-panel-header);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--fusion-space-3);
+  border-bottom: 1px solid var(--fusion-border);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-zone__content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fusion-zone--graph .fusion-zone__content {
+  min-height: 65vh;
+}
+
+/* ── Graph stage ── */
+.graph-stage,
+.fusion-deck-graph-mount {
+  width: 100%;
+  height: 100%;
+  min-height: 65vh;
+  background: var(--fusion-bg-void);
+  position: relative;
+}
+
+.fusion-deck-graph-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 65vh;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-sm);
+  color: var(--fusion-text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── MIO panel ── */
+.mio-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mio-panel__cards {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--fusion-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fusion-space-2);
+}
+
+.mio-card {
+  padding: var(--fusion-space-2);
+  background: var(--fusion-bg-panel);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+}
+
+.mio-card__prio {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mio-card__prio--critical { color: var(--fusion-ops-red); }
+.mio-card__prio--high { color: var(--fusion-ops-orange); }
+.mio-card__prio--medium { color: var(--fusion-ops-yellow); }
+.mio-card__prio--low { color: var(--fusion-ops-blue); }
+
+.mio-card__title {
+  margin-top: var(--fusion-space-1);
+  font-size: var(--fusion-text-base);
+  font-weight: 600;
+  color: var(--fusion-text-primary);
+}
+
+.mio-card__rationale {
+  margin-top: var(--fusion-space-1);
+  font-size: var(--fusion-text-sm);
+  color: var(--fusion-text-secondary);
+  line-height: 1.4;
+}
+
+.mio-card__actions {
+  margin-top: var(--fusion-space-2);
+  display: flex;
+  gap: var(--fusion-space-1);
+}
+
+.mio-card__btn {
+  padding: 3px var(--fusion-space-2);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  background: transparent;
+  color: var(--fusion-text-tertiary);
+  cursor: pointer;
+}
+
+.mio-card__btn--execute {
+  color: var(--fusion-ops-blue);
+  border-color: color-mix(in srgb, var(--fusion-ops-blue) 35%, transparent);
+}
+
+.mio-empty {
+  padding: var(--fusion-space-4);
+  text-align: center;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+/* ── Dense tables (queue) ── */
+.fusion-deck-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-xs);
+}
+
+.fusion-deck-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--fusion-bg-panel);
+}
+
+.fusion-deck-table th {
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  text-align: left;
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+  border-bottom: 1px solid var(--fusion-border);
+}
+
+.fusion-deck-table td {
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  height: var(--fusion-row-height);
+  color: var(--fusion-text-mono);
+  border-bottom: 1px solid color-mix(in srgb, var(--fusion-border) 50%, transparent);
+  cursor: pointer;
+}
+
+.fusion-deck-table tbody tr:hover td {
+  background: var(--fusion-bg-interactive);
+}
+
+.fusion-deck-table tbody tr.is-new td {
+  color: var(--fusion-ops-cyan);
+}
+
+.fusion-deck-table .prio-critical { color: var(--fusion-ops-red); }
+.fusion-deck-table .prio-high { color: var(--fusion-ops-orange); }
+.fusion-deck-table .prio-medium { color: var(--fusion-ops-yellow); }
+
+.fusion-deck-queue {
+  height: 100%;
+  overflow: auto;
+}
+
+.fusion-deck-empty {
+  padding: var(--fusion-space-4);
+  text-align: center;
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-tertiary);
+}
+
+/* ── Bottom dock ── */
+.fusion-dock {
+  flex: 0 0 auto;
+  min-height: var(--fusion-dock-min);
+  max-height: 32vh;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-deck);
+}
+
+.fusion-dock__tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-panel);
+}
+
+.fusion-dock__tab {
+  padding: var(--fusion-space-2) var(--fusion-space-3);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: color 80ms, border-color 80ms;
+}
+
+.fusion-dock__tab:hover {
+  color: var(--fusion-text-secondary);
+}
+
+.fusion-dock__tab--active {
+  color: var(--fusion-text-primary);
+  border-bottom-color: var(--fusion-ops-blue);
+}
+
+.fusion-dock__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.fusion-dock__panel {
+  display: none;
+  height: 100%;
+  overflow: auto;
+}
+
+.fusion-dock__panel--active {
+  display: block;
+}
+
+.fusion-dock__panel .feed-list {
+  padding: var(--fusion-space-2);
+}
+
+/* ── Feed rows (scoped) ── */
+.fusion-os .feed-row {
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--fusion-border) 40%, transparent);
+  font-size: var(--fusion-text-xs);
+}
+
+.fusion-os .feed-row.sev-critical,
+.fusion-os .feed-row.sev-severe {
+  border-left: 2px solid var(--fusion-ops-red);
+}
+
+.fusion-os .feed-row.sev-high {
+  border-left: 2px solid var(--fusion-ops-orange);
+}
+
+/* ── Hidden utility ── */
+.hidden {
+  display: none !important;
+}
+
+.workspace-full {
+  height: 100%;
+  overflow: auto;
+}
+
+.workspace-full.hidden {
+  display: none !important;
+}
+
+/* ── Legacy view content inside fusion (scoped overrides) ── */
+body.fusion-os .workspace-full .section,
+body.fusion-os .workspace-full .btn,
+body.fusion-os .workspace-full .wallet-input {
+  font-family: var(--fusion-font-sans);
+}
+
+body.fusion-os .ops-workspace {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100%;
+}
+
+/* ── Command palette hint ── */
+.fusion-cmd-hint {
+  position: fixed;
+  bottom: var(--fusion-space-3);
+  right: var(--fusion-space-3);
+  z-index: 300;
+  padding: var(--fusion-space-1) var(--fusion-space-2);
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-2xs);
+  color: var(--fusion-text-tertiary);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+  background: var(--fusion-bg-panel);
+  pointer-events: none;
+}
+
+.fusion-cmd-hint kbd {
+  color: var(--fusion-ops-blue);
+}
+
+/* ── Scrollbars ── */
+.fusion-os ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.fusion-os ::-webkit-scrollbar-track {
+  background: var(--fusion-bg-void);
+}
+
+.fusion-os ::-webkit-scrollbar-thumb {
+  background: var(--fusion-border-strong);
+}
+
+/* ── Context drawers (forms never replace workspace — Constitution §9) ── */
+.fusion-context-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 35;
+  width: min(480px, 42vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--fusion-bg-panel);
+  border-left: 1px solid var(--fusion-border);
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.45);
+  transform: translateX(100%);
+  transition: transform 200ms ease-out;
+  overflow: hidden;
+}
+
+.fusion-context-drawer.fusion-context-drawer--open,
+.fusion-context-drawer:not(.hidden) {
+  transform: translateX(0);
+}
+
+.fusion-context-drawer .page-title h2 {
+  font-size: var(--fusion-text-md);
+  font-weight: 600;
+  margin: 0;
+}
+
+.fusion-context-drawer .page-title .subtitle {
+  font-size: var(--fusion-text-xs);
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(11, 17, 24, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+
+.fusion-drawer-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fusion-context-drawer__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  border: 1px solid var(--fusion-border);
+  background: var(--fusion-bg-deck);
+  color: var(--fusion-text-secondary);
+  font-size: var(--fusion-text-xs);
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  border-radius: var(--fusion-radius-sm);
+}
+
+.fusion-context-drawer__close:hover {
+  color: var(--fusion-text-primary);
+}

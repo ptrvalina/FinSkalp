@@ -1,24 +1,7 @@
 import { fetchWithAuth } from './api'
 
-const COMPLIANCE_API =
-  import.meta.env.VITE_COMPLIANCE_API?.replace(/\/$/, '') ||
-  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ||
-  ''
-
+/** Production operator surface: all compliance calls go through JWT API (:5001 / same-origin). */
 async function complianceFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
-  const isDemoStand = Boolean(import.meta.env.VITE_COMPLIANCE_API)
-  const url = `${COMPLIANCE_API}${endpoint}`
-
-  if (isDemoStand) {
-    const headers: HeadersInit = { 'Content-Type': 'application/json', ...options.headers }
-    const response = await fetch(url, { ...options, headers })
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.detail || `Ошибка ${response.status}`)
-    }
-    if (response.status === 204) return null
-    return response.json()
-  }
   return fetchWithAuth(endpoint, options)
 }
 
@@ -29,11 +12,29 @@ export type ComplianceCaseListItem = {
   investigation_id?: string | null
   workflow_status: string
   assignee_id?: string | null
+  assignee_name?: string | null
+  analyst_name_ru?: string | null
   priority?: string
   due_at?: string | null
   sla_breached?: boolean
+  queue_priority?: number | null
   created_at?: string
   updated_at?: string
+}
+
+export type RiskHistoryPoint = {
+  ts: string
+  score: number
+  source?: string
+}
+
+export type CrossCaseGraphLink = {
+  case_ref: string
+  case_id: string
+  entity_type: string
+  entity_value: string
+  relation: string
+  confidence: number
 }
 
 export type WorkflowStats = {
@@ -47,8 +48,98 @@ export type ComplianceCase = {
   case_ref: string
   status: string
   investigation_id?: string | null
+  workflow_status?: string
   fusion_result?: Record<string, unknown> | null
   priority?: string
+  assignee_id?: string | null
+  assignee_name?: string | null
+  analyst_name_ru?: string | null
+  due_at?: string | null
+  sla_breached?: boolean
+  queue_priority?: number | null
+  risk_trend?: RiskHistoryPoint[] | null
+}
+
+export type ConfidenceDimensions = {
+  identity_confidence: number
+  evidence_strength: number
+  relationship_confidence: number
+  source_reliability: number
+  aggregate_risk_score: number
+  explain_ru?: Record<string, string>
+}
+
+export type WalletScreenExplain = {
+  dimensions?: Record<string, string>
+  risk_breakdown?: {
+    total?: number
+    components?: Array<{
+      component: string
+      points: number
+      pct: number
+      explanation_ru: string
+    }>
+    methodology_ru?: string
+  }
+}
+
+export type WalletScreenResult = {
+  screening_id: string
+  address: string
+  chain: string
+  risk_score: number
+  risk_level: string
+  confidence: number
+  summary_ru: string
+  findings: Array<Record<string, unknown>>
+  evidence_chain: string[]
+  source_status: Record<string, string>
+  onchain_summary: Record<string, unknown>
+  recommendations_ru: string[]
+  limitations_ru: string[]
+  confidence_dimensions?: ConfidenceDimensions | null
+  explain?: WalletScreenExplain | null
+  entity?: Record<string, unknown>
+}
+
+export type OperatorEventCatalog = {
+  schema_version: string
+  platform_schema_version: string
+  events: Array<{ type: string; platform_event: string; versioned: boolean }>
+}
+
+export type ScalpelCollector = {
+  id: string
+  name: string
+  description: string
+  group: string
+  ui_status: 'live' | 'needs_config' | 'in_development'
+  status: string
+  status_ru?: string
+  category?: string
+  last_health_check?: string | null
+  health_status?: string | null
+  latency_ms?: number | null
+  request_count: number
+  error_count: number
+  api_key_hint?: string | null
+  requires_env?: string[]
+  call_history: Array<{ id?: string; type?: string; ts?: number; text_ru?: string; severity?: string }>
+  recent_errors: Array<{ id?: string; type?: string; ts?: number; text_ru?: string; severity?: string }>
+  default_checked?: boolean
+  selectable?: boolean
+}
+
+export type ScalpelCollectorsCatalog = {
+  collectors: ScalpelCollector[]
+  groups: Record<string, ScalpelCollector[]>
+  group_order: string[]
+  health_summary?: {
+    status?: string
+    collectors_ok?: number
+    collectors_total?: number
+    checked_at?: string
+  }
 }
 
 export type EvidenceGraph = {
@@ -58,6 +149,9 @@ export type EvidenceGraph = {
     label: string
     region?: string | null
     confidence?: number
+    timestamp?: string
+    occurred_at?: string
+    ts?: string
   }>
   edges: Array<{
     id: string
@@ -65,6 +159,9 @@ export type EvidenceGraph = {
     target: string
     rel_type: string
     strength?: number
+    timestamp?: string
+    occurred_at?: string
+    ts?: string
   }>
 }
 
@@ -100,10 +197,10 @@ export const complianceService = {
   },
 
   fuseCaseStream(caseId: string, scenarioId?: string) {
-    const base = COMPLIANCE_API || ''
+    const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || ''
     const token = localStorage.getItem('auth-token')
     const headers: HeadersInit = { 'Content-Type': 'application/json' }
-    if (token && !import.meta.env.VITE_COMPLIANCE_API) {
+    if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
     return fetch(`${base}/api/compliance/cases/${caseId}/fuse/stream`, {
@@ -132,7 +229,121 @@ export const complianceService = {
     return complianceFetch('/api/compliance/wallets/screen', {
       method: 'POST',
       body: JSON.stringify({ address, chain, limit: 50 })
-    })
+    }) as Promise<WalletScreenResult>
+  },
+
+  decomposeConfidence(payload: {
+    screening: Record<string, unknown>
+    attribution?: Record<string, unknown>
+  }) {
+    return complianceFetch('/api/platform/v2/confidence/decompose', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }) as Promise<ConfidenceDimensions>
+  },
+
+  getOperatorEventCatalog() {
+    return complianceFetch('/api/platform/v2/operator-events/catalog') as Promise<OperatorEventCatalog>
+  },
+
+  getScalpelCollectors() {
+    return complianceFetch('/api/compliance/scalpel/collectors') as Promise<ScalpelCollectorsCatalog>
+  },
+
+  scalpelCollect(payload: {
+    address: string
+    chain?: string
+    depth?: number
+    collectors?: string[] | null
+    usernames?: string[]
+    counterparties?: string[]
+    caseRef?: string
+  }) {
+    return complianceFetch('/api/platform/v2/scalpel/collect', {
+      method: 'POST',
+      body: JSON.stringify({
+        address: payload.address,
+        chain: payload.chain ?? 'tron',
+        depth: payload.depth ?? 2,
+        collectors: payload.collectors ?? null,
+        usernames: payload.usernames ?? [],
+        counterparties: payload.counterparties ?? [],
+        case_ref: payload.caseRef ?? null,
+      }),
+    }) as Promise<{
+      mentions_count?: number
+      evidence_graph?: EvidenceGraph
+      open_risk_score?: number
+      collectors_run?: string[]
+      source_status?: Record<string, string>
+      collector_status?: Record<string, string>
+      [key: string]: unknown
+    }>
+  },
+
+  startWorkflowInvestigation(payload: {
+    caseRef: string
+    seedType: string
+    seedValue: string
+    chain?: string
+  }) {
+    return complianceFetch('/api/platform/v2/workflow/start', {
+      method: 'POST',
+      body: JSON.stringify({
+        case_ref: payload.caseRef,
+        seed_type: payload.seedType,
+        seed_value: payload.seedValue,
+        chain: payload.chain ?? 'tron',
+      }),
+    }) as Promise<{ ok: boolean; case_ref: string; message_ru?: string }>
+  },
+
+  mergeCaseGraph(
+    caseId: string,
+    evidenceGraph: EvidenceGraph,
+    mergeMode: 'replace' | 'append' = 'append'
+  ) {
+    return complianceFetch(`/api/compliance/cases/${caseId}/graph/merge`, {
+      method: 'POST',
+      body: JSON.stringify({
+        evidence_graph: evidenceGraph,
+        merge_mode: mergeMode,
+      }),
+    }) as Promise<{
+      ok: boolean
+      case_ref: string
+      graph_stats: { nodes: number; edges: number }
+      evidence_graph: EvidenceGraph
+    }>
+  },
+
+  exportCaseGraph(caseId: string) {
+    return complianceFetch(`/api/compliance/cases/${caseId}/graph/export`, {
+      method: 'POST',
+    }) as Promise<EvidenceGraph & { case_ref?: string; source?: string }>
+  },
+
+  runFinSkalpInvestigate(payload: {
+    address: string
+    chain?: string
+    scenario_id?: string
+    depth?: number
+    osint_depth?: number
+    limit?: number
+    collectors?: string[] | null
+  }) {
+    return complianceFetch('/api/platform/v2/investigate', {
+      method: 'POST',
+      body: JSON.stringify({
+        address: payload.address,
+        chain: payload.chain ?? 'tron',
+        scenario_id: payload.scenario_id ?? null,
+        depth: payload.depth ?? 2,
+        osint_depth: payload.osint_depth ?? 2,
+        limit: payload.limit ?? 50,
+        collectors: payload.collectors ?? null,
+      }),
+    }) as Promise<Record<string, unknown>>
   },
 
   seedDemo(scenarioId: string) {
@@ -140,11 +351,19 @@ export const complianceService = {
   },
 
   reportPdfUrl(caseId: string) {
-    return `${COMPLIANCE_API}/api/compliance/cases/${caseId}/report.pdf`
+    return `/api/compliance/cases/${caseId}/report.pdf`
+  },
+
+  reportJsonUrl(caseId: string) {
+    return `/api/compliance/cases/${caseId}/report.json`
   },
 
   reportXlsxUrl(caseId: string) {
-    return `${COMPLIANCE_API}/api/compliance/cases/${caseId}/report.xlsx`
+    return `/api/compliance/cases/${caseId}/report.xlsx`
+  },
+
+  fz115ReportUrl(caseId: string, format: 'json' | 'xml' = 'json') {
+    return `/api/compliance/cases/${caseId}/report/fz115?format=${format}`
   },
 
   demoHealth() {
@@ -340,6 +559,20 @@ export const complianceService = {
       investigation_to_compliance: Record<string, string>
       rule_ru: string
       principle_ru: string
+    }>
+  },
+
+  getRbacEffective(investigationId?: string) {
+    const q = investigationId
+      ? `?investigation_id=${encodeURIComponent(investigationId)}`
+      : ''
+    return complianceFetch(`/api/platform/v2/rbac/effective${q}`) as Promise<{
+      user_id: string
+      investigation_id: string | null
+      compliance_role: string
+      investigation_roles: string[]
+      effective_role: string
+      permissions: string[]
     }>
   },
 
@@ -1079,24 +1312,57 @@ export const complianceService = {
     >
   },
 
-  listDemoInbox() {
-    return complianceFetch('/api/inbox') as Promise<
+  listInbox(workflowStatus?: string) {
+    const q = workflowStatus ? `?workflow_status=${encodeURIComponent(workflowStatus)}` : ''
+    return complianceFetch(`/api/compliance/inbox${q}`) as Promise<
       Array<{
         id: string
+        case_id: string
         alert_code?: string
         case_ref?: string
         priority?: string
         workflow_status?: string
         title_ru?: string
+        investigation_id?: string | null
+        assignee_id?: string | null
+        assignee_name?: string | null
+        analyst_name_ru?: string | null
+        due_at?: string | null
+        sla_breached?: boolean
       }>
     >
   },
 
-  listDemoReports() {
-    return complianceFetch('/api/reports') as Promise<
+  getCaseRiskHistory(caseId: string) {
+    return complianceFetch(`/api/compliance/cases/${caseId}/risk-history`) as Promise<{
+      case_id: string
+      points: RiskHistoryPoint[]
+      trend?: string | null
+    }>
+  },
+
+  getCrossCaseGraphLinks(caseRef: string) {
+    return complianceFetch(
+      `/api/compliance/graph/links?case_ref=${encodeURIComponent(caseRef)}`
+    ) as Promise<{
+      case_ref: string
+      links: CrossCaseGraphLink[]
+      count: number
+    }>
+  },
+
+  reorderCaseQueue(caseIds: string[]) {
+    return complianceFetch('/api/compliance/cases/queue-order', {
+      method: 'POST',
+      body: JSON.stringify({ case_ids: caseIds })
+    }) as Promise<{ ok: boolean; updated: number }>
+  },
+
+  listReports(caseRef?: string) {
+    const q = caseRef ? `?case_ref=${encodeURIComponent(caseRef)}` : ''
+    return complianceFetch(`/api/compliance/reports${q}`) as Promise<
       Array<{
-        alert_id?: string
-        alert_code?: string
+        case_id: string
         case_ref?: string
         report_id?: string
         typology_code?: string

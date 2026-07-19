@@ -1,0 +1,193 @@
+/* Fusion design tokens */
+
+.fusion-root,
+[data-fusion] {
+  --fusion-bg-void: #0b141c;
+  --fusion-bg-deck: #141c24;
+  --fusion-bg-panel: #182028;
+  --fusion-bg-interactive: #222b33;
+  --fusion-bg-raised: var(--fusion-bg-interactive);
+  --fusion-border: #2d363e;
+  --fusion-border-strong: #424754;
+
+  --fusion-text-primary: rgba(255, 255, 255, 0.92);
+  --fusion-text-secondary: rgba(255, 255, 255, 0.68);
+  --fusion-text-tertiary: rgba(255, 255, 255, 0.45);
+  --fusion-text-mono: rgba(255, 255, 255, 0.82);
+
+  /* Semantic palette — meaning only, no decorative use */
+  --fusion-ops-green: #67df70;
+  --fusion-ops-yellow: #d4a017;
+  --fusion-ops-orange: #d4a017;
+  --fusion-ops-red: #d64545;
+  --fusion-ops-purple: #9b7fd4;
+  --fusion-ops-cyan: #2ec4cf;
+  --fusion-ops-blue: #4a8fd4;
+  --fusion-ops-gray: rgba(255, 255, 255, 0.45);
+
+  --fusion-sem-verified: var(--fusion-ops-green);
+  --fusion-sem-attention: var(--fusion-ops-yellow);
+  --fusion-sem-risk: var(--fusion-ops-red);
+  --fusion-sem-intel: var(--fusion-ops-purple);
+  --fusion-sem-blockchain: var(--fusion-ops-cyan);
+  --fusion-sem-system: var(--fusion-ops-blue);
+
+  --fusion-radius-sm: 2px;
+  --fusion-radius-md: 4px;
+  --fusion-radius-lg: 6px;
+
+  --fusion-space-1: 4px;
+  --fusion-space-2: 8px;
+  --fusion-space-3: 12px;
+  --fusion-space-4: 16px;
+  --fusion-space-5: 24px;
+
+  --fusion-rail-width: 56px;
+  --fusion-strip-height: 56px;
+  --fusion-telemetry-height: 48px;
+  --fusion-ribbon-height: 28px;
+  --fusion-panel-header: 32px;
+  --fusion-row-height: 28px;
+  --fusion-dock-collapsed: 32px;
+  --fusion-dock-expanded: 180px;
+
+  --fusion-shadow-none: none;
+  --fusion-shadow-pin: 0 0 0 1px color-mix(in srgb, var(--fusion-ops-blue) 40%, transparent);
+
+  --fusion-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --fusion-font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+
+  --fusion-text-2xs: 9px;
+  --fusion-text-xs: 10px;
+  --fusion-text-sm: 11px;
+  --fusion-text-base: 13px;
+  --fusion-text-md: 13px;
+  --fusion-text-lg: 14px;
+
+  --fusion-motion-fast: 150ms;
+  --fusion-motion-base: 250ms;
+  --fusion-motion-slow: 400ms;
+
+  color: var(--fusion-text-primary);
+  background: var(--fusion-bg-void);
+  font-family: var(--fusion-font-sans);
+  font-size: var(--fusion-text-sm);
+  letter-spacing: 0.01em;
+
+  /* Graph entity colors — canonical in fusion shell */
+  --fusion-graph-wallet: var(--fusion-ops-cyan);
+  --fusion-graph-person: var(--fusion-ops-purple);
+  --fusion-graph-company: var(--fusion-ops-blue);
+  --fusion-graph-exchange: var(--fusion-ops-yellow);
+  --fusion-graph-contract: var(--fusion-ops-blue);
+  --fusion-graph-document: var(--fusion-text-secondary);
+  --fusion-graph-evidence: var(--fusion-ops-purple);
+  --fusion-graph-investigation: var(--fusion-ops-blue);
+
+  /* Risk semantics */
+  --fusion-risk-low: var(--fusion-ops-green);
+  --fusion-risk-medium: var(--fusion-ops-yellow);
+  --fusion-risk-high: #E07A45;
+  --fusion-risk-critical: var(--fusion-ops-red);
+
+  /* Legacy --fs-* aliases (sunset — do not use in new fusion code) */
+  --fs-accent: var(--fusion-ops-blue);
+  --fs-border: var(--fusion-border);
+  --fs-border-strong: var(--fusion-border-strong);
+  --fs-bg-primary: var(--fusion-bg-void);
+  --fs-bg-secondary: var(--fusion-bg-deck);
+  --fs-surface: var(--fusion-bg-panel);
+  --fs-surface-raised: var(--fusion-bg-interactive);
+  --fs-text-primary: var(--fusion-text-primary);
+  --fs-text-secondary: var(--fusion-text-secondary);
+  --fs-text-tertiary: var(--fusion-text-tertiary);
+  --fs-font-sans: var(--fusion-font-sans);
+  --fs-font-mono: var(--fusion-font-mono);
+  --fs-risk-low: var(--fusion-risk-low);
+  --fs-risk-medium: var(--fusion-risk-medium);
+  --fs-risk-high: var(--fusion-risk-high);
+  --fs-risk-critical: var(--fusion-risk-critical);
+  --fs-graph-wallet: var(--fusion-graph-wallet);
+  --fs-graph-person: var(--fusion-graph-person);
+  --fs-graph-company: var(--fusion-graph-company);
+  --fs-graph-exchange: var(--fusion-graph-exchange);
+  --fs-graph-contract: var(--fusion-graph-contract);
+  --fs-graph-document: var(--fusion-graph-document);
+  --fs-graph-evidence: var(--fusion-graph-evidence);
+  --fs-graph-investigation: var(--fusion-graph-investigation);
+}
+
+.fusion-tone-clear { color: var(--fusion-sem-verified); }
+.fusion-tone-caution { color: var(--fusion-sem-attention); }
+.fusion-tone-warning { color: var(--fusion-sem-attention); }
+.fusion-tone-critical { color: var(--fusion-sem-risk); }
+.fusion-tone-intel { color: var(--fusion-sem-intel); }
+.fusion-tone-chain { color: var(--fusion-sem-blockchain); }
+.fusion-tone-ops { color: var(--fusion-sem-system); }
+.fusion-tone-neutral { color: var(--fusion-text-secondary); }
+
+.fusion-border-l-critical { border-left: 4px solid var(--fusion-sem-risk); }
+.fusion-border-l-warning { border-left: 4px solid var(--fusion-sem-attention); }
+.fusion-border-l-ops { border-left: 4px solid var(--fusion-sem-system); }
+.fusion-border-l-clear { border-left: 4px solid var(--fusion-sem-verified); }
+.fusion-border-l-intel { border-left: 4px solid var(--fusion-sem-intel); }
+.fusion-border-l-chain { border-left: 4px solid var(--fusion-sem-blockchain); }
+
+.fusion-mono {
+  font-family: var(--fusion-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.fusion-label {
+  font-size: var(--fusion-text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fusion-text-tertiary);
+}
+
+.fusion-value {
+  font-family: var(--fusion-font-mono);
+  font-size: var(--fusion-text-base);
+  font-weight: 600;
+  color: var(--fusion-text-primary);
+}
+
+.fusion-divider {
+  border-color: var(--fusion-border);
+}
+
+.fusion-surface-panel {
+  background: var(--fusion-bg-panel);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+}
+
+.fusion-surface-deck {
+  background: var(--fusion-bg-deck);
+  border: 1px solid var(--fusion-border);
+  border-radius: var(--fusion-radius-sm);
+}
+
+.fusion-live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fusion-sem-verified);
+}
+
+.fusion-live-dot--active {
+  animation: fusion-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fusion-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fusion-live-dot--active {
+    animation: none;
+  }
+}

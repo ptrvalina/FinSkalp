@@ -38,13 +38,31 @@ _BLOCKED_HOSTS = frozenset(
 
 
 def sanitize_filename(name: str) -> str:
-    base = Path(name).name
+    # Normalize Windows separators before Path.name (POSIX keeps `\`)
+    normalized = str(name).replace("\\", "/").strip()
+    base = Path(normalized).name
     safe = re.sub(r"[^a-zA-Z0-9._-]", "_", base)[:120]
+    # Collapse path-traversal leftovers (.. / leading dots)
+    safe = re.sub(r"^\.+", "", safe)
+    safe = safe.replace("..", "_")
     return safe or "document.bin"
 
 
 def sanitize_username(value: str) -> str:
-    token = value.strip().lstrip("@")[:64]
+    """
+    Normalize to a Maigret-safe ASCII token.
+    Cyrillic ФИО and spaces are transliterated / underscored — not rejected.
+    Shell metacharacters are still rejected.
+    """
+    from flowsint_crypto_compliance.osint_core.scalpel.seed_query import transliterate_cyrillic
+
+    token = value.strip().lstrip("@")
+    if re.search(r"[;|&$`\\<>]", token):
+        raise ValueError("Недопустимые символы в username")
+    token = transliterate_cyrillic(token)
+    token = re.sub(r"\s+", "_", token)
+    token = re.sub(r"[^a-zA-Z0-9._@_-]", "", token)[:64]
+    token = token.strip("._-")
     if not _SAFE_TOKEN.match(token):
         raise ValueError("Недопустимые символы в username")
     return token

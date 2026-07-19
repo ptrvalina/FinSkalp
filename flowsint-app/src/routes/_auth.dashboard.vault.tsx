@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { keyService } from '../api/key-service'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -30,7 +29,7 @@ import Loader from '@/components/loader'
 import { type Key as KeyType } from '@/types/key'
 import { queryKeys } from '@/api/query-keys'
 import ErrorState from '@/components/shared/error-state'
-import { PageLayout } from '@/components/layout/page-layout'
+import { FusionPlatformShell } from '@/fusion'
 export const Route = createFileRoute('/_auth/dashboard/vault')({
   component: VaultPage
 })
@@ -102,26 +101,16 @@ function VaultPage() {
   }
 
   return (
-    <PageLayout
-      title="Vault"
-      description="Secure gateway for investigation credentials, encrypted provider keys, and self-hosted connector access."
-      isLoading={keysLoading}
-      loadingComponent={<Loader />}
-      error={keysError}
-      errorComponent={
-        <ErrorState
-          title="Couldn't load keys"
-          description="Something went wrong while fetching data. Please try again."
-          error={keysError}
-          onRetry={() => refetch()}
-        />
-      }
+    <FusionPlatformShell
+      title="Хранилище ключей"
+      subtitle="Зашифрованные учётные данные провайдеров"
+      activeSection="vault"
       actions={
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add credential
+            <Button size="sm" variant="outline" className="fusion-text-micro h-7">
+              <Plus className="w-3 h-3 mr-1" />
+              Добавить
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
@@ -172,75 +161,59 @@ function VaultPage() {
         </Dialog>
       }
     >
-      <div className="w-full">
-        {keys.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-5">
-            <KeyRound className="w-12 h-12 text-muted-foreground/40" strokeWidth={1.5} />
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-bold text-foreground">No credentials stored</h3>
-              <p className="text-muted-foreground max-w-xs leading-relaxed">
-                Add your first encrypted provider credential to enable external investigation services.
-              </p>
-            </div>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add first credential
-            </Button>
-          </div>
-        ) : (
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold">API Keys</CardTitle>
-                <span className="text-xs text-muted-foreground">
-                  {keys.length} {keys.length === 1 ? 'key' : 'keys'}
-                </span>
-              </div>
-              <CardDescription>
-                Your encrypted API keys for external services. These keys will be available for your
-                investigations.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b bg-muted/20">
-                    <TableHead className="py-3 px-6 w-2/5">Name</TableHead>
-                    <TableHead className="py-3 w-1/3">Added</TableHead>
-                    <TableHead className="py-3 px-6 text-right w-1/5">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {keys.map((key: KeyType) => (
-                    <TableRow key={key.id} className="hover:bg-muted/30 border-b border-border/50">
-                      <TableCell className="py-4 px-6 font-medium">{key.name}</TableCell>
-                      <TableCell className="py-4 text-sm text-muted-foreground">
-                        {new Date(key.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </TableCell>
-                      <TableCell className="text-right py-4 px-6">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDeleteKey(key.id, key.name)}
-                          disabled={deleteKeyMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </PageLayout>
+      {keysLoading ? (
+        <Loader />
+      ) : keysError ? (
+        <ErrorState
+          title="Couldn't load keys"
+          description="Something went wrong while fetching data. Please try again."
+          error={keysError}
+          onRetry={() => refetch()}
+        />
+      ) : keys.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <KeyRound className="w-10 h-10 text-[var(--fusion-text-tertiary)]" strokeWidth={1.5} />
+          <p className="fusion-text-data text-center">Нет сохранённых ключей</p>
+          <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Добавить ключ
+          </Button>
+        </div>
+      ) : (
+        <div className="overflow-hidden border border-[var(--fusion-border)] rounded-[var(--fusion-radius-sm)]">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-[var(--fusion-border)] hover:bg-transparent">
+                <TableHead className="fusion-text-micro py-2">Имя</TableHead>
+                <TableHead className="fusion-text-micro py-2">Добавлен</TableHead>
+                <TableHead className="fusion-text-micro py-2 text-right">Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {keys.map((key: KeyType) => (
+                <TableRow key={key.id} className="border-[var(--fusion-border)] hover:bg-[var(--fusion-bg-interactive)]">
+                  <TableCell className="fusion-text-data py-2">{key.name}</TableCell>
+                  <TableCell className="fusion-text-micro py-2 text-[var(--fusion-text-tertiary)]">
+                    {new Date(key.created_at).toLocaleDateString('ru-RU')}
+                  </TableCell>
+                  <TableCell className="text-right py-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-[var(--fusion-ops-red)]"
+                      onClick={() => handleDeleteKey(key.id, key.name)}
+                      disabled={deleteKeyMutation.isPending}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </FusionPlatformShell>
   )
 }
 

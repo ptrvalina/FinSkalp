@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { ConfidenceBreakdownPanel } from './confidence-breakdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -49,33 +50,33 @@ const RISK_META: Record<
 > = {
   low: {
     label: 'Low',
-    border: 'border-[var(--fs-risk-low)]/40',
-    text: 'text-[var(--fs-risk-low)]',
-    bg: 'bg-[color-mix(in_srgb,var(--fs-risk-low)_12%,transparent)]',
-    pill: 'bg-[color-mix(in_srgb,var(--fs-risk-low)_18%,transparent)] text-[var(--fs-risk-low)]',
+    border: 'border-[var(--fusion-risk-low)]/40',
+    text: 'text-[var(--fusion-risk-low)]',
+    bg: 'bg-[color-mix(in_srgb,var(--fusion-risk-low)_12%,transparent)]',
+    pill: 'bg-[color-mix(in_srgb,var(--fusion-risk-low)_18%,transparent)] text-[var(--fusion-risk-low)]',
   },
   medium: {
     label: 'Medium',
-    border: 'border-[var(--fs-risk-medium)]/40',
-    text: 'text-[var(--fs-risk-medium)]',
-    bg: 'bg-[color-mix(in_srgb,var(--fs-risk-medium)_12%,transparent)]',
+    border: 'border-[var(--fusion-risk-medium)]/40',
+    text: 'text-[var(--fusion-risk-medium)]',
+    bg: 'bg-[color-mix(in_srgb,var(--fusion-risk-medium)_12%,transparent)]',
     pill:
-      'bg-[color-mix(in_srgb,var(--fs-risk-medium)_18%,transparent)] text-[var(--fs-risk-medium)]',
+      'bg-[color-mix(in_srgb,var(--fusion-risk-medium)_18%,transparent)] text-[var(--fusion-risk-medium)]',
   },
   high: {
     label: 'High',
-    border: 'border-[var(--fs-risk-high)]/40',
-    text: 'text-[var(--fs-risk-high)]',
-    bg: 'bg-[color-mix(in_srgb,var(--fs-risk-high)_12%,transparent)]',
-    pill: 'bg-[color-mix(in_srgb,var(--fs-risk-high)_18%,transparent)] text-[var(--fs-risk-high)]',
+    border: 'border-[var(--fusion-risk-high)]/40',
+    text: 'text-[var(--fusion-risk-high)]',
+    bg: 'bg-[color-mix(in_srgb,var(--fusion-risk-high)_12%,transparent)]',
+    pill: 'bg-[color-mix(in_srgb,var(--fusion-risk-high)_18%,transparent)] text-[var(--fusion-risk-high)]',
   },
   critical: {
     label: 'Critical',
-    border: 'border-[var(--fs-risk-critical)]/40',
-    text: 'text-[var(--fs-risk-critical)]',
-    bg: 'bg-[color-mix(in_srgb,var(--fs-risk-critical)_12%,transparent)]',
+    border: 'border-[var(--fusion-risk-critical)]/40',
+    text: 'text-[var(--fusion-risk-critical)]',
+    bg: 'bg-[color-mix(in_srgb,var(--fusion-risk-critical)_12%,transparent)]',
     pill:
-      'bg-[color-mix(in_srgb,var(--fs-risk-critical)_18%,transparent)] text-[var(--fs-risk-critical)]',
+      'bg-[color-mix(in_srgb,var(--fusion-risk-critical)_18%,transparent)] text-[var(--fusion-risk-critical)]',
   },
 }
 
@@ -98,39 +99,39 @@ export function EnterprisePageHero({
   metrics?: Array<{ label: string; value: string; tone?: 'default' | 'accent' | 'critical' }>
 }) {
   return (
-    <div className="rounded-lg border border-[var(--fs-border)] bg-[var(--fs-surface)]">
-      <div className="flex flex-col gap-4 border-b border-[var(--fs-border)] px-6 py-5 lg:flex-row lg:items-end lg:justify-between">
+    <div className="rounded-lg border border-[var(--fusion-border)] bg-[var(--fusion-bg-panel)]">
+      <div className="flex flex-col gap-4 border-b border-[var(--fusion-border)] px-6 py-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
           {eyebrow ? (
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--fs-text-secondary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--fusion-text-secondary)]">
               {eyebrow}
             </p>
           ) : null}
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-[var(--fs-text-primary)]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--fusion-text-primary)]">
               {title}
             </h1>
-            <p className="mt-1 max-w-3xl text-sm text-[var(--fs-text-secondary)]">{description}</p>
+            <p className="mt-1 max-w-3xl text-sm text-[var(--fusion-text-secondary)]">{description}</p>
           </div>
         </div>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
       {metrics?.length ? (
-        <div className="grid gap-px bg-[var(--fs-border)] md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-px bg-[var(--fusion-border)] md:grid-cols-2 xl:grid-cols-4">
           {metrics.map((metric) => (
             <div
               key={`${metric.label}-${metric.value}`}
-              className="bg-[var(--fs-bg-secondary)] px-6 py-4"
+              className="bg-[var(--fusion-bg-deck)] px-6 py-4"
             >
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--fs-text-tertiary)]">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--fusion-text-tertiary)]">
                 {metric.label}
               </p>
               <p
                 className={cn(
                   'mt-2 font-mono text-lg font-semibold',
-                  metric.tone === 'accent' && 'text-[var(--fs-accent)]',
-                  metric.tone === 'critical' && 'text-[var(--fs-risk-critical)]',
-                  (!metric.tone || metric.tone === 'default') && 'text-[var(--fs-text-primary)]'
+                  metric.tone === 'accent' && 'text-[var(--fusion-ops-blue)]',
+                  metric.tone === 'critical' && 'text-[var(--fusion-risk-critical)]',
+                  (!metric.tone || metric.tone === 'default') && 'text-[var(--fusion-text-primary)]'
                 )}
               >
                 {metric.value}
@@ -157,15 +158,15 @@ export function EnterprisePanel({
   children: ReactNode
 }) {
   return (
-    <Card className={cn('border-[var(--fs-border)] bg-[var(--fs-surface)] shadow-none', className)}>
-      <CardHeader className="border-b border-[var(--fs-border)] pb-4">
+    <Card className={cn('border-[var(--fusion-border)] bg-[var(--fusion-bg-panel)] shadow-none', className)}>
+      <CardHeader className="border-b border-[var(--fusion-border)] pb-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-sm font-semibold tracking-wide text-[var(--fs-text-primary)]">
+            <CardTitle className="text-sm font-semibold tracking-wide text-[var(--fusion-text-primary)]">
               {title}
             </CardTitle>
             {description ? (
-              <CardDescription className="mt-1 text-xs text-[var(--fs-text-secondary)]">
+              <CardDescription className="mt-1 text-xs text-[var(--fusion-text-secondary)]">
                 {description}
               </CardDescription>
             ) : null}
@@ -192,26 +193,26 @@ export function EnterpriseStatCard({
   icon?: ReactNode
 }) {
   return (
-    <div className="rounded-md border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] p-4">
+    <div className="rounded-md border border-[var(--fusion-border)] bg-[var(--fusion-bg-deck)] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--fs-text-tertiary)]">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--fusion-text-tertiary)]">
             {label}
           </p>
           <p
             className={cn(
               'mt-2 font-mono text-2xl font-semibold',
-              tone === 'accent' && 'text-[var(--fs-accent)]',
-              tone === 'critical' && 'text-[var(--fs-risk-critical)]',
-              tone === 'default' && 'text-[var(--fs-text-primary)]'
+              tone === 'accent' && 'text-[var(--fusion-ops-blue)]',
+              tone === 'critical' && 'text-[var(--fusion-risk-critical)]',
+              tone === 'default' && 'text-[var(--fusion-text-primary)]'
             )}
           >
             {value}
           </p>
         </div>
-        <div className="text-[var(--fs-text-secondary)]">{icon}</div>
+        <div className="text-[var(--fusion-text-secondary)]">{icon}</div>
       </div>
-      <p className="mt-3 text-xs text-[var(--fs-text-secondary)]">{detail}</p>
+      <p className="mt-3 text-xs text-[var(--fusion-text-secondary)]">{detail}</p>
     </div>
   )
 }
@@ -234,21 +235,21 @@ export function EnterpriseContextBar({
   evidenceCount: string
 }) {
   return (
-    <div className="rounded-md border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] px-4 py-3">
+    <div className="rounded-md border border-[var(--fusion-border)] bg-[var(--fusion-bg-deck)] px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge className="rounded-sm border border-[var(--fs-border-strong)] bg-transparent font-mono text-[11px] text-[var(--fs-text-primary)]">
+        <Badge className="rounded-sm border border-[var(--fusion-border-strong)] bg-transparent font-mono text-[11px] text-[var(--fusion-text-primary)]">
           {caseId}
         </Badge>
-        <Badge className="rounded-sm border border-[var(--fs-border)] bg-transparent text-[11px] text-[var(--fs-text-secondary)]">
+        <Badge className="rounded-sm border border-[var(--fusion-border)] bg-transparent text-[11px] text-[var(--fusion-text-secondary)]">
           {status}
         </Badge>
-        <Badge className="rounded-sm border border-[var(--fs-border)] bg-transparent text-[11px] text-[var(--fs-text-secondary)]">
+        <Badge className="rounded-sm border border-[var(--fusion-border)] bg-transparent text-[11px] text-[var(--fusion-text-secondary)]">
           {priority}
         </Badge>
         <RiskBadge level={risk} />
-        <span className="text-xs text-[var(--fs-text-secondary)]">Owner: {owner}</span>
-        <span className="text-xs text-[var(--fs-text-secondary)]">{objectCount} entities</span>
-        <span className="text-xs text-[var(--fs-text-secondary)]">{evidenceCount} evidence</span>
+        <span className="text-xs text-[var(--fusion-text-secondary)]">Owner: {owner}</span>
+        <span className="text-xs text-[var(--fusion-text-secondary)]">{objectCount} entities</span>
+        <span className="text-xs text-[var(--fusion-text-secondary)]">{evidenceCount} evidence</span>
       </div>
     </div>
   )
@@ -303,17 +304,17 @@ export function ConfidenceIndicator({
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-[var(--fs-text-tertiary)]">
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-[var(--fusion-text-tertiary)]">
         <span>Confidence</span>
-        <span className="font-mono text-[var(--fs-text-secondary)]">{safeValue}%</span>
+        <span className="font-mono text-[var(--fusion-text-secondary)]">{safeValue}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-[var(--fs-border)]">
+      <div className="h-1.5 overflow-hidden rounded-full bg-[var(--fusion-border)]">
         <div
-          className="h-full rounded-full bg-[var(--fs-accent)]"
+          className="h-full rounded-full bg-[var(--fusion-ops-blue)]"
           style={{ width: `${safeValue}%` }}
         />
       </div>
-      <div className="flex flex-wrap gap-3 text-xs text-[var(--fs-text-secondary)]">
+      <div className="flex flex-wrap gap-3 text-xs text-[var(--fusion-text-secondary)]">
         <span>{sources}</span>
         <span>{freshness}</span>
       </div>
@@ -323,13 +324,13 @@ export function ConfidenceIndicator({
 
 export function EntityCard({ entity, compact = false }: { entity: EntityItem; compact?: boolean }) {
   return (
-    <div className="rounded-md border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] p-3">
+    <div className="rounded-md border border-[var(--fusion-border)] bg-[var(--fusion-bg-deck)] p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-[var(--fs-text-primary)]">
+          <p className="truncate text-sm font-semibold text-[var(--fusion-text-primary)]">
             {entity.title}
           </p>
-          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-[var(--fs-text-tertiary)]">
+          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-[var(--fusion-text-tertiary)]">
             {entity.subtitle}
           </p>
         </div>
@@ -337,7 +338,7 @@ export function EntityCard({ entity, compact = false }: { entity: EntityItem; co
       </div>
       <div className="mt-3 space-y-2">
         {entity.attributes.slice(0, compact ? 2 : 3).map((attribute) => (
-          <p key={attribute} className="text-xs text-[var(--fs-text-secondary)]">
+          <p key={attribute} className="text-xs text-[var(--fusion-text-secondary)]">
             {attribute}
           </p>
         ))}
@@ -355,25 +356,25 @@ export function EntityCard({ entity, compact = false }: { entity: EntityItem; co
 
 export function EvidenceRow({ item }: { item: EvidenceItem }) {
   return (
-    <div className="grid gap-2 border-b border-[var(--fs-border)] py-3 text-sm md:grid-cols-[1.4fr_0.9fr_0.9fr_1fr_0.8fr] md:items-center">
+    <div className="grid gap-2 border-b border-[var(--fusion-border)] py-3 text-sm md:grid-cols-[1.4fr_0.9fr_0.9fr_1fr_0.8fr] md:items-center">
       <div>
-        <p className="font-mono text-xs text-[var(--fs-accent)]">{item.id}</p>
-        <p className="mt-1 text-xs text-[var(--fs-text-secondary)]">{item.type}</p>
+        <p className="font-mono text-xs text-[var(--fusion-ops-blue)]">{item.id}</p>
+        <p className="mt-1 text-xs text-[var(--fusion-text-secondary)]">{item.type}</p>
       </div>
-      <p className="text-xs text-[var(--fs-text-secondary)]">{item.source}</p>
-      <p className="text-xs text-[var(--fs-text-secondary)]">{item.receivedAt}</p>
-      <p className="font-mono text-xs text-[var(--fs-text-secondary)]">
+      <p className="text-xs text-[var(--fusion-text-secondary)]">{item.source}</p>
+      <p className="text-xs text-[var(--fusion-text-secondary)]">{item.receivedAt}</p>
+      <p className="font-mono text-xs text-[var(--fusion-text-secondary)]">
         {checksumShort(item.checksum)}
       </p>
       <Badge
         className={cn(
           'w-fit rounded-sm border bg-transparent text-[11px] uppercase tracking-[0.14em]',
           item.verified === 'verified' &&
-            'border-[var(--fs-risk-low)]/40 text-[var(--fs-risk-low)]',
+            'border-[var(--fusion-risk-low)]/40 text-[var(--fusion-risk-low)]',
           item.verified === 'pending' &&
-            'border-[var(--fs-risk-medium)]/40 text-[var(--fs-risk-medium)]',
+            'border-[var(--fusion-risk-medium)]/40 text-[var(--fusion-risk-medium)]',
           item.verified === 'review' &&
-            'border-[var(--fs-risk-high)]/40 text-[var(--fs-risk-high)]'
+            'border-[var(--fusion-risk-high)]/40 text-[var(--fusion-risk-high)]'
         )}
       >
         {item.verified}
@@ -387,26 +388,62 @@ export function ExplainabilityDrawer({
   onOpenChange,
   title,
   risk,
+  confidenceDimensions,
+  explain,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   risk: RiskLevel
+  confidenceDimensions?: import('./confidence-breakdown').ConfidenceDimensions | null
+  explain?: {
+    dimensions?: Record<string, string>
+    risk_breakdown?: {
+      total?: number
+      components?: Array<{ component: string; points: number; pct: number; explanation_ru: string }>
+      methodology_ru?: string
+    }
+  } | null
 }) {
+  const dataItems =
+    explain?.risk_breakdown?.components?.map(
+      (c) => `${c.component}: ${c.points} pts (${c.pct}%) — ${c.explanation_ru}`,
+    ) ??
+    (explain?.dimensions
+      ? Object.values(explain.dimensions)
+      : [
+          'Entity graph snapshot for linked wallet cluster and counterparties',
+          'Registry filings from sovereign gateway and licensed VASP lists',
+          'Event stream from OSINT collectors and blockchain intelligence connectors',
+        ])
+
+  const confidenceItems = confidenceDimensions
+    ? [
+        `Идентификация: ${(confidenceDimensions.identity_confidence * 100).toFixed(0)}%`,
+        `Доказательства: ${(confidenceDimensions.evidence_strength * 100).toFixed(0)}%`,
+        `Связи: ${(confidenceDimensions.relationship_confidence * 100).toFixed(0)}%`,
+        `Источники: ${(confidenceDimensions.source_reliability * 100).toFixed(0)}%`,
+      ]
+    : [
+        '4 independent sources corroborate the cluster attribution',
+        'Latest confirmed source updated recently',
+        'Heuristic signals require analyst confirmation',
+      ]
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full border-l border-[var(--fs-border)] bg-[var(--fs-surface-raised)] text-[var(--fs-text-primary)] sm:max-w-2xl"
+        className="w-full border-l border-[var(--fusion-border)] bg-[var(--fusion-bg-interactive)] text-[var(--fusion-text-primary)] sm:max-w-2xl"
       >
         <SheetHeader>
           <div className="flex items-center gap-3">
             <RiskBadge level={risk} />
             <div>
-              <SheetTitle className="text-left text-lg text-[var(--fs-text-primary)]">
+              <SheetTitle className="text-left text-lg text-[var(--fusion-text-primary)]">
                 {title}
               </SheetTitle>
-              <SheetDescription className="text-left text-sm text-[var(--fs-text-secondary)]">
+              <SheetDescription className="text-left text-sm text-[var(--fusion-text-secondary)]">
                 Evidence-first explainability for risk, rule triggers, and analyst review.
               </SheetDescription>
             </div>
@@ -414,33 +451,22 @@ export function ExplainabilityDrawer({
         </SheetHeader>
 
         <div className="mt-6 space-y-5">
+          {confidenceDimensions ? (
+            <div className="rounded-md border border-[var(--fusion-border)] p-4">
+              <ConfidenceBreakdownPanel dimensions={confidenceDimensions} />
+            </div>
+          ) : null}
+          <DrawerSection title="Использованные данные" icon={<FileSearch className="h-4 w-4" />} items={dataItems} />
           <DrawerSection
-            title="Data Used"
-            icon={<FileSearch className="h-4 w-4" />}
-            items={[
-              'Entity graph snapshot for linked wallet cluster and counterparties',
-              'Registry filings from sovereign gateway and licensed VASP lists',
-              'Event stream from OSINT collectors and blockchain intelligence connectors',
-            ]}
-          />
-          <DrawerSection
-            title="Triggered Rules"
+            title="Сработавшие правила"
             icon={<Binary className="h-4 w-4" />}
             items={[
-              'RFC-0013.47 IF 3+ high-risk counterparties AND rapid fan-out THEN escalate',
-              'RFC-0016.09 IF registry mismatch persists > 24h THEN flag analyst confirmation',
-              'RFC-0018.12 IF new evidence revises risk > 15 points THEN notify workspace',
+              'Порог fan-out / hub-агрегатор при >50 входящих за 24ч',
+              'Совпадение с реестром 115-ФЗ или санкционным списком',
+              'Рост risk score >15 пунктов при новом evidence',
             ]}
           />
-          <DrawerSection
-            title="Confidence Score"
-            icon={<ShieldCheck className="h-4 w-4" />}
-            items={[
-              '4 independent sources corroborate the cluster attribution',
-              'Latest confirmed source updated 19 minutes ago',
-              'One heuristic remains analyst-confirmation only and reduces certainty',
-            ]}
-          />
+          <DrawerSection title="Confidence (4 оси)" icon={<ShieldCheck className="h-4 w-4" />} items={confidenceItems} />
           <DrawerSection
             title="Alternative Explanations"
             icon={<CircleAlert className="h-4 w-4" />}
@@ -449,9 +475,9 @@ export function ExplainabilityDrawer({
               'Dormant address revival could represent treasury rotation rather than laundering',
             ]}
           />
-          <div className="rounded-md border border-dashed border-[var(--fs-border-strong)] bg-[var(--fs-bg-secondary)] p-4 text-sm text-[var(--fs-text-secondary)]">
-            <div className="flex items-center gap-2 font-medium text-[var(--fs-text-primary)]">
-              <AlertTriangle className="h-4 w-4 text-[var(--fs-risk-medium)]" />
+          <div className="rounded-md border border-dashed border-[var(--fusion-border-strong)] bg-[var(--fusion-bg-deck)] p-4 text-sm text-[var(--fusion-text-secondary)]">
+            <div className="flex items-center gap-2 font-medium text-[var(--fusion-text-primary)]">
+              <AlertTriangle className="h-4 w-4 text-[var(--fusion-risk-medium)]" />
               Human in the loop
             </div>
             <p className="mt-2">
@@ -462,7 +488,7 @@ export function ExplainabilityDrawer({
               <Button size="sm" className="rounded-sm">
                 Confirm finding
               </Button>
-              <Button size="sm" variant="outline" className="rounded-sm border-[var(--fs-border)]">
+              <Button size="sm" variant="outline" className="rounded-sm border-[var(--fusion-border)]">
                 Request review
               </Button>
             </div>
@@ -483,19 +509,19 @@ function DrawerSection({
   items: string[]
 }) {
   return (
-    <section className="space-y-3 rounded-md border border-[var(--fs-border)] bg-[var(--fs-bg-secondary)] p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--fs-text-primary)]">
+    <section className="space-y-3 rounded-md border border-[var(--fusion-border)] bg-[var(--fusion-bg-deck)] p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--fusion-text-primary)]">
         {icon}
         {title}
       </div>
-      <Separator className="bg-[var(--fs-border)]" />
+      <Separator className="bg-[var(--fusion-border)]" />
       <div className="space-y-2">
         {items.map((item) => (
           <div
             key={item}
-            className="flex items-start gap-2 text-sm text-[var(--fs-text-secondary)]"
+            className="flex items-start gap-2 text-sm text-[var(--fusion-text-secondary)]"
           >
-            <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--fs-accent)]" />
+            <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--fusion-ops-blue)]" />
             <span>{item}</span>
           </div>
         ))}
@@ -503,6 +529,8 @@ function DrawerSection({
     </section>
   )
 }
+
+export type { FusionMissionStripData as MissionStripData } from '@/fusion/FusionMissionStrip'
 
 export function DemoSummaryStrip() {
   return (
